@@ -9,6 +9,7 @@
 
 // Includes
 #include "ntshook.h"
+#include <strsafe.h>
 
 /* * * *\
 	DllMain -
@@ -34,17 +35,58 @@ BOOL APIENTRY DllMain(
 /* * * *\
 	NTStyleHookProc -
 		NT Style Hook procedure
+		Uses WH_CALLWNDPROC.
 \* * * */
 __declspec(dllexport) LRESULT NTStyleHookProc(
-	_In_ int nCode,
+	_In_ UINT uMsg,
 	_In_ WPARAM wParam,
 	_In_ LPARAM lParam
 )
 {
-	if (nCode < 0)  // send it on down the line
-		return CallNextHookEx(NULL, nCode, wParam, lParam);
+	PCWPSTRUCT pcwps;
 
-	//MessageBox(HWND_DESKTOP, L"NC repaint", L"NT Style Hook", MB_OK | MB_ICONINFORMATION | MB_DEFAULT_DESKTOP_ONLY);
-	
-	return CallNextHookEx(NULL, nCode, wParam, lParam);
+	// Switch case for window painting
+	switch (uMsg)
+	{
+	/* BEGIN HC_ACTION */
+	case HC_ACTION:
+		pcwps = (CWPSTRUCT*)lParam;
+
+		switch (pcwps->message)
+		{
+			HDC hdc;
+
+		case WM_NCACTIVATE:
+		case WM_NCPAINT:
+			hdc = GetWindowDC(pcwps->hwnd);
+			break;
+
+		default:
+			break;
+		}
+	/* END HC_ACTION */
+
+	default:
+		break;
+	}
+
+	return CallNextHookEx(NULL, uMsg, wParam, lParam);
+}
+
+/* * * *\
+	NTStyleDrawWindowBorders -
+		Draws window borders
+\* * * */
+VOID NTStyleDrawWindowBorders()
+{
+	return;
+}
+
+/* * * *\
+	NTStyleDrawWindowCaption -
+		Draws window caption & title
+\* * * */
+VOID NTStyleDrawWindowCaption()
+{
+	return;
 }

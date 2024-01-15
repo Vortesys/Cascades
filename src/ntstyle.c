@@ -47,29 +47,13 @@ int WINAPI wWinMain(
 	// Establish our hook :)
 	if (hkprcNTShook)
 		hhkNTShook = SetWindowsHookEx(WH_CALLWNDPROC, hkprcNTShook, g_hDllInstance, 0);
-
-	while (GetMessage(&msg, NULL, 0, 0) > 0)
+		
+	if (hhkNTShook)
 	{
-		switch (msg.message)
-		{
-		case WM_QUIT:
-		case WM_CLOSE:
-		case WM_DESTROY:
-		case WM_NCDESTROY:
-			if (hhkNTShook)
-				UnhookWindowsHookEx(hhkNTShook);
-
-			DefWindowProc(msg.hwnd, msg.message, msg.wParam, 0);
-			PostQuitMessage(0);
-
-			break;
-		default:
-
-			DefWindowProc(msg.hwnd, msg.message, msg.wParam, 0);
-			break;
-		}
-
-		DispatchMessage(&msg);
+		MessageBox(HWND_DESKTOP, L"Started NT Style.\nPress OK to close.", L"NT Style", MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL | MB_DEFAULT_DESKTOP_ONLY);
+		UnhookWindowsHookEx(hhkNTShook);
+		MessageBox(HWND_DESKTOP, L"Quitting NT Style...", L"NT Style", MB_OK | MB_ICONINFORMATION | MB_DEFAULT_DESKTOP_ONLY);
+		PostQuitMessage(0);
 	}
 
 	return 0;
