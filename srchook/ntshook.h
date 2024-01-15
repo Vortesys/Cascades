@@ -20,5 +20,8 @@
 __declspec(dllexport) LRESULT NTStyleHookProc(_In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam);
 
 // Drawing Functions
-VOID NTStyleDrawWindowBorders();
-VOID NTStyleDrawWindowCaption();
+VOID NTStyleDrawWindowBorders(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lParam);
+VOID NTStyleDrawWindowCaption(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lParam);
+
+// System Info Functions
+VOID NTStyleGetWindowMetrics(VOID);
