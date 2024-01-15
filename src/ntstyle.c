@@ -32,6 +32,7 @@ int WINAPI wWinMain(
 {
 	MSG msg = { 0 };
 	HOOKPROC hkprcNTShook = NULL;
+	HHOOK hhkNTShook = NULL;
 
 	// Get our own hInstance and save it for later
 	g_hAppInstance = hInstance;
@@ -45,13 +46,30 @@ int WINAPI wWinMain(
 
 	// Establish our hook :)
 	if (hkprcNTShook)
-		SetWindowsHookEx(WH_CALLWNDPROC, hkprcNTShook, g_hDllInstance, 0);
+		hhkNTShook = SetWindowsHookEx(WH_CALLWNDPROC, hkprcNTShook, g_hDllInstance, 0);
 	// Use callnexthook later
-		/*Before terminating, an application must call the UnhookWindowsHookEx function
-		function to free system resources associated with the hook.*/
 
 	while (GetMessage(&msg, NULL, 0, 0) > 0)
 	{
+		switch (msg.message)
+		{
+		case WM_QUIT:
+		case WM_CLOSE:
+		case WM_DESTROY:
+		case WM_NCDESTROY:
+			if (hhkNTShook)
+				UnhookWindowsHookEx(hhkNTShook);
+
+			DefWindowProc(msg.hwnd, msg.message, msg.wParam, 0);
+			PostQuitMessage(0);
+
+			break;
+		default:
+
+			DefWindowProc(msg.hwnd, msg.message, msg.wParam, 0);
+			break;
+		}
+
 		DispatchMessage(&msg);
 	}
 

@@ -31,3 +31,4 @@ BOOL APIENTRY DllMain(
 	return TRUE;
 }
 
+//NTStyleHookProc
