@@ -9,6 +9,8 @@
 
  /* Headers */
 #include "ntstyle.h"
+#include "resource.h"
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
 // Handles
@@ -21,10 +23,15 @@ HINSTANCE	g_hDllInstance;
 	wWinMain -
 		NT Style's entry point and message loop.
 \* * * */
-int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow)
+int WINAPI wWinMain(
+	_In_ HINSTANCE hInstance,
+	_In_opt_ HINSTANCE hPrevInstance,
+	_In_ LPWSTR lpCmdLine,
+	_In_ int nCmdShow
+)
 {
 	MSG msg = { 0 };
-	HHOOK hkprcNTShook = NULL;
+	HOOKPROC hkprcNTShook = NULL;
 
 	// Get our own hInstance and save it for later
 	g_hAppInstance = hInstance;
