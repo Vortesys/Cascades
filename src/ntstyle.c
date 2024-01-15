@@ -47,7 +47,6 @@ int WINAPI wWinMain(
 	// Establish our hook :)
 	if (hkprcNTShook)
 		hhkNTShook = SetWindowsHookEx(WH_CALLWNDPROC, hkprcNTShook, g_hDllInstance, 0);
-	// Use callnexthook later
 
 	while (GetMessage(&msg, NULL, 0, 0) > 0)
 	{

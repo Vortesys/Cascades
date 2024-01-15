@@ -31,4 +31,20 @@ BOOL APIENTRY DllMain(
 	return TRUE;
 }
 
-//NTStyleHookProc
+/* * * *\
+	NTStyleHookProc -
+		NT Style Hook procedure
+\* * * */
+__declspec(dllexport) LRESULT NTStyleHookProc(
+	_In_ int nCode,
+	_In_ WPARAM wParam,
+	_In_ LPARAM lParam
+)
+{
+	if (nCode < 0)  // send it on down the line
+		return CallNextHookEx(NULL, nCode, wParam, lParam);
+
+	//MessageBox(HWND_DESKTOP, L"NC repaint", L"NT Style Hook", MB_OK | MB_ICONINFORMATION | MB_DEFAULT_DESKTOP_ONLY);
+	
+	return CallNextHookEx(NULL, nCode, wParam, lParam);
+}

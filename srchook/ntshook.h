@@ -16,3 +16,4 @@
 /* Global Variables */
 
 /* Function Prototypes */
+__declspec(dllexport) LRESULT NTStyleHookProc(_In_ int nCode, _In_ WPARAM wParam, _In_ LPARAM lParam);
