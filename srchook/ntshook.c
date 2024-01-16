@@ -72,12 +72,10 @@ __declspec(dllexport) LRESULT NTStyleHookProc(
 
 		switch (pcwps->message)
 		{
+		case WM_NCCALCSIZE:
 		case WM_NCACTIVATE:
-			NTStyleDrawWindowCaption(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
-
-			break;
-
 		case WM_NCPAINT:
+			NTStyleDrawWindowCaption(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
 			NTStyleDrawWindowBorders(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
 
 			break;
@@ -145,10 +143,13 @@ VOID NTStyleDrawWindowBorders(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lP
 	region, regardless of whether it uses the region. */
 
 	HDC hdc = NULL;
+	RECT rcWindow = { 0, 0, 0, 0 };
 	HBRUSH hbr = NULL;
 	PPOINT apt[40];
-	PINT asz[] = { 6, 4, 6, 4, 6, 4, 6, 4 };
+	INT asz[] = { 6, 4, 6, 4, 6, 4, 6, 4 };
 	INT csz = 8;
+
+	RECT rc = { -8, -8, 8, 8 };
 
 	// Verify our window handle
 	if (hWnd != NULL)
@@ -157,9 +158,16 @@ VOID NTStyleDrawWindowBorders(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lP
 	// Always refresh the colors and metrics before drawing
 	NTStyleGetWindowMetrics();
 
+	// Color our brushes
+
 	// Verify the device context
 	if (hdc)
 	{
+		hbr = GetSysColorBrush(COLOR_ACTIVECAPTION);
+
+		// Get external window size
+		FillRect(hdc, &rc, hbr);
+		
 		// Calculate the polygon points
 
 
@@ -167,7 +175,7 @@ VOID NTStyleDrawWindowBorders(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lP
 		SetPolyFillMode(hdc, WINDING);
 
 
-
+		DeleteObject(hbr);
 		ReleaseDC(hWnd, hdc);
 	}
 
