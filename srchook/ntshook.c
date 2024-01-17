@@ -73,7 +73,6 @@ __declspec(dllexport) LRESULT NTStyleHookProc(
 		switch (pcwps->message)
 		{
 		case WM_NCCREATE:
-		case WM_NCCALCSIZE:
 		case WM_NCACTIVATE:
 		case WM_NCPAINT:
 			if ((GetWindowLongPtr(pcwps->hwnd, GWL_STYLE) & WS_CAPTION) == WS_CAPTION)
@@ -81,8 +80,16 @@ __declspec(dllexport) LRESULT NTStyleHookProc(
 				NTStyleDrawWindowCaption(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
 				NTStyleDrawWindowBorders(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
 			}
-			//return 0;
 			break;
+
+		case WM_NCCALCSIZE:
+			if ((GetWindowLongPtr(pcwps->hwnd, GWL_STYLE) & WS_CAPTION) == WS_CAPTION)
+			{
+				NTStyleDrawWindowCaption(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
+				NTStyleDrawWindowBorders(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
+			}
+			return 0;
+
 
 		// WM_NCDESTROY
 
@@ -114,14 +121,60 @@ VOID NTStyleDrawWindowCaption(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lP
 	HDC hdc = NULL;
 	HBRUSH hbr = NULL;
 
+	WINDOWINFO wi;
+	BOOL bIsActiveWindow = FALSE;
+	INT iGradientCaptionColor = 0;
+	INT iCaptionColor = 0;
+
+	RECT rc = { 0, 0, 0, 0 };
+	UINT uiw = 0;
+
+	// Verify our window handle
 	if (hWnd != NULL)
 		hdc = GetWindowDC(hWnd);
 
-	// Always refresh the colors and metrics first
-	NTStyleGetWindowMetrics();
-
+	// Verify the device context
 	if (hdc)
 	{
+		// Check whether or not we're the active window
+		// and change colors based on that
+		bIsActiveWindow = GetForegroundWindow() == hWnd;
+		iGradientCaptionColor = bIsActiveWindow ? COLOR_GRADIENTACTIVECAPTION : COLOR_GRADIENTINACTIVECAPTION;
+		iCaptionColor = bIsActiveWindow ? COLOR_ACTIVECAPTION : COLOR_INACTIVECAPTION;
+
+		// Get external window size
+		wi.cbSize = sizeof(WINDOWINFO);
+		GetWindowInfo(hWnd, &wi);
+
+		// Get window width
+		uiw = wi.rcWindow.right - wi.rcWindow.left;
+
+		// Always refresh the colors and metrics before drawing
+		NTStyleGetWindowMetrics();
+
+		g_iBorderHeight = wi.cyWindowBorders;
+		g_iBorderWidth = wi.cxWindowBorders;
+
+		// Calculate the rect points
+		rc.left = g_iCaptionHeight + g_iBorderWidth;
+		rc.top = g_iBorderHeight;
+		rc.right = uiw - rc.left + 2;
+		rc.bottom = rc.top + g_iCaptionHeight - 1;
+
+		// Draw the caption rectangle
+		// TODO: do it with a gradient
+		hbr = GetSysColorBrush(iCaptionColor);
+		FillRect(hdc, &rc, hbr);
+
+		// Draw the frame around it
+		hbr = GetSysColorBrush(COLOR_WINDOWFRAME);
+		FrameRect(hdc, &rc, hbr);
+
+		// Draw the caption text
+
+		// Cleanup
+		if (hbr)
+			DeleteObject(hbr);
 
 		ReleaseDC(hWnd, hdc);
 	}
@@ -153,16 +206,12 @@ VOID NTStyleDrawWindowBorders(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lP
 	HPEN hpn = NULL;
 
 	POINT apt[7] = { 0, 0 };
-	INT asz[] = { 6, 4, 6, 4, 6, 4, 6, 4 };
-	INT csz = 8;
 
 	WINDOWINFO wi;
 	BOOL bIsActiveWindow = FALSE;
-	INT iGradientCaptionColor = 0;
-	INT iCaptionColor = 0;
 	INT iBorderColor = 0;
 
-	RECT rc = { 0, 0, 8, 8 };
+	RECT rc = { 0, 0, 0, 0 };
 	UINT uiw = 0;
 	UINT uih = 0;
 
@@ -173,19 +222,16 @@ VOID NTStyleDrawWindowBorders(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lP
 	// Verify the device context
 	if (hdc)
 	{
+		INT i;
 
 		// Check whether or not we're the active window
 		// and change colors based on that
-		bIsActiveWindow = GetForegroundWindow() == hWnd;
-		iGradientCaptionColor = bIsActiveWindow ? COLOR_GRADIENTACTIVECAPTION : COLOR_GRADIENTINACTIVECAPTION;
-		iCaptionColor = bIsActiveWindow ? COLOR_ACTIVECAPTION : COLOR_INACTIVECAPTION;
+		bIsActiveWindow = (GetForegroundWindow() == hWnd);
 		iBorderColor = bIsActiveWindow ? COLOR_ACTIVEBORDER : COLOR_INACTIVEBORDER;
 
 		// Set up our brushes
 		hbr = GetSysColorBrush(iBorderColor);
-		hpn = CreatePen(PS_SOLID, 2, RGB(255, 0, 0));
-
-		// FillRect(hdc, &rc, hbr);
+		hpn = CreatePen(PS_SOLID, 2, (COLORREF)GetSysColor(COLOR_WINDOWFRAME));
 
 		// Get external window size
 		wi.cbSize = sizeof(WINDOWINFO);
@@ -201,26 +247,45 @@ VOID NTStyleDrawWindowBorders(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lP
 		g_iBorderHeight = wi.cyWindowBorders;
 		g_iBorderWidth = wi.cxWindowBorders;
 
-		// Calculate the polygon points
-		apt[0].x = 0;
-		apt[0].y = 0;
-		apt[1].x = g_iCaptionHeight + g_iBorderWidth;
-		apt[1].y = 0;
-		apt[2].x = g_iCaptionHeight + g_iBorderWidth;
-		apt[2].y = g_iBorderHeight;
-		apt[3].x = g_iBorderHeight;
-		apt[3].y = g_iBorderHeight;
-		apt[4].x = g_iBorderHeight;
-		apt[4].y = g_iCaptionHeight + g_iBorderHeight;
-		apt[5].x = 0;
-		apt[5].y = g_iCaptionHeight + g_iBorderHeight;
-		apt[6].x = 0;
+		// Draw the colored rectangles around the edges
+		hbr = GetSysColorBrush(iBorderColor);
 
-		// Set the polygon fill mode
-		SetPolyFillMode(hdc, ALTERNATE);
+		FillRect(hdc, &rc, hbr);
 
-		// Draw
-		Polygon(hdc, apt, sizeof(apt) / sizeof(apt[0]));
+		// Paint the "caps"
+		for (i = 0; i < 4; i++)
+		{
+			INT iFlipX = (i & 1) == 1;
+			INT iFlipY = (i & 2) == 2;
+			UINT uiFlipX = (iFlipX ? -1 : 1);
+			UINT uiFlipY = (iFlipY ? -1 : 1);
+
+			// Calculate the polygon points
+			apt[0].x = 0 + uiw * iFlipX - iFlipX;
+			apt[0].y = 0 + uih * iFlipY - iFlipY;
+			apt[1].x = apt[0].x + uiFlipX * (g_iCaptionHeight + g_iBorderWidth);
+			apt[1].y = apt[0].y;
+			apt[2].x = apt[1].x;
+			apt[2].y = apt[0].y + uiFlipY * g_iBorderHeight;
+			apt[3].x = apt[1].x - uiFlipX * g_iCaptionHeight;
+			apt[3].y = apt[2].y;
+			apt[4].x = apt[3].x;
+			apt[4].y = apt[2].y + uiFlipY * g_iCaptionHeight;
+			apt[5].x = apt[0].x;
+			apt[5].y = apt[4].y;
+
+			// These are necessary to close the gap
+			apt[6].x = apt[0].x;
+			apt[6].y = apt[0].y;
+
+			// Draw
+			SetPolyFillMode(hdc, 0);
+			Polygon(hdc, apt, sizeof(apt) / sizeof(apt[0]));
+		}
+
+		// Draw the missing frames
+		hbr = GetSysColorBrush(COLOR_WINDOWFRAME);
+		FrameRect(hdc, &rc, hbr);
 
 		// Cleanup
 		if (hbr)
