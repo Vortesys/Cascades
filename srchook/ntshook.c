@@ -73,6 +73,7 @@ __declspec(dllexport) LRESULT NTStyleHookProc(
 		switch (pcwps->message)
 		{
 		case WM_DISPLAYCHANGE:
+		case WM_SYNCPAINT:
 		case WM_ACTIVATE:
 		case WM_CREATE:
 		case WM_PAINT:
