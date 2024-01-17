@@ -149,8 +149,6 @@ VOID NTStyleDrawWindowBorders(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lP
 	INT asz[] = { 6, 4, 6, 4, 6, 4, 6, 4 };
 	INT csz = 8;
 
-	RECT rc = { -8, -8, 8, 8 };
-
 	// Verify our window handle
 	if (hWnd != NULL)
 		hdc = GetWindowDC(hWnd);
@@ -166,9 +164,19 @@ VOID NTStyleDrawWindowBorders(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lP
 		hbr = GetSysColorBrush(COLOR_ACTIVECAPTION);
 
 		// Get external window size
-		FillRect(hdc, &rc, hbr);
+		get window rectangle here!!
 		
 		// Calculate the polygon points
+		// this is the first one
+		// make this programatically
+		apt[0] = MAKEPOINTS(-g_uiBorderWidth , -g_uiBorderHeight);
+		apt[1] = MAKEPOINTS(g_uiCaptionHeight, g_uiBorderHeight);
+		apt[2] = MAKEPOINTS(0, g_uiCaptionHeight);
+		apt[3] = MAKEPOINTS(0, 0);
+		apt[4] = MAKEPOINTS(0, g_uiCaptionHeight);
+		apt[5] = MAKEPOINTS(0, 0);
+		apt[1] = MAKEPOINTS(0, 0);
+		apt[1] = MAKEPOINTS(0, 0);
 
 
 		// Set the polygon fill mode
