@@ -12,6 +12,15 @@
 #include <windows.h>
 #include "resource.h"
 
+/* Bitmaps */
+IDB_MAX BITMAP images\max.bmp
+IDB_MAX_S BITMAP images\maxd.bmp
+IDB_MIN BITMAP images\min.bmp
+IDB_MIN_S BITMAP images\mind.bmp
+IDB_RES BITMAP images\res.bmp
+IDB_RES_S BITMAP images\resd.bmp
+IDB_MENU BITMAP images\menu.bmp
+
 /* Version Information */
 #include "version.inc"
 #undef APSTUDIO_HIDDEN_SYMBOLS

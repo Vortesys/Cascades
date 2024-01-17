@@ -78,23 +78,13 @@ __declspec(dllexport) LRESULT NTStyleHookProc(
 		case WM_CREATE:
 		case WM_PAINT:
 		case WM_MOVE:
-			if ((GetWindowLongPtr(pcwps->hwnd, GWL_STYLE) & WS_CAPTION) == WS_CAPTION)
-			{
-				NTStyleDrawWindowCaption(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
-				NTStyleDrawWindowBorders(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
-			}
-
+			NTStyleDrawWindow(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
 			break;
 
 		case WM_NCACTIVATE:
 		case WM_NCCALCSIZE:
 		case WM_NCPAINT:
-			if ((GetWindowLongPtr(pcwps->hwnd, GWL_STYLE) & WS_CAPTION) == WS_CAPTION)
-			{
-				NTStyleDrawWindowCaption(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
-				NTStyleDrawWindowBorders(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
-			}
-
+			NTStyleDrawWindow(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
 			return 0;
 
 		default:
@@ -110,80 +100,25 @@ __declspec(dllexport) LRESULT NTStyleHookProc(
 }
 
 /* * * *\
-	NTStyleDrawWindowCaption -
-		Draws window caption & title
+	NTStyleDrawWindow -
+		Draws window using the
+		DrawWindow* helper
+		functions.
 \* * * */
-VOID NTStyleDrawWindowCaption(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lParam)
+VOID NTStyleDrawWindow(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lParam)
 {
-	/* If an application processes the WM_NCACTIVATE message, after
-	processing it must return TRUE to direct the system to complete
-	the change of active window. If the window is minimized when the
-	application receives the WM_NCACTIVATE message, it should pass
-	the message to DefWindowProc. In such cases, the default function
-	redraws the label for the icon. */
+	// Always refresh the colors and metrics before drawing
+	NTStyleGetWindowMetrics();
 
-	HDC hdc = NULL;
-	HBRUSH hbr = NULL;
-
-	WINDOWINFO wi;
-	BOOL bIsActiveWindow = FALSE;
-	INT iGradientCaptionColor = 0;
-	INT iCaptionColor = 0;
-
-	RECT rc = { 0, 0, 0, 0 };
-	UINT uiw = 0;
-
-	// Verify our window handle
-	if (hWnd != NULL)
-		hdc = GetWindowDC(hWnd);
-
-	// Verify the device context
-	if (hdc)
+	// Make sure we're only painting windows with titlebars
+	if ((GetWindowLongPtr(hWnd, GWL_STYLE) & WS_SYSMENU) == WS_SYSMENU)
 	{
-		// Check whether or not we're the active window
-		// and change colors based on that
-		bIsActiveWindow = GetForegroundWindow() == hWnd;
-		iGradientCaptionColor = bIsActiveWindow ? COLOR_GRADIENTACTIVECAPTION : COLOR_GRADIENTINACTIVECAPTION;
-		iCaptionColor = bIsActiveWindow ? COLOR_ACTIVECAPTION : COLOR_INACTIVECAPTION;
-
-		// Get external window size
-		wi.cbSize = sizeof(WINDOWINFO);
-		GetWindowInfo(hWnd, &wi);
-
-		// Get window width
-		uiw = wi.rcWindow.right - wi.rcWindow.left;
-
-		// Always refresh the colors and metrics before drawing
-		NTStyleGetWindowMetrics();
-
-		g_iBorderHeight = wi.cyWindowBorders;
-		g_iBorderWidth = wi.cxWindowBorders;
-
-		// Calculate the rect points
-		rc.left = g_iBorderWidth;
-		rc.top = g_iBorderHeight;
-		rc.right = uiw - rc.left;
-		rc.bottom = rc.top + g_iCaptionHeight;
-
-		// Draw the caption rectangle
-		// TODO: do it with a gradient
-		hbr = GetSysColorBrush(iCaptionColor);
-		FillRect(hdc, &rc, hbr);
-
-		// Draw the frame around it
-		hbr = GetSysColorBrush(COLOR_WINDOWFRAME);
-		FrameRect(hdc, &rc, hbr);
-
-		// Draw the caption text
-		// TODO!!!
-
-		// Cleanup
-		if (hbr)
-			DeleteObject(hbr);
-
-		ReleaseDC(hWnd, hdc);
+		// Draw the window
+		NTStyleDrawWindowCaption(hWnd, wParam, lParam);
+		NTStyleDrawWindowBorders(hWnd, wParam, lParam);
+		NTStyleDrawWindowButtons(hWnd, wParam, lParam);
 	}
-	
+
 	return;
 }
 
@@ -207,15 +142,6 @@ VOID NTStyleDrawWindowBorders(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lP
 	region, regardless of whether it uses the region. */
 
 	HDC hdc = NULL;
-	HBRUSH hbr = NULL;
-	HPEN hpn = NULL;
-
-	WINDOWINFO wi;
-	BOOL bIsActiveWindow = FALSE;
-	INT iBorderColor = 0;
-
-	UINT uiw = 0;
-	UINT uih = 0;
 
 	// Verify our window handle
 	if (hWnd != NULL)
@@ -224,26 +150,33 @@ VOID NTStyleDrawWindowBorders(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lP
 	// Verify the device context
 	if (hdc)
 	{
-		INT i;
+		HBRUSH hbr = NULL;
+		HPEN hpn = NULL;
 
-		// Check whether or not we're the active window
-		// and change colors based on that
-		bIsActiveWindow = (GetForegroundWindow() == hWnd);
-		iBorderColor = bIsActiveWindow ? COLOR_ACTIVEBORDER : COLOR_INACTIVEBORDER;
+		WINDOWINFO wi;
+		BOOL bIsActiveWindow = FALSE;
+		INT iBorderColor = 0;
+
+		UINT uiw = 0;
+		UINT uih = 0;
+
+		INT i;
 
 		// Get external window size
 		wi.cbSize = sizeof(WINDOWINFO);
 		GetWindowInfo(hWnd, &wi);
 
-		// Get window width and height
+		// Check whether or not we're the active window
+		// and change colors based on that
+		bIsActiveWindow = wi.dwWindowStatus == WS_ACTIVECAPTION;
+		iBorderColor = bIsActiveWindow ? COLOR_ACTIVEBORDER : COLOR_INACTIVEBORDER;
+
+		// Get window width, height and border size
 		uiw = wi.rcWindow.right - wi.rcWindow.left;
 		uih = wi.rcWindow.bottom - wi.rcWindow.top;
 
-		// Always refresh the colors and metrics before drawing
-		NTStyleGetWindowMetrics();
-
-		g_iBorderHeight = wi.cyWindowBorders;
-		g_iBorderWidth = wi.cxWindowBorders;
+		g_iBorderHeight = wi.cyWindowBorders - 1;
+		g_iBorderWidth = wi.cxWindowBorders - 1;
 
 		// Draw the colored rectangles around the edges
 		i = 0;
@@ -291,7 +224,7 @@ VOID NTStyleDrawWindowBorders(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lP
 			// Calculate the polygon points
 			apt[0].x = 0 + uiw * iFlipX - iFlipX;
 			apt[0].y = 0 + uih * iFlipY - iFlipY;
-			apt[1].x = apt[0].x + uiFlipX * (g_iCaptionHeight + g_iBorderWidth - 1);
+			apt[1].x = apt[0].x + uiFlipX * (g_iCaptionHeight + g_iBorderWidth);
 			apt[1].y = apt[0].y;
 			apt[2].x = apt[1].x;
 			apt[2].y = apt[0].y + uiFlipY * g_iBorderHeight;
@@ -324,6 +257,137 @@ VOID NTStyleDrawWindowBorders(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lP
 }
 
 /* * * *\
+	NTStyleDrawWindowCaption -
+		Draws window caption & title
+\* * * */
+VOID NTStyleDrawWindowCaption(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lParam)
+{
+	/* If an application processes the WM_NCACTIVATE message, after
+	processing it must return TRUE to direct the system to complete
+	the change of active window. If the window is minimized when the
+	application receives the WM_NCACTIVATE message, it should pass
+	the message to DefWindowProc. In such cases, the default function
+	redraws the label for the icon. */
+
+	HDC hdc = NULL;
+
+	// Verify our window handle
+	if (hWnd != NULL)
+		hdc = GetWindowDC(hWnd);
+
+	// Verify the device context
+	if (hdc)
+	{
+		HBRUSH hbr = NULL;
+		HFONT hft = NULL;
+
+		WINDOWINFO wi;
+		BOOL bIsActiveWindow = FALSE;
+		INT iGradientCaptionColor = 0;
+		INT iCaptionColor = 0;
+		INT iCaptionTextColor = 0;
+
+		RECT rc = { 0, 0, 0, 0 };
+		UINT uiw = 0;
+
+		INT cTxtLen = 0;
+		LPWSTR pszTxt;
+
+		// Get external window size
+		wi.cbSize = sizeof(WINDOWINFO);
+		GetWindowInfo(hWnd, &wi);
+
+		// Check whether or not we're the active window
+		// and change colors based on that
+		bIsActiveWindow = wi.dwWindowStatus == WS_ACTIVECAPTION; // GetForegroundWindow() == hWnd;
+		iGradientCaptionColor = bIsActiveWindow ? COLOR_GRADIENTACTIVECAPTION : COLOR_GRADIENTINACTIVECAPTION;
+		iCaptionColor = bIsActiveWindow ? COLOR_ACTIVECAPTION : COLOR_INACTIVECAPTION;
+		iCaptionTextColor = bIsActiveWindow ? COLOR_CAPTIONTEXT : COLOR_INACTIVECAPTIONTEXT;
+
+		// Get window width
+		uiw = wi.rcWindow.right - wi.rcWindow.left;
+
+		// Always refresh the colors and metrics before drawing
+		NTStyleGetWindowMetrics();
+
+		g_iBorderHeight = wi.cyWindowBorders - 1;
+		g_iBorderWidth = wi.cxWindowBorders - 1;
+
+		// Calculate the rect points
+		rc.left = g_iBorderWidth - 1;
+		rc.top = g_iBorderHeight;
+		rc.right = uiw - rc.left;
+		rc.bottom = rc.top + g_iCaptionHeight;
+
+		// Draw the caption rectangle
+		// TODO: do it with a gradient
+		hbr = GetSysColorBrush(iCaptionColor);
+		FillRect(hdc, &rc, hbr);
+
+		// Draw the frame around it
+		hbr = GetSysColorBrush(COLOR_WINDOWFRAME);
+		FrameRect(hdc, &rc, hbr);
+
+		// Get the font object
+		/* It is not recommended that you employ this method
+		to obtain the current font used by dialogs and windows.
+		Instead, use the SystemParametersInfo function with the
+		SPI_GETNONCLIENTMETRICS parameter to retrieve the current
+		font. SystemParametersInfo will take into account the
+		current theme and provides font information for captions,
+		menus, and message dialogs. */
+		hft = (HFONT)GetStockObject(SYSTEM_FONT);
+
+		// Set up our HDC for the text
+		SetTextColor(hdc, (COLORREF)GetSysColor(iCaptionTextColor));
+		SetBkColor(hdc, (COLORREF)GetSysColor(iCaptionColor));
+
+		SelectObject(hdc, hbr);
+		SelectObject(hdc, hft);
+
+		// Calculate the rect points for the text
+		rc.left = rc.left + g_iCaptionHeight;
+		rc.right = rc.right - g_iCaptionHeight;
+
+		// Allocate memory for the caption text
+		cTxtLen = GetWindowTextLength(hWnd);
+
+		pszTxt = (LPWSTR)VirtualAlloc((LPVOID)NULL,
+			(DWORD)(cTxtLen + 1), MEM_COMMIT,
+			PAGE_READWRITE);
+
+		// Get the caption text
+		GetWindowText(hWnd, pszTxt, cTxtLen + 1);
+
+		// Draw the caption text
+		ExtTextOut(hdc, rc.left, rc.top, ETO_CLIPPED, &rc, pszTxt, cTxtLen + 1, NULL);
+
+		// Cleanup
+		if (pszTxt)
+			VirtualFree(pszTxt, 0, MEM_RELEASE);
+
+		if (hbr)
+			DeleteObject(hbr);
+
+		if (hft)
+			DeleteObject(hft);
+
+		ReleaseDC(hWnd, hdc);
+	}
+
+	return;
+}
+
+/* * * *\
+	NTStyleDrawWindowButtons -
+		Draws window buttons
+\* * * */
+VOID NTStyleDrawWindowButtons(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lParam)
+{
+	return;
+}
+
+/* * * *\
 	NTStyleGetWindowMetrics -
 		Gathers system colors
 		and metrics for use with
@@ -333,22 +397,8 @@ VOID NTStyleGetWindowMetrics(VOID)
 {
 	// First get the system metrics.
 	g_iCaptionHeight = GetSystemMetrics(SM_CYCAPTION); // Caption bar height
-	g_iBorderWidth = GetSystemMetrics(SM_CXBORDER); // Border width
-	g_iBorderHeight = GetSystemMetrics(SM_CYBORDER); // Border height
 	g_iDlgFrmWidth = GetSystemMetrics(SM_CXDLGFRAME); // Dialog frame width
 	g_iDlgFrmHeight = GetSystemMetrics(SM_CYDLGFRAME); // Dialog frame height
-
-	// And then the active colors...
-	g_dwActiveCaption = GetSysColor(COLOR_ACTIVECAPTION); // Active caption bar
-	g_dwActiveCaptionGradient = GetSysColor(COLOR_GRADIENTACTIVECAPTION); // Active caption bar gradient
-	g_dwActiveCaptionText = GetSysColor(COLOR_CAPTIONTEXT); // Active caption text
-	g_dwActiveBorder = GetSysColor(COLOR_ACTIVEBORDER); // Active window border
-
-	// Plus inactive...
-	g_dwInactiveCaption = GetSysColor(COLOR_INACTIVECAPTION); // Inactive caption bar
-	g_dwInactiveCaptionGradient = GetSysColor(COLOR_GRADIENTINACTIVECAPTION); // Inactive caption bar gradient
-	g_dwInactiveCaptionText = GetSysColor(COLOR_ACTIVEBORDER); // Inactive caption text
-	g_dwInactiveBorder = GetSysColor(COLOR_INACTIVEBORDER); // Inactive window border
 
 	// And the window frame.
 	g_dwWindowFrame = GetSysColor(COLOR_WINDOWFRAME); // Window frame color
