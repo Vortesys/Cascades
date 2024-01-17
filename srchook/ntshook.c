@@ -159,7 +159,7 @@ VOID NTStyleDrawWindowCaption(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lP
 		g_iBorderWidth = wi.cxWindowBorders;
 
 		// Calculate the rect points
-		rc.left = g_iCaptionHeight + g_iBorderWidth;
+		rc.left = g_iBorderWidth;
 		rc.top = g_iBorderHeight;
 		rc.right = uiw - rc.left;
 		rc.bottom = rc.top + g_iCaptionHeight;
@@ -290,14 +290,14 @@ VOID NTStyleDrawWindowBorders(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lP
 			// Calculate the polygon points
 			apt[0].x = 0 + uiw * iFlipX - iFlipX;
 			apt[0].y = 0 + uih * iFlipY - iFlipY;
-			apt[1].x = apt[0].x + uiFlipX * (g_iCaptionHeight + g_iBorderWidth);
+			apt[1].x = apt[0].x + uiFlipX * (g_iCaptionHeight + g_iBorderWidth - 1);
 			apt[1].y = apt[0].y;
 			apt[2].x = apt[1].x;
 			apt[2].y = apt[0].y + uiFlipY * g_iBorderHeight;
 			apt[3].x = apt[1].x - uiFlipX * g_iCaptionHeight;
 			apt[3].y = apt[2].y;
 			apt[4].x = apt[3].x;
-			apt[4].y = apt[2].y + uiFlipY * g_iCaptionHeight;
+			apt[4].y = apt[2].y + uiFlipY * (g_iCaptionHeight - 1);
 			apt[5].x = apt[0].x;
 			apt[5].y = apt[4].y;
 
