@@ -12,11 +12,11 @@
 #include <strsafe.h>
 
 // System Metrics
-static UINT g_uiCaptionHeight;
-static UINT g_uiBorderWidth;
-static UINT g_uiBorderHeight;
-static UINT g_uiDlgFrmWidth;
-static UINT g_uiDlgFrmHeight;
+static INT g_iCaptionHeight;
+static INT g_iBorderWidth;
+static INT g_iBorderHeight;
+static INT g_iDlgFrmWidth;
+static INT g_iDlgFrmHeight;
 
 // System Colors
 static DWORD g_dwActiveCaption;
@@ -72,6 +72,7 @@ __declspec(dllexport) LRESULT NTStyleHookProc(
 
 		switch (pcwps->message)
 		{
+		case WM_NCCREATE:
 		case WM_NCCALCSIZE:
 		case WM_NCACTIVATE:
 		case WM_NCPAINT:
@@ -80,7 +81,10 @@ __declspec(dllexport) LRESULT NTStyleHookProc(
 				NTStyleDrawWindowCaption(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
 				NTStyleDrawWindowBorders(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
 			}
+			//return 0;
 			break;
+
+		// WM_NCDESTROY
 
 		default:
 			break;
@@ -145,47 +149,85 @@ VOID NTStyleDrawWindowBorders(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lP
 	region, regardless of whether it uses the region. */
 
 	HDC hdc = NULL;
-	RECT rcWindow = { 0, 0, 0, 0 };
 	HBRUSH hbr = NULL;
-	PPOINT apt[40];
+	HPEN hpn = NULL;
+
+	POINT apt[7] = { 0, 0 };
 	INT asz[] = { 6, 4, 6, 4, 6, 4, 6, 4 };
 	INT csz = 8;
+
+	WINDOWINFO wi;
+	BOOL bIsActiveWindow = FALSE;
+	INT iGradientCaptionColor = 0;
+	INT iCaptionColor = 0;
+	INT iBorderColor = 0;
+
+	RECT rc = { 0, 0, 8, 8 };
+	UINT uiw = 0;
+	UINT uih = 0;
 
 	// Verify our window handle
 	if (hWnd != NULL)
 		hdc = GetWindowDC(hWnd);
 
-	// Always refresh the colors and metrics before drawing
-	NTStyleGetWindowMetrics();
-
-	// Color our brushes
-
 	// Verify the device context
 	if (hdc)
 	{
-		hbr = GetSysColorBrush(COLOR_ACTIVECAPTION);
+
+		// Check whether or not we're the active window
+		// and change colors based on that
+		bIsActiveWindow = GetForegroundWindow() == hWnd;
+		iGradientCaptionColor = bIsActiveWindow ? COLOR_GRADIENTACTIVECAPTION : COLOR_GRADIENTINACTIVECAPTION;
+		iCaptionColor = bIsActiveWindow ? COLOR_ACTIVECAPTION : COLOR_INACTIVECAPTION;
+		iBorderColor = bIsActiveWindow ? COLOR_ACTIVEBORDER : COLOR_INACTIVEBORDER;
+
+		// Set up our brushes
+		hbr = GetSysColorBrush(iBorderColor);
+		hpn = CreatePen(PS_SOLID, 2, RGB(255, 0, 0));
+
+		// FillRect(hdc, &rc, hbr);
 
 		// Get external window size
-		get window rectangle here!!
-		
-		// Calculate the polygon points
-		// this is the first one
-		// make this programatically
-		apt[0] = MAKEPOINTS(-g_uiBorderWidth , -g_uiBorderHeight);
-		apt[1] = MAKEPOINTS(g_uiCaptionHeight, g_uiBorderHeight);
-		apt[2] = MAKEPOINTS(0, g_uiCaptionHeight);
-		apt[3] = MAKEPOINTS(0, 0);
-		apt[4] = MAKEPOINTS(0, g_uiCaptionHeight);
-		apt[5] = MAKEPOINTS(0, 0);
-		apt[1] = MAKEPOINTS(0, 0);
-		apt[1] = MAKEPOINTS(0, 0);
+		wi.cbSize = sizeof(WINDOWINFO);
+		GetWindowInfo(hWnd, &wi);
 
+		// Get window width and height
+		uiw = wi.rcWindow.right - wi.rcWindow.left;
+		uih = wi.rcWindow.bottom - wi.rcWindow.top;
+
+		// Always refresh the colors and metrics before drawing
+		NTStyleGetWindowMetrics();
+
+		g_iBorderHeight = wi.cyWindowBorders;
+		g_iBorderWidth = wi.cxWindowBorders;
+
+		// Calculate the polygon points
+		apt[0].x = 0;
+		apt[0].y = 0;
+		apt[1].x = g_iCaptionHeight + g_iBorderWidth;
+		apt[1].y = 0;
+		apt[2].x = g_iCaptionHeight + g_iBorderWidth;
+		apt[2].y = g_iBorderHeight;
+		apt[3].x = g_iBorderHeight;
+		apt[3].y = g_iBorderHeight;
+		apt[4].x = g_iBorderHeight;
+		apt[4].y = g_iCaptionHeight + g_iBorderHeight;
+		apt[5].x = 0;
+		apt[5].y = g_iCaptionHeight + g_iBorderHeight;
+		apt[6].x = 0;
 
 		// Set the polygon fill mode
-		SetPolyFillMode(hdc, WINDING);
+		SetPolyFillMode(hdc, ALTERNATE);
 
+		// Draw
+		Polygon(hdc, apt, sizeof(apt) / sizeof(apt[0]));
 
-		DeleteObject(hbr);
+		// Cleanup
+		if (hbr)
+			DeleteObject(hbr);
+		if (hpn)
+			DeleteObject(hpn);
+
 		ReleaseDC(hWnd, hdc);
 	}
 
@@ -201,11 +243,11 @@ VOID NTStyleDrawWindowBorders(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lP
 VOID NTStyleGetWindowMetrics(VOID)
 {
 	// First get the system metrics.
-	g_uiCaptionHeight = GetSystemMetrics(SM_CYCAPTION); // Caption bar height
-	g_uiBorderWidth = GetSystemMetrics(SM_CXBORDER); // Border width
-	g_uiBorderHeight = GetSystemMetrics(SM_CYBORDER); // Border height
-	g_uiDlgFrmWidth = GetSystemMetrics(SM_CXDLGFRAME); // Dialog frame width
-	g_uiDlgFrmHeight = GetSystemMetrics(SM_CYDLGFRAME); // Dialog frame height
+	g_iCaptionHeight = GetSystemMetrics(SM_CYCAPTION); // Caption bar height
+	g_iBorderWidth = GetSystemMetrics(SM_CXBORDER); // Border width
+	g_iBorderHeight = GetSystemMetrics(SM_CYBORDER); // Border height
+	g_iDlgFrmWidth = GetSystemMetrics(SM_CXDLGFRAME); // Dialog frame width
+	g_iDlgFrmHeight = GetSystemMetrics(SM_CYDLGFRAME); // Dialog frame height
 
 	// And then the active colors...
 	g_dwActiveCaption = GetSysColor(COLOR_ACTIVECAPTION); // Active caption bar
