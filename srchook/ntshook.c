@@ -75,9 +75,11 @@ __declspec(dllexport) LRESULT NTStyleHookProc(
 		case WM_NCCALCSIZE:
 		case WM_NCACTIVATE:
 		case WM_NCPAINT:
-			NTStyleDrawWindowCaption(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
-			NTStyleDrawWindowBorders(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
-
+			if ((GetWindowLongPtr(pcwps->hwnd, GWL_STYLE) & WS_CAPTION) == WS_CAPTION)
+			{
+				NTStyleDrawWindowCaption(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
+				NTStyleDrawWindowBorders(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
+			}
 			break;
 
 		default:
