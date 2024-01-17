@@ -72,26 +72,29 @@ __declspec(dllexport) LRESULT NTStyleHookProc(
 
 		switch (pcwps->message)
 		{
-		case WM_NCCREATE:
+		case WM_DISPLAYCHANGE:
+		case WM_ACTIVATE:
+		case WM_CREATE:
+		case WM_PAINT:
+		case WM_MOVE:
+			if ((GetWindowLongPtr(pcwps->hwnd, GWL_STYLE) & WS_CAPTION) == WS_CAPTION)
+			{
+				NTStyleDrawWindowCaption(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
+				NTStyleDrawWindowBorders(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
+			}
+
+			break;
+
 		case WM_NCACTIVATE:
+		case WM_NCCALCSIZE:
 		case WM_NCPAINT:
 			if ((GetWindowLongPtr(pcwps->hwnd, GWL_STYLE) & WS_CAPTION) == WS_CAPTION)
 			{
 				NTStyleDrawWindowCaption(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
 				NTStyleDrawWindowBorders(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
 			}
-			break;
 
-		case WM_NCCALCSIZE:
-			if ((GetWindowLongPtr(pcwps->hwnd, GWL_STYLE) & WS_CAPTION) == WS_CAPTION)
-			{
-				NTStyleDrawWindowCaption(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
-				NTStyleDrawWindowBorders(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
-			}
 			return 0;
-
-
-		// WM_NCDESTROY
 
 		default:
 			break;
@@ -159,7 +162,7 @@ VOID NTStyleDrawWindowCaption(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lP
 		rc.left = g_iCaptionHeight + g_iBorderWidth;
 		rc.top = g_iBorderHeight;
 		rc.right = uiw - rc.left;
-		rc.bottom = rc.top + g_iCaptionHeight - 1;
+		rc.bottom = rc.top + g_iCaptionHeight;
 
 		// Draw the caption rectangle
 		// TODO: do it with a gradient
@@ -171,6 +174,7 @@ VOID NTStyleDrawWindowCaption(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lP
 		FrameRect(hdc, &rc, hbr);
 
 		// Draw the caption text
+		// TODO!!!
 
 		// Cleanup
 		if (hbr)
@@ -266,7 +270,10 @@ VOID NTStyleDrawWindowBorders(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lP
 
 		// Set up our brushes
 		hbr = GetSysColorBrush(iBorderColor);
-		hpn = CreatePen(PS_SOLID, 2, (COLORREF)GetSysColor(COLOR_WINDOWFRAME));
+		hpn = CreatePen(PS_SOLID, 0, (COLORREF)GetSysColor(COLOR_WINDOWFRAME));
+
+		SelectObject(hdc, hbr);
+		SelectObject(hdc, hpn);
 
 		// Paint the "caps"
 		i = 0;
