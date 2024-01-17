@@ -158,7 +158,7 @@ VOID NTStyleDrawWindowCaption(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lP
 		// Calculate the rect points
 		rc.left = g_iCaptionHeight + g_iBorderWidth;
 		rc.top = g_iBorderHeight;
-		rc.right = uiw - rc.left + 2;
+		rc.right = uiw - rc.left;
 		rc.bottom = rc.top + g_iCaptionHeight - 1;
 
 		// Draw the caption rectangle
@@ -205,13 +205,10 @@ VOID NTStyleDrawWindowBorders(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lP
 	HBRUSH hbr = NULL;
 	HPEN hpn = NULL;
 
-	POINT apt[7] = { 0, 0 };
-
 	WINDOWINFO wi;
 	BOOL bIsActiveWindow = FALSE;
 	INT iBorderColor = 0;
 
-	RECT rc = { 0, 0, 0, 0 };
 	UINT uiw = 0;
 	UINT uih = 0;
 
@@ -229,10 +226,6 @@ VOID NTStyleDrawWindowBorders(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lP
 		bIsActiveWindow = (GetForegroundWindow() == hWnd);
 		iBorderColor = bIsActiveWindow ? COLOR_ACTIVEBORDER : COLOR_INACTIVEBORDER;
 
-		// Set up our brushes
-		hbr = GetSysColorBrush(iBorderColor);
-		hpn = CreatePen(PS_SOLID, 2, (COLORREF)GetSysColor(COLOR_WINDOWFRAME));
-
 		// Get external window size
 		wi.cbSize = sizeof(WINDOWINFO);
 		GetWindowInfo(hWnd, &wi);
@@ -248,17 +241,44 @@ VOID NTStyleDrawWindowBorders(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lP
 		g_iBorderWidth = wi.cxWindowBorders;
 
 		// Draw the colored rectangles around the edges
-		hbr = GetSysColorBrush(iBorderColor);
+		i = 0;
 
-		FillRect(hdc, &rc, hbr);
+		for (i = 0; i < 4; i++)
+		{
+			INT iModX = (i & 1) == 1;
+			INT iModY = (i & 2) == 2;
+
+			RECT rc = { 0, 0, 0, 0 };
+
+			rc.left = (i == 2) * (uiw - g_iBorderWidth - 1);
+			rc.top = (i == 3) * (uih - g_iBorderHeight - 1);
+			rc.right = (i == 0) ? g_iBorderWidth + 1 : uiw;
+			rc.bottom = (i == 1) ? g_iBorderHeight + 1 : uih;
+
+			// Draw rectangle
+			hbr = GetSysColorBrush(iBorderColor);
+			FillRect(hdc, &rc, hbr);
+
+			// Draw the frame
+			hbr = GetSysColorBrush(COLOR_WINDOWFRAME);
+			FrameRect(hdc, &rc, hbr);
+		}
+
+		// Set up our brushes
+		hbr = GetSysColorBrush(iBorderColor);
+		hpn = CreatePen(PS_SOLID, 2, (COLORREF)GetSysColor(COLOR_WINDOWFRAME));
 
 		// Paint the "caps"
+		i = 0;
+
 		for (i = 0; i < 4; i++)
 		{
 			INT iFlipX = (i & 1) == 1;
 			INT iFlipY = (i & 2) == 2;
 			UINT uiFlipX = (iFlipX ? -1 : 1);
 			UINT uiFlipY = (iFlipY ? -1 : 1);
+
+			POINT apt[7] = { 0, 0 };
 
 			// Calculate the polygon points
 			apt[0].x = 0 + uiw * iFlipX - iFlipX;
@@ -282,10 +302,6 @@ VOID NTStyleDrawWindowBorders(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lP
 			SetPolyFillMode(hdc, 0);
 			Polygon(hdc, apt, sizeof(apt) / sizeof(apt[0]));
 		}
-
-		// Draw the missing frames
-		hbr = GetSysColorBrush(COLOR_WINDOWFRAME);
-		FrameRect(hdc, &rc, hbr);
 
 		// Cleanup
 		if (hbr)
