@@ -132,6 +132,7 @@ VOID NTStyleDrawWindow(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lParam)
 		NTStyleDrawWindowCaption(hdc, &wi, wParam, lParam);
 		NTStyleDrawWindowBorders(hdc, &wi, wParam, lParam);
 		NTStyleDrawWindowButtons(hdc, &wi, wParam, lParam);
+		NTStyleDrawWindowTitle(hWnd, hdc, &wi, wParam, lParam);
 	}
 
 	return;
@@ -146,7 +147,6 @@ VOID NTStyleDrawWindowBorders(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 	HBRUSH hbr = NULL;
 	HPEN hpn = NULL;
 
-	WINDOWINFO wi;
 	BOOL bIsActiveWindow = FALSE;
 	INT iBorderColor = 0;
 
@@ -270,7 +270,6 @@ VOID NTStyleDrawWindowCaption(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 
 	HBRUSH hbr = NULL;
 
-	WINDOWINFO wi;
 	BOOL bIsActiveWindow = FALSE;
 	INT iGradientCaptionColor = 0;
 	INT iCaptionColor = 0;
