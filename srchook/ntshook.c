@@ -113,6 +113,13 @@ VOID NTStyleDrawWindow(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lParam)
 	// Make sure we're only painting windows with titlebars
 	if ((GetWindowLongPtr(hWnd, GWL_STYLE) & WS_SYSMENU) == WS_SYSMENU)
 	{
+		// TODO: condense a few things, create and release a single DC
+		// so that we're not making and deleting a bunch, theoretically
+		// I could create an offscreen one and then blit it to the screen
+		// afterwards.
+		// Maybe pass an HDC and a window info structure? Prevents us from
+		// needing an HWND.
+		
 		// Draw the window
 		NTStyleDrawWindowCaption(hWnd, wParam, lParam);
 		NTStyleDrawWindowBorders(hWnd, wParam, lParam);
@@ -384,6 +391,7 @@ VOID NTStyleDrawWindowCaption(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lP
 \* * * */
 VOID NTStyleDrawWindowButtons(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lParam)
 {
+	// Get window styles
 	return;
 }
 
