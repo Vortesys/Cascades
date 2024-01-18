@@ -113,17 +113,25 @@ VOID NTStyleDrawWindow(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lParam)
 	// Make sure we're only painting windows with titlebars
 	if ((GetWindowLongPtr(hWnd, GWL_STYLE) & WS_SYSMENU) == WS_SYSMENU)
 	{
+		HDC hdc = NULL;
+		WINDOWINFO wi;
 		// TODO: condense a few things, create and release a single DC
 		// so that we're not making and deleting a bunch, theoretically
 		// I could create an offscreen one and then blit it to the screen
 		// afterwards.
-		// Maybe pass an HDC and a window info structure? Prevents us from
-		// needing an HWND.
+
+		// Verify our window handle
+		if (hWnd != NULL)
+			hdc = GetWindowDC(hWnd);
+
+		// Get external window size
+		wi.cbSize = sizeof(WINDOWINFO);
+		GetWindowInfo(hWnd, &wi);
 		
 		// Draw the window
-		NTStyleDrawWindowCaption(hWnd, wParam, lParam);
-		NTStyleDrawWindowBorders(hWnd, wParam, lParam);
-		NTStyleDrawWindowButtons(hWnd, wParam, lParam);
+		NTStyleDrawWindowCaption(hdc, &wi, wParam, lParam);
+		NTStyleDrawWindowBorders(hdc, &wi, wParam, lParam);
+		NTStyleDrawWindowButtons(hdc, &wi, wParam, lParam);
 	}
 
 	return;
@@ -133,8 +141,20 @@ VOID NTStyleDrawWindow(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lParam)
 	NTStyleDrawWindowBorders -
 		Draws window borders
 \* * * */
-VOID NTStyleDrawWindowBorders(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lParam)
+VOID NTStyleDrawWindowBorders(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wParam, _In_ LPARAM lParam)
 {
+	HBRUSH hbr = NULL;
+	HPEN hpn = NULL;
+
+	WINDOWINFO wi;
+	BOOL bIsActiveWindow = FALSE;
+	INT iBorderColor = 0;
+
+	UINT uiw = 0;
+	UINT uih = 0;
+
+	INT i;
+
 	/* The system maintains an update region for the nonclient area.
 	When an application receives a WM_NCPAINT message, the wParam
 	parameter contains a handle to a region defining the dimensions of
@@ -148,117 +168,89 @@ VOID NTStyleDrawWindowBorders(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lP
 	clipped. The application is not responsible for clearing the update
 	region, regardless of whether it uses the region. */
 
-	HDC hdc = NULL;
+	// Check whether or not we're the active window
+	// and change colors based on that
+	bIsActiveWindow = pwi->dwWindowStatus == WS_ACTIVECAPTION;
+	iBorderColor = bIsActiveWindow ? COLOR_ACTIVEBORDER : COLOR_INACTIVEBORDER;
 
-	// Verify our window handle
-	if (hWnd != NULL)
-		hdc = GetWindowDC(hWnd);
+	// Get window width, height and border size
+	uiw = pwi->rcWindow.right - pwi->rcWindow.left;
+	uih = pwi->rcWindow.bottom - pwi->rcWindow.top;
 
-	// Verify the device context
-	if (hdc)
+	g_iBorderHeight = pwi->cyWindowBorders - 1;
+	g_iBorderWidth = pwi->cxWindowBorders - 1;
+
+	// Draw the colored rectangles around the edges
+	i = 0;
+
+	for (i = 0; i < 4; i++)
 	{
-		HBRUSH hbr = NULL;
-		HPEN hpn = NULL;
+		INT iModX = (i & 1) == 1;
+		INT iModY = (i & 2) == 2;
 
-		WINDOWINFO wi;
-		BOOL bIsActiveWindow = FALSE;
-		INT iBorderColor = 0;
+		RECT rc = { 0, 0, 0, 0 };
 
-		UINT uiw = 0;
-		UINT uih = 0;
+		rc.left = (i == 2) * (uiw - g_iBorderWidth - 1);
+		rc.top = (i == 3) * (uih - g_iBorderHeight - 1);
+		rc.right = (i == 0) ? g_iBorderWidth + 1 : uiw;
+		rc.bottom = (i == 1) ? g_iBorderHeight + 1 : uih;
 
-		INT i;
-
-		// Get external window size
-		wi.cbSize = sizeof(WINDOWINFO);
-		GetWindowInfo(hWnd, &wi);
-
-		// Check whether or not we're the active window
-		// and change colors based on that
-		bIsActiveWindow = wi.dwWindowStatus == WS_ACTIVECAPTION;
-		iBorderColor = bIsActiveWindow ? COLOR_ACTIVEBORDER : COLOR_INACTIVEBORDER;
-
-		// Get window width, height and border size
-		uiw = wi.rcWindow.right - wi.rcWindow.left;
-		uih = wi.rcWindow.bottom - wi.rcWindow.top;
-
-		g_iBorderHeight = wi.cyWindowBorders - 1;
-		g_iBorderWidth = wi.cxWindowBorders - 1;
-
-		// Draw the colored rectangles around the edges
-		i = 0;
-
-		for (i = 0; i < 4; i++)
-		{
-			INT iModX = (i & 1) == 1;
-			INT iModY = (i & 2) == 2;
-
-			RECT rc = { 0, 0, 0, 0 };
-
-			rc.left = (i == 2) * (uiw - g_iBorderWidth - 1);
-			rc.top = (i == 3) * (uih - g_iBorderHeight - 1);
-			rc.right = (i == 0) ? g_iBorderWidth + 1 : uiw;
-			rc.bottom = (i == 1) ? g_iBorderHeight + 1 : uih;
-
-			// Draw rectangle
-			hbr = GetSysColorBrush(iBorderColor);
-			FillRect(hdc, &rc, hbr);
-
-			// Draw the frame
-			hbr = GetSysColorBrush(COLOR_WINDOWFRAME);
-			FrameRect(hdc, &rc, hbr);
-		}
-
-		// Set up our brushes
+		// Draw rectangle
 		hbr = GetSysColorBrush(iBorderColor);
-		hpn = CreatePen(PS_SOLID, 0, (COLORREF)GetSysColor(COLOR_WINDOWFRAME));
+		FillRect(hDC, &rc, hbr);
 
-		SelectObject(hdc, hbr);
-		SelectObject(hdc, hpn);
-
-		// Paint the "caps"
-		i = 0;
-
-		for (i = 0; i < 4; i++)
-		{
-			INT iFlipX = (i & 1) == 1;
-			INT iFlipY = (i & 2) == 2;
-			UINT uiFlipX = (iFlipX ? -1 : 1);
-			UINT uiFlipY = (iFlipY ? -1 : 1);
-
-			POINT apt[7] = { 0, 0 };
-
-			// Calculate the polygon points
-			apt[0].x = 0 + uiw * iFlipX - iFlipX;
-			apt[0].y = 0 + uih * iFlipY - iFlipY;
-			apt[1].x = apt[0].x + uiFlipX * (g_iCaptionHeight + g_iBorderWidth);
-			apt[1].y = apt[0].y;
-			apt[2].x = apt[1].x;
-			apt[2].y = apt[0].y + uiFlipY * g_iBorderHeight;
-			apt[3].x = apt[1].x - uiFlipX * g_iCaptionHeight;
-			apt[3].y = apt[2].y;
-			apt[4].x = apt[3].x;
-			apt[4].y = apt[2].y + uiFlipY * (g_iCaptionHeight - 1);
-			apt[5].x = apt[0].x;
-			apt[5].y = apt[4].y;
-
-			// These are necessary to close the gap
-			apt[6].x = apt[0].x;
-			apt[6].y = apt[0].y;
-
-			// Draw
-			SetPolyFillMode(hdc, 0);
-			Polygon(hdc, apt, sizeof(apt) / sizeof(apt[0]));
-		}
-
-		// Cleanup
-		if (hbr)
-			DeleteObject(hbr);
-		if (hpn)
-			DeleteObject(hpn);
-
-		ReleaseDC(hWnd, hdc);
+		// Draw the frame
+		hbr = GetSysColorBrush(COLOR_WINDOWFRAME);
+		FrameRect(hDC, &rc, hbr);
 	}
+
+	// Set up our brushes
+	hbr = GetSysColorBrush(iBorderColor);
+	hpn = CreatePen(PS_SOLID, 0, (COLORREF)GetSysColor(COLOR_WINDOWFRAME));
+
+	SelectObject(hDC, hbr);
+	SelectObject(hDC, hpn);
+
+	// Paint the "caps"
+	i = 0;
+
+	for (i = 0; i < 4; i++)
+	{
+		INT iFlipX = (i & 1) == 1;
+		INT iFlipY = (i & 2) == 2;
+		UINT uiFlipX = (iFlipX ? -1 : 1);
+		UINT uiFlipY = (iFlipY ? -1 : 1);
+
+		POINT apt[7] = { 0, 0 };
+
+		// Calculate the polygon points
+		apt[0].x = 0 + uiw * iFlipX - iFlipX;
+		apt[0].y = 0 + uih * iFlipY - iFlipY;
+		apt[1].x = apt[0].x + uiFlipX * (g_iCaptionHeight + g_iBorderWidth);
+		apt[1].y = apt[0].y;
+		apt[2].x = apt[1].x;
+		apt[2].y = apt[0].y + uiFlipY * g_iBorderHeight;
+		apt[3].x = apt[1].x - uiFlipX * g_iCaptionHeight;
+		apt[3].y = apt[2].y;
+		apt[4].x = apt[3].x;
+		apt[4].y = apt[2].y + uiFlipY * (g_iCaptionHeight - 1);
+		apt[5].x = apt[0].x;
+		apt[5].y = apt[4].y;
+
+		// These are necessary to close the gap
+		apt[6].x = apt[0].x;
+		apt[6].y = apt[0].y;
+
+		// Draw
+		SetPolyFillMode(hDC, 0);
+		Polygon(hDC, apt, sizeof(apt) / sizeof(apt[0]));
+	}
+
+	// Cleanup
+	if (hbr)
+		DeleteObject(hbr);
+	if (hpn)
+		DeleteObject(hpn);
 
 	return;
 }
@@ -267,7 +259,7 @@ VOID NTStyleDrawWindowBorders(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lP
 	NTStyleDrawWindowCaption -
 		Draws window caption & title
 \* * * */
-VOID NTStyleDrawWindowCaption(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lParam)
+VOID NTStyleDrawWindowCaption(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wParam, _In_ LPARAM lParam)
 {
 	/* If an application processes the WM_NCACTIVATE message, after
 	processing it must return TRUE to direct the system to complete
@@ -276,111 +268,48 @@ VOID NTStyleDrawWindowCaption(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lP
 	the message to DefWindowProc. In such cases, the default function
 	redraws the label for the icon. */
 
-	HDC hdc = NULL;
+	HBRUSH hbr = NULL;
 
-	// Verify our window handle
-	if (hWnd != NULL)
-		hdc = GetWindowDC(hWnd);
+	WINDOWINFO wi;
+	BOOL bIsActiveWindow = FALSE;
+	INT iGradientCaptionColor = 0;
+	INT iCaptionColor = 0;
 
-	// Verify the device context
-	if (hdc)
-	{
-		HBRUSH hbr = NULL;
-		HFONT hft = NULL;
+	RECT rc = { 0, 0, 0, 0 };
+	UINT uiw = 0;
 
-		WINDOWINFO wi;
-		BOOL bIsActiveWindow = FALSE;
-		INT iGradientCaptionColor = 0;
-		INT iCaptionColor = 0;
-		INT iCaptionTextColor = 0;
+	// Check whether or not we're the active window
+	// and change colors based on that
+	bIsActiveWindow = pwi->dwWindowStatus == WS_ACTIVECAPTION;
+	iGradientCaptionColor = bIsActiveWindow ? COLOR_GRADIENTACTIVECAPTION : COLOR_GRADIENTINACTIVECAPTION;
+	iCaptionColor = bIsActiveWindow ? COLOR_ACTIVECAPTION : COLOR_INACTIVECAPTION;
 
-		RECT rc = { 0, 0, 0, 0 };
-		UINT uiw = 0;
+	// Get window width
+	uiw = pwi->rcWindow.right - pwi->rcWindow.left;
 
-		INT cTxtLen = 0;
-		LPWSTR pszTxt;
+	// Always refresh the colors and metrics before drawing
+	NTStyleGetWindowMetrics();
 
-		// Get external window size
-		wi.cbSize = sizeof(WINDOWINFO);
-		GetWindowInfo(hWnd, &wi);
+	g_iBorderHeight = pwi->cyWindowBorders - 1;
+	g_iBorderWidth = pwi->cxWindowBorders - 1;
 
-		// Check whether or not we're the active window
-		// and change colors based on that
-		bIsActiveWindow = wi.dwWindowStatus == WS_ACTIVECAPTION; // GetForegroundWindow() == hWnd;
-		iGradientCaptionColor = bIsActiveWindow ? COLOR_GRADIENTACTIVECAPTION : COLOR_GRADIENTINACTIVECAPTION;
-		iCaptionColor = bIsActiveWindow ? COLOR_ACTIVECAPTION : COLOR_INACTIVECAPTION;
-		iCaptionTextColor = bIsActiveWindow ? COLOR_CAPTIONTEXT : COLOR_INACTIVECAPTIONTEXT;
+	// Calculate the rect points
+	rc.left = g_iBorderWidth - 1;
+	rc.top = g_iBorderHeight;
+	rc.right = uiw - rc.left;
+	rc.bottom = rc.top + g_iCaptionHeight;
 
-		// Get window width
-		uiw = wi.rcWindow.right - wi.rcWindow.left;
+	// Draw the caption rectangle
+	// TODO: do it with a gradient
+	hbr = GetSysColorBrush(iCaptionColor);
+	FillRect(hDC, &rc, hbr);
 
-		// Always refresh the colors and metrics before drawing
-		NTStyleGetWindowMetrics();
+	// Draw the frame around it
+	hbr = GetSysColorBrush(COLOR_WINDOWFRAME);
+	FrameRect(hDC, &rc, hbr);
 
-		g_iBorderHeight = wi.cyWindowBorders - 1;
-		g_iBorderWidth = wi.cxWindowBorders - 1;
-
-		// Calculate the rect points
-		rc.left = g_iBorderWidth - 1;
-		rc.top = g_iBorderHeight;
-		rc.right = uiw - rc.left;
-		rc.bottom = rc.top + g_iCaptionHeight;
-
-		// Draw the caption rectangle
-		// TODO: do it with a gradient
-		hbr = GetSysColorBrush(iCaptionColor);
-		FillRect(hdc, &rc, hbr);
-
-		// Draw the frame around it
-		hbr = GetSysColorBrush(COLOR_WINDOWFRAME);
-		FrameRect(hdc, &rc, hbr);
-
-		// Get the font object
-		/* It is not recommended that you employ this method
-		to obtain the current font used by dialogs and windows.
-		Instead, use the SystemParametersInfo function with the
-		SPI_GETNONCLIENTMETRICS parameter to retrieve the current
-		font. SystemParametersInfo will take into account the
-		current theme and provides font information for captions,
-		menus, and message dialogs. */
-		hft = (HFONT)GetStockObject(SYSTEM_FONT);
-
-		// Set up our HDC for the text
-		SetTextColor(hdc, (COLORREF)GetSysColor(iCaptionTextColor));
-		SetBkColor(hdc, (COLORREF)GetSysColor(iCaptionColor));
-
-		SelectObject(hdc, hbr);
-		SelectObject(hdc, hft);
-
-		// Calculate the rect points for the text
-		rc.left = rc.left + g_iCaptionHeight;
-		rc.right = rc.right - g_iCaptionHeight;
-
-		// Allocate memory for the caption text
-		cTxtLen = GetWindowTextLength(hWnd);
-
-		pszTxt = (LPWSTR)VirtualAlloc((LPVOID)NULL,
-			(DWORD)(cTxtLen + 1), MEM_COMMIT,
-			PAGE_READWRITE);
-
-		// Get the caption text
-		GetWindowText(hWnd, pszTxt, cTxtLen + 1);
-
-		// Draw the caption text
-		ExtTextOut(hdc, rc.left, rc.top, ETO_CLIPPED, &rc, pszTxt, cTxtLen + 1, NULL);
-
-		// Cleanup
-		if (pszTxt)
-			VirtualFree(pszTxt, 0, MEM_RELEASE);
-
-		if (hbr)
-			DeleteObject(hbr);
-
-		if (hft)
-			DeleteObject(hft);
-
-		ReleaseDC(hWnd, hdc);
-	}
+	if (hbr)
+		DeleteObject(hbr);
 
 	return;
 }
@@ -389,9 +318,94 @@ VOID NTStyleDrawWindowCaption(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lP
 	NTStyleDrawWindowButtons -
 		Draws window buttons
 \* * * */
-VOID NTStyleDrawWindowButtons(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lParam)
+VOID NTStyleDrawWindowButtons(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wParam, _In_ LPARAM lParam)
 {
 	// Get window styles
+	return;
+}
+
+/* * * *\
+	NTStyleDrawWindowTitle -
+		Draws window title text
+\* * * */
+VOID NTStyleDrawWindowTitle(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wParam, _In_ LPARAM lParam)
+{
+	HBRUSH hbr = NULL;
+	HFONT hft = NULL;
+
+	BOOL bIsActiveWindow = FALSE;
+	INT iCaptionColor = 0;
+	INT iCaptionTextColor = 0;
+
+	UINT uiw = 0;
+
+	RECT rc = { 0, 0, 0, 0 };
+	INT cTxtLen = 0;
+	LPWSTR pszTxt;
+
+	// Get the font object
+		/* It is not recommended that you employ this method
+		to obtain the current font used by dialogs and windows.
+		Instead, use the SystemParametersInfo function with the
+		SPI_GETNONCLIENTMETRICS parameter to retrieve the current
+		font. SystemParametersInfo will take into account the
+		current theme and provides font information for captions,
+		menus, and message dialogs. */
+
+	// Check whether or not we're the active window
+	// and change colors based on that
+	bIsActiveWindow = pwi->dwWindowStatus == WS_ACTIVECAPTION;
+	iCaptionTextColor = bIsActiveWindow ? COLOR_CAPTIONTEXT : COLOR_INACTIVECAPTIONTEXT;
+	iCaptionColor = bIsActiveWindow ? COLOR_ACTIVECAPTION : COLOR_INACTIVECAPTION;
+
+	hbr = GetSysColorBrush(iCaptionColor);
+	hft = (HFONT)GetStockObject(SYSTEM_FONT);
+
+	// Set up our HDC for the text
+	SetTextColor(hDC, (COLORREF)GetSysColor(iCaptionTextColor));
+	SetBkColor(hDC, (COLORREF)GetSysColor(iCaptionColor));
+
+	SelectObject(hDC, hbr);
+	SelectObject(hDC, hft);
+
+	// Get our window metrics
+	uiw = pwi->rcWindow.right - pwi->rcWindow.left;
+
+	g_iBorderHeight = pwi->cyWindowBorders - 1;
+	g_iBorderWidth = pwi->cxWindowBorders - 1;
+
+	// Calculate the rect points for the text
+	rc.left = g_iBorderWidth - 1 + g_iCaptionHeight;
+	rc.top = g_iBorderHeight;
+	rc.right = uiw - rc.left;
+	rc.bottom = rc.top + g_iCaptionHeight;
+
+	// Allocate memory for the caption text
+	cTxtLen = GetWindowTextLength(hWnd);
+
+	pszTxt = (LPWSTR)VirtualAlloc((LPVOID)NULL,
+		(DWORD)(cTxtLen + 1), MEM_COMMIT,
+		PAGE_READWRITE);
+
+	// TODO: draw pretty text and not the ugly
+	// stuff, actually use some good font funcs
+
+	if (pszTxt)
+	{
+		// Get the caption text
+		GetWindowText(hWnd, pszTxt, cTxtLen + 1);
+
+		// Draw the caption text
+		ExtTextOut(hDC, rc.left, rc.top, ETO_CLIPPED, &rc, pszTxt, cTxtLen + 1, NULL);
+
+		// Free the memory
+		VirtualFree(pszTxt, 0, MEM_RELEASE);
+	}
+
+	// Cleanup
+	if (hft)
+		DeleteObject(hft);
+
 	return;
 }
 
