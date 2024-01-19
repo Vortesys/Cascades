@@ -90,7 +90,7 @@ __declspec(dllexport) LRESULT NTStyleHookProc(
 		case WM_PAINT:
 		case WM_MOVE:
 			NTStyleDrawWindow(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
-			break;
+			return DefWindowProc(pcwps->hwnd, pcwps->message, pcwps->wParam, pcwps->lParam);
 
 		case WM_NCACTIVATE:
 		case WM_NCCALCSIZE:
@@ -143,9 +143,6 @@ VOID NTStyleDrawWindow(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lParam)
 			// Setup some metrics
 			g_iBorderHeight = wi.cyWindowBorders - 1;
 			g_iBorderWidth = wi.cxWindowBorders - 1;
-
-			// Set the window to the classic theme
-			//NTStyleDisableWindowTheme(hWnd);
 
 			// Draw the window
 			// TODO: make caption return a rect for the window title
@@ -308,9 +305,6 @@ VOID NTStyleDrawWindowCaption(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 	// Get window width
 	uiw = pwi->rcWindow.right - pwi->rcWindow.left;
 
-	// Always refresh the colors and metrics before drawing
-	NTStyleGetWindowMetrics();
-
 	// Calculate the rect points
 	rc.left = g_iBorderWidth - 1;
 	rc.top = g_iBorderHeight;
@@ -342,14 +336,13 @@ VOID NTStyleDrawWindowButtons(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 	RECT rc = { 0, 0, 0, 0 };
 	RECT rcT = { 0, 0, 0, 0 };
 	UINT uiw = 0;
+	
+	UINT uiSysMenuSpace = (pwi->dwExStyle & WS_EX_MDICHILD) == WS_EX_MDICHILD ? 5 : 3;
+	BOOL bDrawMinBox = (pwi->dwStyle & WS_MINIMIZEBOX) == WS_MINIMIZEBOX;
+	BOOL bDrawMaxBox = (pwi->dwStyle & WS_MAXIMIZEBOX) == WS_MAXIMIZEBOX;
 
 	// Get window width
 	uiw = pwi->rcWindow.right - pwi->rcWindow.left;
-
-	// Always refresh the colors and metrics before drawing
-	NTStyleGetWindowMetrics();
-
-	// TODO: draw thinner sysmenu for mdi children
 
 	/* BEGIN SYSTEM MENU */
 	// Lil setup
@@ -369,9 +362,9 @@ VOID NTStyleDrawWindowButtons(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 	// Draw shadow
 	hbr = GetSysColorBrush(COLOR_BTNSHADOW);
 
-	rcT.left = rc.left + 4;
+	rcT.left = rc.left + uiSysMenuSpace;
 	rcT.top = rc.top + (g_iCaptionHeight / 2) - 1;
-	rcT.right = rcT.left + g_iCaptionHeight - 7;
+	rcT.right = rcT.left + g_iCaptionHeight - 2 * uiSysMenuSpace;
 	rcT.bottom = rcT.top + 3;
 
 	FillRect(hDC, &rcT, hbr);
