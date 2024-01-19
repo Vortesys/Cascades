@@ -140,6 +140,10 @@ VOID NTStyleDrawWindow(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lParam)
 			wi.cbSize = sizeof(WINDOWINFO);
 			GetWindowInfo(hWnd, &wi);
 
+			// Setup some metrics
+			g_iBorderHeight = wi.cyWindowBorders - 1;
+			g_iBorderWidth = wi.cxWindowBorders - 1;
+
 			// Set the window to the classic theme
 			//NTStyleDisableWindowTheme(hWnd);
 
@@ -198,9 +202,6 @@ VOID NTStyleDrawWindowBorders(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 	uiw = pwi->rcWindow.right - pwi->rcWindow.left;
 	uih = pwi->rcWindow.bottom - pwi->rcWindow.top;
 
-	g_iBorderHeight = pwi->cyWindowBorders - 1;
-	g_iBorderWidth = pwi->cxWindowBorders - 1;
-
 	// Draw the colored rectangles around the edges
 	i = 0;
 
@@ -247,11 +248,11 @@ VOID NTStyleDrawWindowBorders(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 		// Calculate the polygon points
 		apt[0].x = 0 + uiw * iFlipX - iFlipX;
 		apt[0].y = 0 + uih * iFlipY - iFlipY;
-		apt[1].x = apt[0].x + uiFlipX * (g_iCaptionHeight + g_iBorderWidth);
+		apt[1].x = apt[0].x + uiFlipX * (g_iCaptionHeight + g_iBorderWidth - uiFlipX);
 		apt[1].y = apt[0].y;
 		apt[2].x = apt[1].x;
 		apt[2].y = apt[0].y + uiFlipY * g_iBorderHeight;
-		apt[3].x = apt[1].x - uiFlipX * g_iCaptionHeight;
+		apt[3].x = apt[1].x - uiFlipX * (g_iCaptionHeight - uiFlipX);
 		apt[3].y = apt[2].y;
 		apt[4].x = apt[3].x;
 		apt[4].y = apt[2].y + uiFlipY * (g_iCaptionHeight - 1);
@@ -310,9 +311,6 @@ VOID NTStyleDrawWindowCaption(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 	// Always refresh the colors and metrics before drawing
 	NTStyleGetWindowMetrics();
 
-	g_iBorderHeight = pwi->cyWindowBorders - 1;
-	g_iBorderWidth = pwi->cxWindowBorders - 1;
-
 	// Calculate the rect points
 	rc.left = g_iBorderWidth - 1;
 	rc.top = g_iBorderHeight;
@@ -340,40 +338,68 @@ VOID NTStyleDrawWindowCaption(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 \* * * */
 VOID NTStyleDrawWindowButtons(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wParam, _In_ LPARAM lParam)
 {
-	HDC hdcTemp;
-	HBITMAP hbm;
-	HBITMAP hbmTemp;
+	HBRUSH hbr = NULL;
+	RECT rc = { 0, 0, 0, 0 };
+	RECT rcT = { 0, 0, 0, 0 };
+	UINT uiw = 0;
 
-	RECT rcSrc = { 0,0,0,0 };
-	RECT rcDest = { 0,0,0,0 };
+	// Get window width
+	uiw = pwi->rcWindow.right - pwi->rcWindow.left;
 
-	// Lil baby hdc
-	hdcTemp = CreateCompatibleDC(hDC);
+	// Always refresh the colors and metrics before drawing
+	NTStyleGetWindowMetrics();
 
-	// Get the necessary window metrics
-	g_iBorderHeight = pwi->cyWindowBorders - 1;
-	g_iBorderWidth = pwi->cxWindowBorders - 1;
+	// TODO: draw thinner sysmenu for mdi children
 
-	// Draw the system menu button
-	hbm = LoadBitmap(g_hDllInstance, MAKEINTRESOURCE(IDB_MENU));
-	hbmTemp = SelectObject(hdcTemp, hbm);
+	/* BEGIN SYSTEM MENU */
+	// Lil setup
+	rc.left = g_iBorderWidth;
+	rc.top = g_iBorderHeight;
+	rc.right = rc.left + g_iCaptionHeight;
+	rc.bottom = rc.top + g_iCaptionHeight;
 
-	SetStretchBltMode(hDC, COLORONCOLOR);
-	SetStretchBltMode(hdcTemp, COLORONCOLOR);
-	StretchBlt(hDC, g_iBorderWidth, g_iBorderHeight, g_iCaptionHeight, g_iCaptionHeight, hdcTemp, 0, 0, 18, 18, SRCCOPY);
+	// Draw background
+	hbr = GetSysColorBrush(COLOR_BTNFACE);
+	FillRect(hDC, &rc, hbr);
 
-	// Draw the maximize button
-	//hbm = LoadBitmap(g_hDllInstance, MAKEINTRESOURCE(IDB_MENU));
+	// Draw the frame
+	hbr = GetSysColorBrush(COLOR_WINDOWFRAME);
+	FrameRect(hDC, &rc, hbr);
 
-	// Draw the minimize button
-	//hbm = LoadBitmap(g_hDllInstance, MAKEINTRESOURCE(IDB_MENU));
+	// Draw shadow
+	hbr = GetSysColorBrush(COLOR_BTNSHADOW);
 
-	// Clean 'er up
-	if (hbm)
-		DeleteObject(hbm);
+	rcT.left = rc.left + 4;
+	rcT.top = rc.top + (g_iCaptionHeight / 2) - 1;
+	rcT.right = rcT.left + g_iCaptionHeight - 7;
+	rcT.bottom = rcT.top + 3;
 
-	if (hbmTemp)
-		DeleteObject(hbmTemp);
+	FillRect(hDC, &rcT, hbr);
+
+	// Draw "minus" inside
+	hbr = GetSysColorBrush(COLOR_BTNHIGHLIGHT);
+
+	rcT.left = rcT.left - 1;
+	rcT.top = rcT.top - 1;
+	rcT.right = rcT.right - 1;
+	rcT.bottom = rcT.top + 3;
+
+	FillRect(hDC, &rcT, hbr);
+
+	// Draw "minus" border
+	hbr = GetSysColorBrush(COLOR_BTNTEXT);
+	FrameRect(hDC, &rcT, hbr);
+	/* END SYSTEM MENU */
+
+	/* BEGIN MINIMIZEBOX */
+	/* END MINIMIZEBOX */
+
+	/* BEGIN MAXIMIZEBOX */
+	/* END MAXIMIZEBOX */
+
+	// Cleanup
+	if (hbr)
+		DeleteObject(hbr);
 
 	return;
 }
