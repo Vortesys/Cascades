@@ -9,6 +9,7 @@
 
 // Includes
 #include "ntshook.h"
+#include "resource.h"
 #include <dwmapi.h>
 #include <uxtheme.h>
 #include <strsafe.h>
@@ -34,6 +35,9 @@ static DWORD g_dwInactiveCaptionGradient;
 static DWORD g_dwInactiveCaptionText;
 static DWORD g_dwInactiveBorder;
 static DWORD g_dwWindowFrame;
+
+// Handles
+HINSTANCE	g_hDllInstance;
 
 /* * * *\
 	DllMain -
@@ -121,30 +125,35 @@ VOID NTStyleDrawWindow(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lParam)
 	if ((GetWindowLongPtr(hWnd, GWL_STYLE) & WS_SYSMENU) == WS_SYSMENU)
 	{
 		HDC hdc = NULL;
+		HDC hdcMem = NULL;
 		WINDOWINFO wi;
-		// TODO: condense a few things, create and release a single DC
-		// so that we're not making and deleting a bunch, theoretically
-		// I could create an offscreen one and then blit it to the screen
-		// afterwards.
+		// TODO: I could create an offscreen DC and
+		// then blit it to the screen afterwards.
 
 		// Verify our window handle
 		if (hWnd != NULL)
 			hdc = GetWindowDC(hWnd);
 
-		// Get external window size
-		wi.cbSize = sizeof(WINDOWINFO);
-		GetWindowInfo(hWnd, &wi);
+		if (hdc)
+		{
+			// Get external window size
+			wi.cbSize = sizeof(WINDOWINFO);
+			GetWindowInfo(hWnd, &wi);
 
-		// Set the window to the classic theme
-		//NTStyleDisableWindowTheme(hWnd);
-		
-		// Draw the window
-		// TODO: make caption return a rect for the window title
-		// so that the text can center itself a little better
-		NTStyleDrawWindowCaption(hdc, &wi, wParam, lParam);
-		NTStyleDrawWindowBorders(hdc, &wi, wParam, lParam);
-		//NTStyleDrawWindowButtons(hdc, &wi, wParam, lParam);
-		//NTStyleDrawWindowTitle(hWnd, hdc, &wi, wParam, lParam);
+			// Set the window to the classic theme
+			//NTStyleDisableWindowTheme(hWnd);
+
+			// Draw the window
+			// TODO: make caption return a rect for the window title
+			// so that the text can center itself a little better
+			NTStyleDrawWindowCaption(hdc, &wi, wParam, lParam);
+			NTStyleDrawWindowBorders(hdc, &wi, wParam, lParam);
+			NTStyleDrawWindowButtons(hdc, &wi, wParam, lParam);
+			//NTStyleDrawWindowTitle(hWnd, hdc, &wi, wParam, lParam);
+
+			// Blit it to our actual window
+			//BitBlt(hdcMem, 0, 0, wi.rcWindow.right - wi.rcWindow.left, wi.rcWindow.bottom - wi.rcWindow.top, hdc, 0, 0, SRCCOPY);
+		}
 	}
 
 	return;
@@ -331,7 +340,41 @@ VOID NTStyleDrawWindowCaption(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 \* * * */
 VOID NTStyleDrawWindowButtons(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wParam, _In_ LPARAM lParam)
 {
-	// Get window styles
+	HDC hdcTemp;
+	HBITMAP hbm;
+	HBITMAP hbmTemp;
+
+	RECT rcSrc = { 0,0,0,0 };
+	RECT rcDest = { 0,0,0,0 };
+
+	// Lil baby hdc
+	hdcTemp = CreateCompatibleDC(hDC);
+
+	// Get the necessary window metrics
+	g_iBorderHeight = pwi->cyWindowBorders - 1;
+	g_iBorderWidth = pwi->cxWindowBorders - 1;
+
+	// Draw the system menu button
+	hbm = LoadBitmap(g_hDllInstance, MAKEINTRESOURCE(IDB_MENU));
+	hbmTemp = SelectObject(hdcTemp, hbm);
+
+	SetStretchBltMode(hDC, COLORONCOLOR);
+	SetStretchBltMode(hdcTemp, COLORONCOLOR);
+	StretchBlt(hDC, g_iBorderWidth, g_iBorderHeight, g_iCaptionHeight, g_iCaptionHeight, hdcTemp, 0, 0, 18, 18, SRCCOPY);
+
+	// Draw the maximize button
+	//hbm = LoadBitmap(g_hDllInstance, MAKEINTRESOURCE(IDB_MENU));
+
+	// Draw the minimize button
+	//hbm = LoadBitmap(g_hDllInstance, MAKEINTRESOURCE(IDB_MENU));
+
+	// Clean 'er up
+	if (hbm)
+		DeleteObject(hbm);
+
+	if (hbmTemp)
+		DeleteObject(hbmTemp);
+
 	return;
 }
 
@@ -479,7 +522,7 @@ VOID NTStyleUnlockWindowUpdates(_In_ HWND hWnd)
 	NTStyleDisableWindowTheme -
 		de-themify that window
 \* * * */
-VOID NTStyleDisableWindowTheme(_In_ HWND hWnd)
+__declspec(dllexport) VOID NTStyleDisableWindowTheme(_In_ HWND hWnd)
 {
 	enum DWMNCRENDERINGPOLICY ncrp = DWMNCRP_DISABLED;
 
@@ -488,6 +531,7 @@ VOID NTStyleDisableWindowTheme(_In_ HWND hWnd)
 	// DO NOT DO ANY OF THIS TO EXPLORER!!!
 	// EXPLORER NEEDS DWM!!!
 	GetClassName(hWnd, (LPWSTR)pszClassName, ARRAYSIZE(pszClassName));
+
 	if(pszClassName != (LPWSTR)L"ImmersiveLauncher")
 		// Nuke DWM
 		DwmSetWindowAttributeDelay(hWnd,

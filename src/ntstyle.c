@@ -50,6 +50,10 @@ int WINAPI wWinMain(
 		
 	if (hhkNTShook)
 	{
+		// Enumerate the existing windows and get them dwm-free :fire:
+		EnumWindows(&NTStyleEnumWindowProc, 0);
+
+		// Start NT Style
 		MessageBox(HWND_DESKTOP, L"Started NT Style.\nPress OK to close.", L"NT Style", MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL | MB_DEFAULT_DESKTOP_ONLY);
 		UnhookWindowsHookEx(hhkNTShook);
 		MessageBox(HWND_DESKTOP, L"Quitting NT Style...", L"NT Style", MB_OK | MB_ICONINFORMATION | MB_DEFAULT_DESKTOP_ONLY);
@@ -57,4 +61,19 @@ int WINAPI wWinMain(
 	}
 
 	return 0;
+}
+
+BOOL CALLBACK NTStyleEnumWindowProc(
+	_In_ HWND hwnd,
+	_In_ LPARAM lParam
+)
+{
+	if (g_hDllInstance)
+	{
+		FARPROC fLib = GetProcAddress(g_hDllInstance, "NTStyleDisableWindowTheme");
+		fLib(hwnd);
+		
+	}
+
+	return TRUE;
 }

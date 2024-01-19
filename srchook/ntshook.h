@@ -25,7 +25,7 @@ VOID NTStyleDrawWindow(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lParam);
 VOID NTStyleGetWindowMetrics(VOID);
 VOID NTStyleLockWindowUpdates(_In_ HWND hWnd);
 VOID NTStyleUnlockWindowUpdates(_In_ HWND hWnd);
-VOID NTStyleDisableWindowTheme(_In_ HWND hWnd);
+__declspec(dllexport) VOID NTStyleDisableWindowTheme(_In_ HWND hWnd);
 
 
 // Drawing Functions

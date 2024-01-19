@@ -19,3 +19,4 @@
 extern HINSTANCE	g_hAppInstance;
 
 /* Function Prototypes */
+BOOL CALLBACK NTStyleEnumWindowProc(_In_ HWND hwnd, _In_ LPARAM lParam);
