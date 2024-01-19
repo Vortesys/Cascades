@@ -170,6 +170,7 @@
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ntdwmfc.c" />
     <ClCompile Include="ntshook.c" />
   </ItemGroup>
   <ItemGroup>

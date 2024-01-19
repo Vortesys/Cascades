@@ -9,7 +9,13 @@
 
 // Includes
 #include "ntshook.h"
+#include <dwmapi.h>
+#include <uxtheme.h>
 #include <strsafe.h>
+
+// Global Variables
+static INT g_iSystemHasDWM = 2;
+static INT g_iLockUpdateCount;
 
 // System Metrics
 static INT g_iCaptionHeight;
@@ -72,10 +78,11 @@ __declspec(dllexport) LRESULT NTStyleHookProc(
 
 		switch (pcwps->message)
 		{
+		case WM_CREATE:
+			NTStyleDisableWindowTheme(pcwps->hwnd);
 		case WM_DISPLAYCHANGE:
 		case WM_SYNCPAINT:
 		case WM_ACTIVATE:
-		case WM_CREATE:
 		case WM_PAINT:
 		case WM_MOVE:
 			NTStyleDrawWindow(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
@@ -127,12 +134,17 @@ VOID NTStyleDrawWindow(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lParam)
 		// Get external window size
 		wi.cbSize = sizeof(WINDOWINFO);
 		GetWindowInfo(hWnd, &wi);
+
+		// Set the window to the classic theme
+		//NTStyleDisableWindowTheme(hWnd);
 		
 		// Draw the window
+		// TODO: make caption return a rect for the window title
+		// so that the text can center itself a little better
 		NTStyleDrawWindowCaption(hdc, &wi, wParam, lParam);
 		NTStyleDrawWindowBorders(hdc, &wi, wParam, lParam);
-		NTStyleDrawWindowButtons(hdc, &wi, wParam, lParam);
-		NTStyleDrawWindowTitle(hWnd, hdc, &wi, wParam, lParam);
+		//NTStyleDrawWindowButtons(hdc, &wi, wParam, lParam);
+		//NTStyleDrawWindowTitle(hWnd, hdc, &wi, wParam, lParam);
 	}
 
 	return;
@@ -426,4 +438,66 @@ VOID NTStyleGetWindowMetrics(VOID)
 
 	return;
 	//GetSystemMetrics(SM_SWAPBUTTON); i will prolly have to think about this later
+}
+
+/* * * *\
+	NTStyleLockWindowUpdates -
+		Prevents a window from
+		updating for a small
+		period of time to prevent
+		flickering issues.
+\* * * */
+VOID NTStyleLockWindowUpdates(_In_ HWND hWnd)
+{
+	if (++g_iLockUpdateCount == 1) {
+		SetWindowLong(hWnd, GWL_STYLE,
+			GetWindowLong(hWnd, GWL_STYLE) & ~WS_VISIBLE);
+	}
+
+	return;
+}
+
+/* * * *\
+	NTStyleUnlockWindowUpdates -
+		Prevents a window from
+		updating for a small
+		period of time to prevent
+		flickering issues.
+\* * * */
+VOID NTStyleUnlockWindowUpdates(_In_ HWND hWnd)
+{
+	if (--g_iLockUpdateCount <= 0) {
+		SetWindowLong(hWnd, GWL_STYLE,
+			GetWindowLong(hWnd, GWL_STYLE) | WS_VISIBLE);
+		g_iLockUpdateCount = 0;
+	}
+
+	return;
+}
+
+/* * * *\
+	NTStyleDisableWindowTheme -
+		de-themify that window
+\* * * */
+VOID NTStyleDisableWindowTheme(_In_ HWND hWnd)
+{
+	enum DWMNCRENDERINGPOLICY ncrp = DWMNCRP_DISABLED;
+
+	WCHAR pszClassName[256] = L"";
+
+	// DO NOT DO ANY OF THIS TO EXPLORER!!!
+	// EXPLORER NEEDS DWM!!!
+	GetClassName(hWnd, (LPWSTR)pszClassName, ARRAYSIZE(pszClassName));
+	if(pszClassName != (LPWSTR)L"ImmersiveLauncher")
+		// Nuke DWM
+		DwmSetWindowAttributeDelay(hWnd,
+			DWMWA_NCRENDERING_POLICY,
+			&ncrp,
+			sizeof(ncrp));
+
+	// Nuke the theming
+	SetWindowTheme(hWnd, L"", L"");
+	RedrawWindow(hWnd, NULL, NULL, RDW_FRAME);
+
+	return;
 }
