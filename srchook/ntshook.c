@@ -90,12 +90,14 @@ __declspec(dllexport) LRESULT NTStyleHookProc(
 		case WM_PAINT:
 		case WM_MOVE:
 			NTStyleDrawWindow(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
-			return DefWindowProc(pcwps->hwnd, pcwps->message, pcwps->wParam, pcwps->lParam);
+
+			break;
 
 		case WM_NCACTIVATE:
 		case WM_NCCALCSIZE:
 		case WM_NCPAINT:
 			NTStyleDrawWindow(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
+
 			return 0;
 
 		default:
@@ -150,7 +152,7 @@ VOID NTStyleDrawWindow(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lParam)
 			NTStyleDrawWindowCaption(hdc, &wi, wParam, lParam);
 			NTStyleDrawWindowBorders(hdc, &wi, wParam, lParam);
 			NTStyleDrawWindowButtons(hdc, &wi, wParam, lParam);
-			//NTStyleDrawWindowTitle(hWnd, hdc, &wi, wParam, lParam);
+			NTStyleDrawWindowTitle(hWnd, hdc, &wi, wParam, lParam);
 
 			// Blit it to our actual window
 			//BitBlt(hdcMem, 0, 0, wi.rcWindow.right - wi.rcWindow.left, wi.rcWindow.bottom - wi.rcWindow.top, hdc, 0, 0, SRCCOPY);
@@ -245,11 +247,11 @@ VOID NTStyleDrawWindowBorders(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 		// Calculate the polygon points
 		apt[0].x = 0 + uiw * iFlipX - iFlipX;
 		apt[0].y = 0 + uih * iFlipY - iFlipY;
-		apt[1].x = apt[0].x + uiFlipX * (g_iCaptionHeight + g_iBorderWidth - uiFlipX);
+		apt[1].x = apt[0].x + uiFlipX * (g_iCaptionHeight + g_iBorderWidth - 1);
 		apt[1].y = apt[0].y;
 		apt[2].x = apt[1].x;
 		apt[2].y = apt[0].y + uiFlipY * g_iBorderHeight;
-		apt[3].x = apt[1].x - uiFlipX * (g_iCaptionHeight - uiFlipX);
+		apt[3].x = apt[1].x - uiFlipX * (g_iCaptionHeight - 1);
 		apt[3].y = apt[2].y;
 		apt[4].x = apt[3].x;
 		apt[4].y = apt[2].y + uiFlipY * (g_iCaptionHeight - 1);
@@ -333,24 +335,25 @@ VOID NTStyleDrawWindowCaption(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 VOID NTStyleDrawWindowButtons(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wParam, _In_ LPARAM lParam)
 {
 	HBRUSH hbr = NULL;
+	HPEN hpn = NULL;
 	RECT rc = { 0, 0, 0, 0 };
 	RECT rcT = { 0, 0, 0, 0 };
 	UINT uiw = 0;
 	
-	UINT uiSysMenuSpace = (pwi->dwExStyle & WS_EX_MDICHILD) == WS_EX_MDICHILD ? 5 : 3;
+	UINT uiSysMenuSpace = (pwi->dwExStyle & WS_EX_MDICHILD) == WS_EX_MDICHILD ? 6 : 3;
 	BOOL bDrawMinBox = (pwi->dwStyle & WS_MINIMIZEBOX) == WS_MINIMIZEBOX;
 	BOOL bDrawMaxBox = (pwi->dwStyle & WS_MAXIMIZEBOX) == WS_MAXIMIZEBOX;
 
 	// Get window width
 	uiw = pwi->rcWindow.right - pwi->rcWindow.left;
 
-	/* BEGIN SYSTEM MENU */
-	// Lil setup
-	rc.left = g_iBorderWidth;
+	// Setup our basic rectangle
 	rc.top = g_iBorderHeight;
-	rc.right = rc.left + g_iCaptionHeight;
+	rc.left = g_iBorderWidth;
 	rc.bottom = rc.top + g_iCaptionHeight;
+	rc.right = rc.left + g_iCaptionHeight;
 
+	/* BEGIN SYSTEM MENU */
 	// Draw background
 	hbr = GetSysColorBrush(COLOR_BTNFACE);
 	FillRect(hDC, &rc, hbr);
@@ -362,20 +365,20 @@ VOID NTStyleDrawWindowButtons(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 	// Draw shadow
 	hbr = GetSysColorBrush(COLOR_BTNSHADOW);
 
-	rcT.left = rc.left + uiSysMenuSpace;
 	rcT.top = rc.top + (g_iCaptionHeight / 2) - 1;
-	rcT.right = rcT.left + g_iCaptionHeight - 2 * uiSysMenuSpace;
+	rcT.left = rc.left + uiSysMenuSpace;
 	rcT.bottom = rcT.top + 3;
+	rcT.right = rcT.left + g_iCaptionHeight - 2 * uiSysMenuSpace;
 
 	FillRect(hDC, &rcT, hbr);
 
 	// Draw "minus" inside
 	hbr = GetSysColorBrush(COLOR_BTNHIGHLIGHT);
 
-	rcT.left = rcT.left - 1;
 	rcT.top = rcT.top - 1;
-	rcT.right = rcT.right - 1;
+	rcT.left = rcT.left - 1;
 	rcT.bottom = rcT.top + 3;
+	rcT.right = rcT.right - 1;
 
 	FillRect(hDC, &rcT, hbr);
 
@@ -384,15 +387,92 @@ VOID NTStyleDrawWindowButtons(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 	FrameRect(hDC, &rcT, hbr);
 	/* END SYSTEM MENU */
 
-	/* BEGIN MINIMIZEBOX */
-	/* END MINIMIZEBOX */
+	// Setup our basic rectangle
+	rc.top = g_iBorderHeight;
+	rc.right = uiw - g_iBorderWidth;
+	rc.bottom = rc.top + g_iCaptionHeight;
+	rc.left = rc.right - g_iCaptionHeight;
 
 	/* BEGIN MAXIMIZEBOX */
+	if (bDrawMinBox)
+	{
+		// Draw background
+		hbr = GetSysColorBrush(COLOR_BTNSHADOW);
+		FillRect(hDC, &rc, hbr);
+
+		// Draw the frame
+		hbr = GetSysColorBrush(COLOR_WINDOWFRAME);
+		FrameRect(hDC, &rc, hbr);
+
+		// Draw the highlight
+		hpn = CreatePen(PS_SOLID, 0, (COLORREF)GetSysColor(COLOR_BTNHIGHLIGHT));
+		SelectObject(hDC, hpn);
+
+		MoveToEx(hDC, rc.right - 3, rc.top + 1, NULL);
+		LineTo(hDC, rc.left + 1, rc.top + 1);
+		LineTo(hDC, rc.left + 1, rc.bottom - 2);
+
+		// Draw the "background"
+		hbr = GetSysColorBrush(COLOR_BTNFACE);
+
+		rcT.top = rc.top + 2;
+		rcT.left = rc.left + 2;
+		rcT.bottom = rc.bottom - 3;
+		rcT.right = rc.right - 3;
+
+		FillRect(hDC, &rcT, hbr);
+
+		// Draw the triangle
+		//SelectObject(hDC, hbr);
+	}
 	/* END MAXIMIZEBOX */
+
+	/* BEGIN MINIMIZEBOX */
+	if (bDrawMinBox)
+	{
+		if (bDrawMaxBox)
+		{
+			rc.left = rc.left - g_iCaptionHeight + 1;
+			rc.right = rc.right - g_iCaptionHeight + 1;
+		}
+
+		// Draw background
+		hbr = GetSysColorBrush(COLOR_BTNSHADOW);
+		FillRect(hDC, &rc, hbr);
+
+		// Draw the frame
+		hbr = GetSysColorBrush(COLOR_WINDOWFRAME);
+		FrameRect(hDC, &rc, hbr);
+
+		// Draw the highlight
+		hpn = CreatePen(PS_SOLID, 0, (COLORREF)GetSysColor(COLOR_BTNHIGHLIGHT));
+		SelectObject(hDC, hpn);
+
+		MoveToEx(hDC, rc.right - 3, rc.top + 1, NULL);
+		LineTo(hDC, rc.left + 1, rc.top + 1);
+		LineTo(hDC, rc.left + 1, rc.bottom - 2);
+
+		// Draw the "background"
+		hbr = GetSysColorBrush(COLOR_BTNFACE);
+
+		rcT.top = rc.top + 2;
+		rcT.left = rc.left + 2;
+		rcT.bottom = rc.bottom - 3;
+		rcT.right = rc.right - 3;
+
+		FillRect(hDC, &rcT, hbr);
+
+		// Draw the triangle
+		//SelectObject(hDC, hbr);
+	}
+	/* END MINIMIZEBOX */
 
 	// Cleanup
 	if (hbr)
 		DeleteObject(hbr);
+
+	if (hpn)
+		DeleteObject(hpn);
 
 	return;
 }
@@ -448,7 +528,7 @@ VOID NTStyleDrawWindowTitle(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi, 
 	g_iBorderWidth = pwi->cxWindowBorders - 1;
 
 	// Calculate the rect points for the text
-	rc.left = g_iBorderWidth - 1 + g_iCaptionHeight;
+	rc.left = g_iBorderWidth + g_iCaptionHeight - 1;
 	rc.top = g_iBorderHeight;
 	rc.right = uiw - rc.left;
 	rc.bottom = rc.top + g_iCaptionHeight;
@@ -469,7 +549,8 @@ VOID NTStyleDrawWindowTitle(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi, 
 		GetWindowText(hWnd, pszTxt, cTxtLen + 1);
 
 		// Draw the caption text
-		ExtTextOut(hDC, rc.left, rc.top, ETO_CLIPPED, &rc, pszTxt, cTxtLen + 1, NULL);
+		DrawText(hDC, pszTxt, cTxtLen + 1, &rc, DT_CENTER | DT_NOCLIP
+			| DT_END_ELLIPSIS | DT_SINGLELINE | DT_VCENTER);
 
 		// Free the memory
 		VirtualFree(pszTxt, 0, MEM_RELEASE);
