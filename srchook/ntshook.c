@@ -152,7 +152,7 @@ VOID NTStyleDrawWindow(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lParam)
 			NTStyleDrawWindowCaption(hdc, &wi, wParam, lParam);
 			NTStyleDrawWindowTitle(hWnd, hdc, &wi, wParam, lParam);
 			NTStyleDrawWindowBorders(hdc, &wi, wParam, lParam);
-			NTStyleDrawWindowButtons(hdc, &wi, wParam, lParam);
+			NTStyleDrawWindowButtons(hWnd, hdc, &wi, wParam, lParam);
 
 			// Blit it to our actual window
 			//BitBlt(hdcMem, 0, 0, wi.rcWindow.right - wi.rcWindow.left, wi.rcWindow.bottom - wi.rcWindow.top, hdc, 0, 0, SRCCOPY);
@@ -263,7 +263,7 @@ VOID NTStyleDrawWindowBorders(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 		apt[6].y = apt[0].y;
 
 		// Draw
-		SetPolyFillMode(hDC, 0);
+		//SetPolyFillMode(hDC, 0);
 		Polygon(hDC, apt, sizeof(apt) / sizeof(apt[0]));
 	}
 
@@ -332,17 +332,22 @@ VOID NTStyleDrawWindowCaption(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 	NTStyleDrawWindowButtons -
 		Draws window buttons
 \* * * */
-VOID NTStyleDrawWindowButtons(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wParam, _In_ LPARAM lParam)
+VOID NTStyleDrawWindowButtons(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wParam, _In_ LPARAM lParam)
 {
 	HBRUSH hbr = NULL;
 	HPEN hpn = NULL;
 	RECT rc = { 0, 0, 0, 0 };
 	RECT rcT = { 0, 0, 0, 0 };
+
 	UINT uiw = 0;
+	UINT uiTriW = 0;
+	UINT uiTriH = 0;
 	
 	UINT uiSysMenuSpace = (pwi->dwExStyle & WS_EX_MDICHILD) == WS_EX_MDICHILD ? 6 : 3;
 	BOOL bDrawMinBox = (pwi->dwStyle & WS_MINIMIZEBOX) == WS_MINIMIZEBOX;
 	BOOL bDrawMaxBox = (pwi->dwStyle & WS_MAXIMIZEBOX) == WS_MAXIMIZEBOX;
+
+	INT i;
 
 	// Get window width
 	uiw = pwi->rcWindow.right - pwi->rcWindow.left;
@@ -387,15 +392,25 @@ VOID NTStyleDrawWindowButtons(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 	FrameRect(hDC, &rcT, hbr);
 	/* END SYSTEM MENU */
 
-	// Setup our basic rectangle
-	rc.top = g_iBorderHeight;
-	rc.right = uiw - g_iBorderWidth;
-	rc.bottom = rc.top + g_iCaptionHeight;
-	rc.left = rc.right - g_iCaptionHeight;
+	if (bDrawMaxBox | bDrawMinBox)
+	{
+		// Setup our basic rectangle
+		rc.top = g_iBorderHeight;
+		rc.right = uiw - g_iBorderWidth;
+		rc.bottom = rc.top + g_iCaptionHeight;
+		rc.left = rc.right - g_iCaptionHeight;
+
+		// Get triangle size
+		uiTriW = (g_iCaptionHeight) / 3;
+		uiTriH = uiTriW / 2;
+	}
 
 	/* BEGIN MAXIMIZEBOX */
-	if (bDrawMinBox)
+	if (bDrawMaxBox)
 	{
+		WINDOWPLACEMENT wp;
+		BOOL bWindowMaximized;
+
 		// Draw background
 		hbr = GetSysColorBrush(COLOR_BTNSHADOW);
 		FillRect(hDC, &rc, hbr);
@@ -422,14 +437,47 @@ VOID NTStyleDrawWindowButtons(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 
 		FillRect(hDC, &rcT, hbr);
 
-		// Draw the triangle
-		//SelectObject(hDC, hbr);
+		// Prepare the triangle brushes
+		hbr = GetSysColorBrush(COLOR_BTNTEXT);
+		hpn = CreatePen(PS_SOLID, 0, (COLORREF)GetSysColor(COLOR_BTNTEXT));
+		SelectObject(hDC, hbr);
+		SelectObject(hDC, hpn);
+
+		wp.length = sizeof(WINDOWPLACEMENT);
+		GetWindowPlacement(hWnd, &wp);
+		bWindowMaximized = (wp.showCmd) == SW_MAXIMIZE;
+
+		i = 0;
+
+		for (i = 0; i < (bWindowMaximized + 1); i++)
+		{
+			POINT apt[4] = { 0, 0 };
+
+			UINT uiModY = bWindowMaximized ? -1 : 1;
+
+			// Calculate the triangle points
+			apt[0].x = rcT.left + (rcT.right - rcT.left) / 2 - 1;
+			apt[0].y = rcT.top + (rcT.bottom - rcT.top) / 2 - uiTriH / 2 + uiModY * (i * uiTriH);
+			apt[1].x = apt[0].x + uiTriW / 2;
+			apt[1].y = apt[0].y + uiTriH * uiModY;
+			apt[2].x = apt[1].x - uiTriW;
+			apt[2].y = apt[1].y;
+
+			// These are necessary to close the gap
+			apt[3].x = apt[0].x;
+			apt[3].y = apt[0].y;
+
+			// Draw the triangle
+			Polygon(hDC, apt, sizeof(apt) / sizeof(apt[0]));
+		}
 	}
 	/* END MAXIMIZEBOX */
 
 	/* BEGIN MINIMIZEBOX */
 	if (bDrawMinBox)
 	{
+		POINT apt[4] = { 0, 0 };
+
 		if (bDrawMaxBox)
 		{
 			rc.left = rc.left - g_iCaptionHeight + 1;
@@ -462,8 +510,26 @@ VOID NTStyleDrawWindowButtons(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 
 		FillRect(hDC, &rcT, hbr);
 
+		// Prepare the triangle brushes
+		hbr = GetSysColorBrush(COLOR_BTNTEXT);
+		hpn = CreatePen(PS_SOLID, 0, (COLORREF)GetSysColor(COLOR_BTNTEXT));
+		SelectObject(hDC, hbr);
+		SelectObject(hDC, hpn);
+
+		// Calculate the triangle points
+		apt[0].x = rcT.left + (rcT.right - rcT.left) / 2;
+		apt[0].y = rcT.top + (rcT.bottom - rcT.top) / 2 + uiTriH / 2;
+		apt[1].x = apt[0].x + uiTriW / 2;
+		apt[1].y = apt[0].y - uiTriH;
+		apt[2].x = apt[1].x - uiTriW;
+		apt[2].y = apt[1].y;
+
+		// These are necessary to close the gap
+		apt[3].x = apt[0].x;
+		apt[3].y = apt[0].y;
+
 		// Draw the triangle
-		//SelectObject(hDC, hbr);
+		Polygon(hDC, apt, sizeof(apt) / sizeof(apt[0]));
 	}
 	/* END MINIMIZEBOX */
 
