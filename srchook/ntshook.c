@@ -150,9 +150,9 @@ VOID NTStyleDrawWindow(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lParam)
 			// TODO: make caption return a rect for the window title
 			// so that the text can center itself a little better
 			NTStyleDrawWindowCaption(hdc, &wi, wParam, lParam);
+			NTStyleDrawWindowTitle(hWnd, hdc, &wi, wParam, lParam);
 			NTStyleDrawWindowBorders(hdc, &wi, wParam, lParam);
 			NTStyleDrawWindowButtons(hdc, &wi, wParam, lParam);
-			NTStyleDrawWindowTitle(hWnd, hdc, &wi, wParam, lParam);
 
 			// Blit it to our actual window
 			//BitBlt(hdcMem, 0, 0, wi.rcWindow.right - wi.rcWindow.left, wi.rcWindow.bottom - wi.rcWindow.top, hdc, 0, 0, SRCCOPY);
@@ -308,7 +308,7 @@ VOID NTStyleDrawWindowCaption(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 	uiw = pwi->rcWindow.right - pwi->rcWindow.left;
 
 	// Calculate the rect points
-	rc.left = g_iBorderWidth - 1;
+	rc.left = g_iBorderWidth - 2;
 	rc.top = g_iBorderHeight;
 	rc.right = uiw - rc.left;
 	rc.bottom = rc.top + g_iCaptionHeight;
@@ -368,7 +368,7 @@ VOID NTStyleDrawWindowButtons(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 	rcT.top = rc.top + (g_iCaptionHeight / 2) - 1;
 	rcT.left = rc.left + uiSysMenuSpace + 1;
 	rcT.bottom = rcT.top + 3;
-	rcT.right = rcT.left + g_iCaptionHeight - 2 * uiSysMenuSpace;
+	rcT.right = rcT.left + g_iCaptionHeight - 2 * uiSysMenuSpace - 1;
 
 	FillRect(hDC, &rcT, hbr);
 
@@ -486,6 +486,8 @@ VOID NTStyleDrawWindowTitle(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi, 
 	HBRUSH hbr = NULL;
 	HFONT hft = NULL;
 
+	BOOL bDrawMinBox = (pwi->dwStyle & WS_MINIMIZEBOX) == WS_MINIMIZEBOX;
+	BOOL bDrawMaxBox = (pwi->dwStyle & WS_MAXIMIZEBOX) == WS_MAXIMIZEBOX;
 	BOOL bIsActiveWindow = FALSE;
 	INT iCaptionColor = 0;
 	INT iCaptionTextColor = 0;
@@ -528,9 +530,10 @@ VOID NTStyleDrawWindowTitle(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi, 
 	g_iBorderWidth = pwi->cxWindowBorders - 1;
 
 	// Calculate the rect points for the text
-	rc.left = g_iBorderWidth + g_iCaptionHeight - 1;
+	rc.left = g_iBorderWidth + g_iCaptionHeight + 1;
 	rc.top = g_iBorderHeight;
-	rc.right = uiw - rc.left;
+	rc.right = uiw - g_iCaptionHeight * bDrawMinBox
+		- g_iCaptionHeight * bDrawMaxBox;
 	rc.bottom = rc.top + g_iCaptionHeight;
 
 	// Allocate memory for the caption text
@@ -549,8 +552,8 @@ VOID NTStyleDrawWindowTitle(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi, 
 		GetWindowText(hWnd, pszTxt, cTxtLen + 1);
 
 		// Draw the caption text
-		DrawText(hDC, pszTxt, cTxtLen + 1, &rc, DT_CENTER | DT_NOCLIP
-			| DT_END_ELLIPSIS | DT_SINGLELINE | DT_VCENTER);
+		DrawText(hDC, pszTxt, cTxtLen + 1, &rc, DT_CENTER
+			| DT_NOCLIP | DT_SINGLELINE | DT_VCENTER);
 
 		// Free the memory
 		VirtualFree(pszTxt, 0, MEM_RELEASE);
