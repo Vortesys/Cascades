@@ -366,7 +366,7 @@ VOID NTStyleDrawWindowButtons(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 	hbr = GetSysColorBrush(COLOR_BTNSHADOW);
 
 	rcT.top = rc.top + (g_iCaptionHeight / 2) - 1;
-	rcT.left = rc.left + uiSysMenuSpace;
+	rcT.left = rc.left + uiSysMenuSpace + 1;
 	rcT.bottom = rcT.top + 3;
 	rcT.right = rcT.left + g_iCaptionHeight - 2 * uiSysMenuSpace;
 
