@@ -171,6 +171,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ntdwmfc.c" />
+    <ClCompile Include="ntsdrfn.c" />
     <ClCompile Include="ntshook.c" />
   </ItemGroup>
   <ItemGroup>

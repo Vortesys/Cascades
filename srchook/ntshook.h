@@ -22,13 +22,12 @@ __declspec(dllexport) LRESULT NTStyleHookProc(_In_ UINT uMsg, _In_ WPARAM wParam
 
 // Functions
 VOID NTStyleDrawWindow(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lParam);
-VOID NTStyleGetWindowMetrics(VOID);
 VOID NTStyleLockWindowUpdates(_In_ HWND hWnd);
 VOID NTStyleUnlockWindowUpdates(_In_ HWND hWnd);
 __declspec(dllexport) VOID NTStyleDisableWindowTheme(_In_ HWND hWnd);
 
-
 // Drawing Functions
+VOID NTStyleGetWindowMetrics(VOID);
 VOID NTStyleDrawWindowBorders(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wParam, _In_ LPARAM lParam);
 VOID NTStyleDrawWindowCaption(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wParam, _In_ LPARAM lParam);
 VOID NTStyleDrawWindowButtons(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wParam, _In_ LPARAM lParam);

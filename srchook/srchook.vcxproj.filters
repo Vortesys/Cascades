@@ -29,6 +29,9 @@
     <ClCompile Include="ntdwmfc.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ntsdrfn.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc">
