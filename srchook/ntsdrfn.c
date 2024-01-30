@@ -68,8 +68,8 @@ VOID NTStyleDrawWindow(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lParam)
 			// so that the text can center itself a little better
 			NTStyleDrawWindowCaption(hdc, &wi, wParam, lParam);
 			NTStyleDrawWindowTitle(hWnd, hdc, &wi, wParam, lParam);
-			NTStyleDrawWindowBorders(hdc, &wi, wParam, lParam);
 			NTStyleDrawWindowButtons(hWnd, hdc, &wi, wParam, lParam);
+			NTStyleDrawWindowBorders(hdc, &wi, wParam, lParam);
 
 			// Blit it to our actual window
 			//BitBlt(hdcMem, 0, 0, wi.rcWindow.right - wi.rcWindow.left, wi.rcWindow.bottom - wi.rcWindow.top, hdc, 0, 0, SRCCOPY);
