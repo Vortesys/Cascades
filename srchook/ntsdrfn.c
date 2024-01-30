@@ -86,8 +86,8 @@ VOID NTStyleDrawWindow(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lParam)
 VOID NTStyleDrawWindowBorders(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wParam, _In_ LPARAM lParam)
 {
 	HBRUSH hbrInit = NULL;
-	HPEN hbr = NULL;
-	HBRUSH hpnInit = NULL;
+	HBRUSH hbr = NULL;
+	HPEN hpnInit = NULL;
 	HPEN hpn = NULL;
 
 	BOOL bIsActiveWindow = FALSE;
@@ -379,13 +379,13 @@ VOID NTStyleDrawWindowButtons(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi
 		{
 			POINT apt[4] = { 0, 0 };
 
-			UINT uiModY = bWindowMaximized ? -1 : 1;
+			UINT uiModY = i ? 1 : -1;
 
 			// Calculate the triangle points
 			apt[0].x = rcT.left + (rcT.right - rcT.left) / 2;
-			apt[0].y = rcT.top + (rcT.bottom - rcT.top) / 2 - uiTriH / 2 + uiModY * (i * uiTriH);
+			apt[0].y = rcT.top + (rcT.bottom - rcT.top) / 2 - uiTriH / 2 - (uiTriH / 2 * -bWindowMaximized);
 			apt[1].x = apt[0].x + uiTriW / 2;
-			apt[1].y = apt[0].y + uiTriH * uiModY;
+			apt[1].y = apt[0].y - uiTriH * uiModY;
 			apt[2].x = apt[1].x - uiTriW;
 			apt[2].y = apt[1].y;
 
@@ -589,4 +589,10 @@ VOID NTStyleGetWindowMetrics(VOID)
 
 	return;
 	//GetSystemMetrics(SM_SWAPBUTTON); i will prolly have to think about this later
+
+	/*poop coode pooop code code for pooping
+	big chungus big chungus
+	pass the boof
+	gimme sum
+	if [???] is dirty poop then(succubus train wreck )*/
 }
