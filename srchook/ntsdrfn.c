@@ -208,11 +208,15 @@ VOID NTStyleDrawWindowBorders(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 	}
 
 	// Cleanup
-	SelectObject(hDC, hbrInit);
+	if (hbrInit)
+		SelectObject(hDC, hbrInit);
+
 	if (hbr)
 		DeleteObject(hbr);
 
-	SelectObject(hDC, hpnInit);
+	if (hpnInit)
+		SelectObject(hDC, hpnInit);
+
 	if (hpn)
 		DeleteObject(hpn);
 
@@ -581,11 +585,15 @@ VOID NTStyleDrawWindowTitle(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi, 
 	}
 
 	// Cleanup
-	SelectObject(hDC, hftInit);
+	if (hftInit)
+		SelectObject(hDC, hftInit);
+	
 	if (hft)
 		DeleteObject(hft);
 
-	SelectObject(hDC, hbrInit);
+	if (hbrInit)
+		SelectObject(hDC, hbrInit);
+
 	if (hbr)
 		DeleteObject(hbr);
 
