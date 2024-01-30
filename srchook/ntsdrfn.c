@@ -131,12 +131,12 @@ VOID NTStyleDrawWindowBorders(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 		INT iModX = (i & 1) == 1;
 		INT iModY = (i & 2) == 2;
 
-		RECT rc = { 0, 0, 0, 0 };
-
-		rc.left = (i == 2) * (uiw - g_iBorderWidth - 1);
-		rc.top = (i == 3) * (uih - g_iBorderHeight - 1);
-		rc.right = (i == 0) ? g_iBorderWidth + 1 : uiw;
-		rc.bottom = (i == 1) ? g_iBorderHeight + 1 : uih;
+		RECT rc = {
+			(i == 2) * (uiw - g_iBorderWidth - 1),
+			(i == 3) * (uih - g_iBorderHeight - 1),
+			((i == 0) ? g_iBorderWidth : uiw) + 1,
+			((i == 1) ? g_iBorderHeight : uih) + 1
+		};
 
 		// Draw rectangle
 		hbr = GetSysColorBrush(bIsDlgWindow ? iCaptionColor : iBorderColor);
@@ -145,11 +145,24 @@ VOID NTStyleDrawWindowBorders(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 
 	if (bIsDlgWindow)
 	{
-		// Draw the window frame's frame
-		RECT rc = { g_iBorderWidth, g_iBorderHeight, uiw - g_iBorderWidth - 1, uih - g_iBorderHeight - 1 };
+		// Draw the window frame's inner frame
+		RECT rc = {
+			g_iBorderWidth,
+			g_iBorderHeight,
+			uiw - g_iBorderWidth,
+			uih - g_iBorderHeight
+		};
 
-		// Draw the frame
 		hbr = GetSysColorBrush(COLOR_WINDOW);
+		FrameRect(hDC, &rc, hbr);
+
+		// Draw the outer frame
+		rc.left = 0;
+		rc.top = 0;
+		rc.right = uiw;
+		rc.bottom = uih;
+
+		hbr = GetSysColorBrush(COLOR_WINDOWFRAME);
 		FrameRect(hDC, &rc, hbr);
 	}
 	else
@@ -196,14 +209,14 @@ VOID NTStyleDrawWindowBorders(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 			// Calculate the polygon points
 			apt[0].x = 0 + uiw * iFlipX - iFlipX;
 			apt[0].y = 0 + uih * iFlipY - iFlipY;
-			apt[1].x = apt[0].x + uiFlipX * (g_iCaptionHeight + g_iBorderWidth - 1);
+			apt[1].x = apt[0].x + uiFlipX * (g_iCaptionHeight + g_iBorderWidth);
 			apt[1].y = apt[0].y;
 			apt[2].x = apt[1].x;
 			apt[2].y = apt[0].y + uiFlipY * g_iBorderHeight;
-			apt[3].x = apt[1].x - uiFlipX * (g_iCaptionHeight - 1);
+			apt[3].x = apt[1].x - uiFlipX * (g_iCaptionHeight);
 			apt[3].y = apt[2].y;
 			apt[4].x = apt[3].x;
-			apt[4].y = apt[2].y + uiFlipY * (g_iCaptionHeight - 1);
+			apt[4].y = apt[2].y + uiFlipY * (g_iCaptionHeight);
 			apt[5].x = apt[0].x;
 			apt[5].y = apt[4].y;
 
@@ -264,10 +277,10 @@ VOID NTStyleDrawWindowCaption(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 	uiw = pwi->rcWindow.right - pwi->rcWindow.left;
 
 	// Calculate the rect points
-	rc.left = g_iBorderWidth - 2;
+	rc.left = g_iBorderWidth;
 	rc.top = g_iBorderHeight;
 	rc.right = uiw - rc.left;
-	rc.bottom = rc.top + g_iCaptionHeight;
+	rc.bottom = rc.top + g_iCaptionHeight + 1;
 
 	// Draw the caption rectangle
 	// TODO: do it with a gradient
@@ -315,8 +328,8 @@ VOID NTStyleDrawWindowButtons(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi
 	// Setup our basic rectangle
 	rc.top = g_iBorderHeight;
 	rc.left = g_iBorderWidth;
-	rc.bottom = rc.top + g_iCaptionHeight;
-	rc.right = rc.left + g_iCaptionHeight;
+	rc.bottom = rc.top + g_iCaptionHeight + 1;
+	rc.right = rc.left + g_iCaptionHeight + 1;
 
 	/* BEGIN SYSTEM MENU */
 	// Draw background
@@ -330,10 +343,10 @@ VOID NTStyleDrawWindowButtons(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi
 	// Draw shadow
 	hbr = GetSysColorBrush(COLOR_BTNSHADOW);
 
-	rcT.top = rc.top + (g_iCaptionHeight / 2) - 1;
+	rcT.top = rc.top + (g_iCaptionHeight / 2);
 	rcT.left = rc.left + uiSysMenuSpace + 1;
 	rcT.bottom = rcT.top + 3;
-	rcT.right = rcT.left + g_iCaptionHeight - 2 * uiSysMenuSpace - 1;
+	rcT.right = rcT.left + g_iCaptionHeight - 2 * uiSysMenuSpace;
 
 	FillRect(hDC, &rcT, hbr);
 
@@ -357,8 +370,8 @@ VOID NTStyleDrawWindowButtons(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi
 		// Setup our basic rectangle
 		rc.top = g_iBorderHeight;
 		rc.right = uiw - g_iBorderWidth;
-		rc.bottom = rc.top + g_iCaptionHeight;
-		rc.left = rc.right - g_iCaptionHeight;
+		rc.bottom = rc.top + g_iCaptionHeight + 1;
+		rc.left = rc.right - g_iCaptionHeight - 1;
 
 		// Get triangle size
 		uiTriW = (g_iCaptionHeight) / 3;
@@ -440,8 +453,8 @@ VOID NTStyleDrawWindowButtons(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi
 
 		if (bDrawMaxBox)
 		{
-			rc.left = rc.left - g_iCaptionHeight + 1;
-			rc.right = rc.right - g_iCaptionHeight + 1;
+			rc.left = rc.left - g_iCaptionHeight;
+			rc.right = rc.right - g_iCaptionHeight;
 		}
 
 		// Draw background
