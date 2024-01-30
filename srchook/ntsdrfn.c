@@ -206,6 +206,15 @@ VOID NTStyleDrawWindowBorders(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 			Polygon(hDC, apt, sizeof(apt) / sizeof(apt[0]));
 		}
 	}
+	else
+	{
+		// Draw the window frame's frame
+		RECT rc = { g_iBorderWidth, g_iBorderHeight, uiw - g_iBorderWidth - 1, uih - g_iBorderHeight - 1 };
+
+		// Draw the frame
+		hbr = GetSysColorBrush(COLOR_WINDOW);
+		FrameRect(hDC, &rc, hbr);
+	}
 
 	// Cleanup
 	if (hbrInit)
@@ -511,8 +520,10 @@ VOID NTStyleDrawWindowTitle(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi, 
 	HFONT hftInit = NULL;
 	HFONT hft = NULL;
 
-	BOOL bDrawMinBox = (pwi->dwStyle & WS_MINIMIZEBOX) == WS_MINIMIZEBOX;
-	BOOL bDrawMaxBox = (pwi->dwStyle & WS_MAXIMIZEBOX) == WS_MAXIMIZEBOX;
+	BOOL bDrawMinBox = (pwi->dwStyle & WS_MINIMIZEBOX)
+		== WS_MINIMIZEBOX;
+	BOOL bDrawMaxBox = (pwi->dwStyle & WS_MAXIMIZEBOX)
+		== WS_MAXIMIZEBOX;
 	BOOL bIsActiveWindow = FALSE;
 	INT iCaptionColor = 0;
 	INT iCaptionTextColor = 0;
@@ -535,8 +546,10 @@ VOID NTStyleDrawWindowTitle(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi, 
 		// Check whether or not we're the active window
 		// and change colors based on that
 	bIsActiveWindow = pwi->dwWindowStatus == WS_ACTIVECAPTION;
-	iCaptionTextColor = bIsActiveWindow ? COLOR_CAPTIONTEXT : COLOR_INACTIVECAPTIONTEXT;
-	iCaptionColor = bIsActiveWindow ? COLOR_ACTIVECAPTION : COLOR_INACTIVECAPTION;
+	iCaptionTextColor = bIsActiveWindow ?
+		COLOR_CAPTIONTEXT : COLOR_INACTIVECAPTIONTEXT;
+	iCaptionColor = bIsActiveWindow ?
+		COLOR_ACTIVECAPTION : COLOR_INACTIVECAPTION;
 
 	hbr = GetSysColorBrush(iCaptionColor);
 	hft = (HFONT)GetStockObject(SYSTEM_FONT);
