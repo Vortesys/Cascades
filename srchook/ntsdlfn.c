@@ -1,5 +1,5 @@
 /* * * * * * * *\
-	NTDLYLD.C -
+	NTSDLFN.C -
 		Copyright © 2023 Brady McDermott, Vortesys
 	DESCRIPTION -
 		Delay loaded functions, mostly for only testing

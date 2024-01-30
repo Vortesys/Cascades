@@ -91,6 +91,8 @@ VOID NTStyleDrawWindowBorders(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 	HPEN hpn = NULL;
 
 	BOOL bIsActiveWindow = FALSE;
+	BOOL bIsDlgWindow = (pwi->dwExStyle & WS_EX_DLGMODALFRAME) == WS_EX_DLGMODALFRAME;
+	INT iCaptionColor = 0;
 	INT iBorderColor = 0;
 
 	UINT uiw = 0;
@@ -115,12 +117,13 @@ VOID NTStyleDrawWindowBorders(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 	// and change colors based on that
 	bIsActiveWindow = pwi->dwWindowStatus == WS_ACTIVECAPTION;
 	iBorderColor = bIsActiveWindow ? COLOR_ACTIVEBORDER : COLOR_INACTIVEBORDER;
+	iCaptionColor = bIsActiveWindow ? COLOR_ACTIVECAPTION : COLOR_INACTIVECAPTION;
 
 	// Get window width, height and border size
 	uiw = pwi->rcWindow.right - pwi->rcWindow.left;
 	uih = pwi->rcWindow.bottom - pwi->rcWindow.top;
 
-	// Draw the colored rectangles around the edges
+	// Draw the window frame
 	i = 0;
 
 	for (i = 0; i < 4; i++)
@@ -136,54 +139,72 @@ VOID NTStyleDrawWindowBorders(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 		rc.bottom = (i == 1) ? g_iBorderHeight + 1 : uih;
 
 		// Draw rectangle
-		hbr = GetSysColorBrush(iBorderColor);
+		hbr = GetSysColorBrush(bIsDlgWindow ? iCaptionColor : iBorderColor);
 		FillRect(hDC, &rc, hbr);
-
-		// Draw the frame
-		hbr = GetSysColorBrush(COLOR_WINDOWFRAME);
-		FrameRect(hDC, &rc, hbr);
 	}
 
-	// Set up our brushes
-	hbr = GetSysColorBrush(iBorderColor);
-	hpn = CreatePen(PS_SOLID, 0, (COLORREF)GetSysColor(COLOR_WINDOWFRAME));
-
-	hbrInit = SelectObject(hDC, hbr);
-	hpnInit = SelectObject(hDC, hpn);
-
-	// Paint the "caps"
-	i = 0;
-
-	for (i = 0; i < 4; i++)
+	if (bIsDlgWindow)
 	{
-		INT iFlipX = (i & 1) == 1;
-		INT iFlipY = (i & 2) == 2;
-		UINT uiFlipX = (iFlipX ? -1 : 1);
-		UINT uiFlipY = (iFlipY ? -1 : 1);
+		// Draw the window frame's frame
+		i = 0;
 
-		POINT apt[7] = { 0, 0 };
+		for (i = 0; i < 4; i++)
+		{
+			INT iModX = (i & 1) == 1;
+			INT iModY = (i & 2) == 2;
 
-		// Calculate the polygon points
-		apt[0].x = 0 + uiw * iFlipX - iFlipX;
-		apt[0].y = 0 + uih * iFlipY - iFlipY;
-		apt[1].x = apt[0].x + uiFlipX * (g_iCaptionHeight + g_iBorderWidth - 1);
-		apt[1].y = apt[0].y;
-		apt[2].x = apt[1].x;
-		apt[2].y = apt[0].y + uiFlipY * g_iBorderHeight;
-		apt[3].x = apt[1].x - uiFlipX * (g_iCaptionHeight - 1);
-		apt[3].y = apt[2].y;
-		apt[4].x = apt[3].x;
-		apt[4].y = apt[2].y + uiFlipY * (g_iCaptionHeight - 1);
-		apt[5].x = apt[0].x;
-		apt[5].y = apt[4].y;
+			RECT rc = { 0, 0, 0, 0 };
 
-		// These are necessary to close the gap
-		apt[6].x = apt[0].x;
-		apt[6].y = apt[0].y;
+			rc.left = (i == 2) * (uiw - g_iBorderWidth - 1);
+			rc.top = (i == 3) * (uih - g_iBorderHeight - 1);
+			rc.right = (i == 0) ? g_iBorderWidth + 1 : uiw;
+			rc.bottom = (i == 1) ? g_iBorderHeight + 1 : uih;
 
-		// Draw
-		//SetPolyFillMode(hDC, 0);
-		Polygon(hDC, apt, sizeof(apt) / sizeof(apt[0]));
+			// Draw the frame
+			hbr = GetSysColorBrush(COLOR_WINDOWFRAME);
+			FrameRect(hDC, &rc, hbr);
+		}
+
+		// Set up our brushes
+		hbr = GetSysColorBrush(iBorderColor);
+		hpn = CreatePen(PS_SOLID, 0, (COLORREF)GetSysColor(COLOR_WINDOWFRAME));
+
+		hbrInit = SelectObject(hDC, hbr);
+		hpnInit = SelectObject(hDC, hpn);
+
+		// Paint the "caps"
+		i = 0;
+
+		for (i = 0; i < 4; i++)
+		{
+			INT iFlipX = (i & 1) == 1;
+			INT iFlipY = (i & 2) == 2;
+			UINT uiFlipX = (iFlipX ? -1 : 1);
+			UINT uiFlipY = (iFlipY ? -1 : 1);
+
+			POINT apt[7] = { 0, 0 };
+
+			// Calculate the polygon points
+			apt[0].x = 0 + uiw * iFlipX - iFlipX;
+			apt[0].y = 0 + uih * iFlipY - iFlipY;
+			apt[1].x = apt[0].x + uiFlipX * (g_iCaptionHeight + g_iBorderWidth - 1);
+			apt[1].y = apt[0].y;
+			apt[2].x = apt[1].x;
+			apt[2].y = apt[0].y + uiFlipY * g_iBorderHeight;
+			apt[3].x = apt[1].x - uiFlipX * (g_iCaptionHeight - 1);
+			apt[3].y = apt[2].y;
+			apt[4].x = apt[3].x;
+			apt[4].y = apt[2].y + uiFlipY * (g_iCaptionHeight - 1);
+			apt[5].x = apt[0].x;
+			apt[5].y = apt[4].y;
+
+			// These are necessary to close the gap
+			apt[6].x = apt[0].x;
+			apt[6].y = apt[0].y;
+
+			// Draw
+			Polygon(hDC, apt, sizeof(apt) / sizeof(apt[0]));
+		}
 	}
 
 	// Cleanup
