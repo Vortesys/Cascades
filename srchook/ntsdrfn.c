@@ -146,6 +146,15 @@ VOID NTStyleDrawWindowBorders(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 	if (bIsDlgWindow)
 	{
 		// Draw the window frame's frame
+		RECT rc = { g_iBorderWidth, g_iBorderHeight, uiw - g_iBorderWidth - 1, uih - g_iBorderHeight - 1 };
+
+		// Draw the frame
+		hbr = GetSysColorBrush(COLOR_WINDOW);
+		FrameRect(hDC, &rc, hbr);
+	}
+	else
+	{
+		// Draw the window frame's frame
 		i = 0;
 
 		for (i = 0; i < 4; i++)
@@ -205,15 +214,6 @@ VOID NTStyleDrawWindowBorders(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 			// Draw
 			Polygon(hDC, apt, sizeof(apt) / sizeof(apt[0]));
 		}
-	}
-	else
-	{
-		// Draw the window frame's frame
-		RECT rc = { g_iBorderWidth, g_iBorderHeight, uiw - g_iBorderWidth - 1, uih - g_iBorderHeight - 1 };
-
-		// Draw the frame
-		hbr = GetSysColorBrush(COLOR_WINDOW);
-		FrameRect(hDC, &rc, hbr);
 	}
 
 	// Cleanup
