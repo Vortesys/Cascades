@@ -46,7 +46,7 @@ BOOL APIENTRY DllMain(
 		NT Style Hook procedure
 		Uses WH_CALLWNDPROC.
 \* * * */
-__declspec(dllexport) LRESULT NTStyleHookProc(
+__declspec(dllexport) LRESULT APIENTRY NTStyleHookProc(
 	_In_ UINT uMsg,
 	_In_ WPARAM wParam,
 	_In_ LPARAM lParam
@@ -132,7 +132,7 @@ VOID NTStyleUnlockWindowUpdates(_In_ HWND hWnd)
 	NTStyleDisableWindowTheme -
 		de-themify that window
 \* * * */
-__declspec(dllexport) VOID NTStyleDisableWindowTheme(_In_ HWND hWnd)
+__declspec(dllexport) VOID APIENTRY NTStyleDisableWindowTheme(_In_ HWND hWnd)
 {
 	enum DWMNCRENDERINGPOLICY ncrp = DWMNCRP_DISABLED;
 

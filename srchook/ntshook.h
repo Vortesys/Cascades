@@ -18,13 +18,13 @@
 
 /* Function Prototypes */
 // Hook Procedure
-__declspec(dllexport) LRESULT NTStyleHookProc(_In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam);
+__declspec(dllexport) LRESULT APIENTRY NTStyleHookProc(_In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam);
 
 // Functions
 VOID NTStyleDrawWindow(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lParam);
 VOID NTStyleLockWindowUpdates(_In_ HWND hWnd);
 VOID NTStyleUnlockWindowUpdates(_In_ HWND hWnd);
-__declspec(dllexport) VOID NTStyleDisableWindowTheme(_In_ HWND hWnd);
+__declspec(dllexport) VOID APIENTRY NTStyleDisableWindowTheme(_In_ HWND hWnd);
 
 // Drawing Functions
 VOID NTStyleGetWindowMetrics(VOID);
