@@ -1,0 +1,4 @@
+LIBRARY NTSHOOK
+EXPORTS
+    NTStyleDisableWindowTheme @1
+    NTStyleHookProc @2
