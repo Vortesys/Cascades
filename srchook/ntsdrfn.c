@@ -143,50 +143,28 @@ VOID NTStyleDrawWindowBorders(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 		FillRect(hDC, &rc, hbr);
 	}
 
-	if (bIsDlgWindow)
+	// Draw the window frame's inner frame
+	RECT rc = {
+		g_iBorderWidth,
+		g_iBorderHeight,
+		uiw - g_iBorderWidth,
+		uih - g_iBorderHeight
+	};
+
+	hbr = GetSysColorBrush(bIsDlgWindow ? COLOR_WINDOW : COLOR_WINDOWFRAME);
+	FrameRect(hDC, &rc, hbr);
+
+	// Draw the outer frame
+	rc.left = 0;
+	rc.top = 0;
+	rc.right = uiw;
+	rc.bottom = uih;
+
+	hbr = GetSysColorBrush(COLOR_WINDOWFRAME);
+	FrameRect(hDC, &rc, hbr);
+
+	if (!bIsDlgWindow)
 	{
-		// Draw the window frame's inner frame
-		RECT rc = {
-			g_iBorderWidth,
-			g_iBorderHeight,
-			uiw - g_iBorderWidth,
-			uih - g_iBorderHeight
-		};
-
-		hbr = GetSysColorBrush(COLOR_WINDOW);
-		FrameRect(hDC, &rc, hbr);
-
-		// Draw the outer frame
-		rc.left = 0;
-		rc.top = 0;
-		rc.right = uiw;
-		rc.bottom = uih;
-
-		hbr = GetSysColorBrush(COLOR_WINDOWFRAME);
-		FrameRect(hDC, &rc, hbr);
-	}
-	else
-	{
-		// Draw the window frame's frame
-		i = 0;
-
-		for (i = 0; i < 4; i++)
-		{
-			INT iModX = (i & 1) == 1;
-			INT iModY = (i & 2) == 2;
-
-			RECT rc = { 0, 0, 0, 0 };
-
-			rc.left = (i == 2) * (uiw - g_iBorderWidth - 1);
-			rc.top = (i == 3) * (uih - g_iBorderHeight - 1);
-			rc.right = (i == 0) ? g_iBorderWidth + 1 : uiw;
-			rc.bottom = (i == 1) ? g_iBorderHeight + 1 : uih;
-
-			// Draw the frame
-			hbr = GetSysColorBrush(COLOR_WINDOWFRAME);
-			FrameRect(hDC, &rc, hbr);
-		}
-
 		// Set up our brushes
 		hbr = GetSysColorBrush(iBorderColor);
 		hpn = CreatePen(PS_SOLID, 0, (COLORREF)GetSysColor(COLOR_WINDOWFRAME));
