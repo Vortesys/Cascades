@@ -591,7 +591,7 @@ VOID NTStyleDrawWindowTitle(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi, 
 	cTxtLen = GetWindowTextLength(hWnd);
 
 	pszTxt = (LPWSTR)VirtualAlloc((LPVOID)NULL,
-		(DWORD)(cTxtLen + 1), MEM_COMMIT,
+		(DWORD)cTxtLen + 1, MEM_COMMIT,
 		PAGE_READWRITE);
 
 	// TODO: draw pretty text and not the ugly
