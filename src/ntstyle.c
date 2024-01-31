@@ -43,10 +43,14 @@ int WINAPI wWinMain(
 	// Get the hook procedure of NTShook
 	if (g_hDllInstance)
 		hkprcNTShook = (HOOKPROC)GetProcAddress(g_hDllInstance, "NTStyleHookProc");
+	else
+		return GetLastError();
 
 	// Establish our hook :)
 	if (hkprcNTShook)
 		hhkNTShook = SetWindowsHookEx(WH_CALLWNDPROC, hkprcNTShook, g_hDllInstance, 0);
+	else
+		return GetLastError();
 		
 	if (hhkNTShook)
 	{
