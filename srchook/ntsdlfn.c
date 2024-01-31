@@ -40,9 +40,9 @@ HRESULT DwmSetWindowAttributeDelay(
 		if (hRet = (HRESULT)fLib(hwnd, dwAttribute, pvAttribute, cbAttribute))
 		{
 			FreeLibrary(hLib);
-			return TRUE;
+			return hRet;
 		}
 	}
 
-	return hRet;
+	return 0;
 }
