@@ -366,33 +366,23 @@ VOID NTStyleDrawWindowButtons(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi
 		hbr = GetSysColorBrush(COLOR_BTNSHADOW);
 		FillRect(hDC, &rc, hbr);
 
+		// Draw the highlight
+		DrawEdge(hDC, &rc, EDGE_RAISED, BF_RECT | BF_MIDDLE | BF_DIAGONAL);
+
 		// Draw the frame
 		hbr = GetSysColorBrush(COLOR_WINDOWFRAME);
 		FrameRect(hDC, &rc, hbr);
 
-		// Draw the highlight
-		hpn = CreatePen(PS_SOLID, 0, (COLORREF)GetSysColor(COLOR_BTNHIGHLIGHT));
-		hpnInit = SelectObject(hDC, hpn);
-
-		MoveToEx(hDC, rc.right - 3, rc.top + 1, NULL);
-		LineTo(hDC, rc.left + 1, rc.top + 1);
-		LineTo(hDC, rc.left + 1, rc.bottom - 2);
-
-		// Draw the "background"
-		hbr = GetSysColorBrush(COLOR_BTNFACE);
-
+		// Prepare the triangle brushes
 		rcT.top = rc.top + 2;
 		rcT.left = rc.left + 2;
 		rcT.bottom = rc.bottom - 3;
 		rcT.right = rc.right - 3;
 
-		FillRect(hDC, &rcT, hbr);
-
-		// Prepare the triangle brushes
 		hbr = GetSysColorBrush(COLOR_BTNTEXT);
 		hpn = CreatePen(PS_SOLID, 0, (COLORREF)GetSysColor(COLOR_BTNTEXT));
 		hbrInit = SelectObject(hDC, hbr);
-		SelectObject(hDC, hpn);
+		hpnInit = SelectObject(hDC, hpn);
 
 		wp.length = sizeof(WINDOWPLACEMENT);
 		GetWindowPlacement(hWnd, &wp);
@@ -444,12 +434,7 @@ VOID NTStyleDrawWindowButtons(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi
 		FrameRect(hDC, &rc, hbr);
 
 		// Draw the highlight
-		hpn = CreatePen(PS_SOLID, 0, (COLORREF)GetSysColor(COLOR_BTNHIGHLIGHT));
-		hpnInit = SelectObject(hDC, hpn);
-
-		MoveToEx(hDC, rc.right - 3, rc.top + 1, NULL);
-		LineTo(hDC, rc.left + 1, rc.top + 1);
-		LineTo(hDC, rc.left + 1, rc.bottom - 2);
+		DrawEdge(hDC, &rc, EDGE_RAISED, BF_RECT);
 
 		// Draw the "background"
 		hbr = GetSysColorBrush(COLOR_BTNFACE);
@@ -465,7 +450,7 @@ VOID NTStyleDrawWindowButtons(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi
 		hbr = GetSysColorBrush(COLOR_BTNTEXT);
 		hpn = CreatePen(PS_SOLID, 0, (COLORREF)GetSysColor(COLOR_BTNTEXT));
 		hbrInit = SelectObject(hDC, hbr);
-		SelectObject(hDC, hpn);
+		hpnInit = SelectObject(hDC, hpn);
 
 		// Calculate the triangle points
 		apt[0].x = rcT.left + (rcT.right - rcT.left) / 2;
