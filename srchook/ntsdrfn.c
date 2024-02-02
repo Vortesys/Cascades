@@ -331,10 +331,10 @@ VOID NTStyleDrawWindowButtons(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi
 	// Draw "minus" inside
 	hbr = GetSysColorBrush(COLOR_BTNHIGHLIGHT);
 
-	rcT.top = rcT.top - 1;
-	rcT.left = rcT.left - 1;
-	rcT.bottom = rcT.top + 3;
-	rcT.right = rcT.right - 1;
+	rcT.top -= 1;
+	rcT.left -= 1;
+	rcT.bottom -= 1;
+	rcT.right -= 1;
 
 	FillRect(hDC, &rcT, hbr);
 
@@ -362,23 +362,24 @@ VOID NTStyleDrawWindowButtons(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi
 		WINDOWPLACEMENT wp;
 		BOOL bWindowMaximized;
 
+		rcT.top = rc.top + 1;
+		rcT.right = rc.right - 1;
+		rcT.bottom = rc.bottom - 1;
+		rcT.left = rc.left + 1;
+
 		// Draw background
 		hbr = GetSysColorBrush(COLOR_BTNSHADOW);
-		FillRect(hDC, &rc, hbr);
+		FillRect(hDC, &rcT, hbr);
 
 		// Draw the highlight
-		DrawEdge(hDC, &rc, EDGE_RAISED, BF_RECT | BF_MIDDLE | BF_DIAGONAL);
+		//DrawEdge(hDC, &rcT, EDGE_RAISED, BF_TOPLEFT | BF_MIDDLE | BF_ADJUST);
+		DrawFrameControl(hDC, &rcT, DFC_BUTTON, DFCS_BUTTONPUSH);
 
 		// Draw the frame
 		hbr = GetSysColorBrush(COLOR_WINDOWFRAME);
 		FrameRect(hDC, &rc, hbr);
 
 		// Prepare the triangle brushes
-		rcT.top = rc.top + 2;
-		rcT.left = rc.left + 2;
-		rcT.bottom = rc.bottom - 3;
-		rcT.right = rc.right - 3;
-
 		hbr = GetSysColorBrush(COLOR_BTNTEXT);
 		hpn = CreatePen(PS_SOLID, 0, (COLORREF)GetSysColor(COLOR_BTNTEXT));
 		hbrInit = SelectObject(hDC, hbr);
@@ -421,30 +422,25 @@ VOID NTStyleDrawWindowButtons(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi
 
 		if (bDrawMaxBox)
 		{
-			rc.left = rc.left - g_iCaptionHeight;
-			rc.right = rc.right - g_iCaptionHeight;
+			rc.left -= g_iCaptionHeight;
+			rc.right -= g_iCaptionHeight;
 		}
+
+		rcT.top = rc.top + 1;
+		rcT.right = rc.right - 1;
+		rcT.bottom = rc.bottom - 1;
+		rcT.left = rc.left + 1;
 
 		// Draw background
 		hbr = GetSysColorBrush(COLOR_BTNSHADOW);
-		FillRect(hDC, &rc, hbr);
+		FillRect(hDC, &rcT, hbr);
+
+		// Draw the highlight
+		DrawEdge(hDC, &rcT, EDGE_RAISED, BF_TOPLEFT | BF_MIDDLE | BF_ADJUST);
 
 		// Draw the frame
 		hbr = GetSysColorBrush(COLOR_WINDOWFRAME);
 		FrameRect(hDC, &rc, hbr);
-
-		// Draw the highlight
-		DrawEdge(hDC, &rc, EDGE_RAISED, BF_RECT);
-
-		// Draw the "background"
-		hbr = GetSysColorBrush(COLOR_BTNFACE);
-
-		rcT.top = rc.top + 2;
-		rcT.left = rc.left + 2;
-		rcT.bottom = rc.bottom - 3;
-		rcT.right = rc.right - 3;
-
-		FillRect(hDC, &rcT, hbr);
 
 		// Prepare the triangle brushes
 		hbr = GetSysColorBrush(COLOR_BTNTEXT);
@@ -481,6 +477,49 @@ VOID NTStyleDrawWindowButtons(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi
 
 	if (hpn)
 		DeleteObject(hpn);
+
+	return;
+}
+
+/* * * *\
+	NTStyleDrawButtonInterior -
+		Draws the highlight and
+		middle part of a button.
+	RETURNS - 
+		This function returns a
+		rectangle that is
+		centered within the high-
+		light area of the button.
+\* * * */
+RECT NTStyleDrawButtonInterior(_In_ HDC hDC, _In_ HBRUSH hBr, _In_ HPEN hPn, _In_ RECT rc, _In_ BOOL bSelected)
+{
+	RECT rcT = rc;
+
+	// Draw background
+	hbr = GetSysColorBrush(COLOR_BTNSHADOW);
+	FillRect(hDC, &rc, hbr);
+
+	// Draw the frame
+	hbr = GetSysColorBrush(COLOR_WINDOWFRAME);
+	FrameRect(hDC, &rc, hbr);
+
+	// Draw the highlight
+	hpn = CreatePen(PS_SOLID, 0, (COLORREF)GetSysColor(COLOR_BTNHIGHLIGHT));
+	hpnInit = SelectObject(hDC, hpn);
+
+	MoveToEx(hDC, rc.right - 3, rc.top + 1, NULL);
+	LineTo(hDC, rc.left + 1, rc.top + 1);
+	LineTo(hDC, rc.left + 1, rc.bottom - 2);
+
+	// Draw the "background"
+	hbr = GetSysColorBrush(COLOR_BTNFACE);
+
+	rcT.top = rc.top + 2;
+	rcT.left = rc.left + 2;
+	rcT.bottom = rc.bottom - 3;
+	rcT.right = rc.right - 3;
+
+	FillRect(hDC, &rcT, hbr);
 
 	return;
 }
