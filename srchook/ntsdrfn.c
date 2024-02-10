@@ -95,8 +95,8 @@ VOID NTStyleDrawWindowBorders(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 	INT iCaptionColor = 0;
 	INT iBorderColor = 0;
 
-	UINT uiw = 0;
-	UINT uih = 0;
+	UINT uWinW = 0;
+	UINT uWinH = 0;
 
 	INT i;
 
@@ -120,8 +120,8 @@ VOID NTStyleDrawWindowBorders(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 	iCaptionColor = bIsActiveWindow ? COLOR_ACTIVECAPTION : COLOR_INACTIVECAPTION;
 
 	// Get window width, height and border size
-	uiw = pwi->rcWindow.right - pwi->rcWindow.left;
-	uih = pwi->rcWindow.bottom - pwi->rcWindow.top;
+	uWinW = pwi->rcWindow.right - pwi->rcWindow.left;
+	uWinH = pwi->rcWindow.bottom - pwi->rcWindow.top;
 
 	// Draw the window frame
 	i = 0;
@@ -132,10 +132,10 @@ VOID NTStyleDrawWindowBorders(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 		INT iModY = (i & 2) == 2;
 
 		RECT rc = {
-			(i == 2) * (uiw - g_iBorderWidth - 1),
-			(i == 3) * (uih - g_iBorderHeight - 1),
-			((i == 0) ? g_iBorderWidth : uiw) + 1,
-			((i == 1) ? g_iBorderHeight : uih) + 1
+			(i == 2) * (uWinW - g_iBorderWidth - 1),
+			(i == 3) * (uWinH - g_iBorderHeight - 1),
+			((i == 0) ? g_iBorderWidth : uWinW) + 1,
+			((i == 1) ? g_iBorderHeight : uWinH) + 1
 		};
 
 		// Draw rectangle
@@ -147,8 +147,8 @@ VOID NTStyleDrawWindowBorders(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 	RECT rc = {
 		g_iBorderWidth,
 		g_iBorderHeight,
-		uiw - g_iBorderWidth,
-		uih - g_iBorderHeight
+		uWinW - g_iBorderWidth,
+		uWinH - g_iBorderHeight
 	};
 
 	hbr = GetSysColorBrush(bIsDlgWindow ? COLOR_WINDOW : COLOR_WINDOWFRAME);
@@ -157,8 +157,8 @@ VOID NTStyleDrawWindowBorders(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 	// Draw the outer frame
 	rc.left = 0;
 	rc.top = 0;
-	rc.right = uiw;
-	rc.bottom = uih;
+	rc.right = uWinW;
+	rc.bottom = uWinH;
 
 	hbr = GetSysColorBrush(COLOR_WINDOWFRAME);
 	FrameRect(hDC, &rc, hbr);
@@ -179,22 +179,22 @@ VOID NTStyleDrawWindowBorders(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 		{
 			INT iFlipX = (i & 1) == 1;
 			INT iFlipY = (i & 2) == 2;
-			UINT uiFlipX = (iFlipX ? -1 : 1);
-			UINT uiFlipY = (iFlipY ? -1 : 1);
+			UINT uFlipX = (iFlipX ? -1 : 1);
+			UINT uFlipY = (iFlipY ? -1 : 1);
 
 			POINT apt[7] = { 0, 0 };
 
 			// Calculate the polygon points
-			apt[0].x = 0 + uiw * iFlipX - iFlipX;
-			apt[0].y = 0 + uih * iFlipY - iFlipY;
-			apt[1].x = apt[0].x + uiFlipX * (g_iCaptionHeight + g_iBorderWidth);
+			apt[0].x = 0 + uWinW * iFlipX - iFlipX;
+			apt[0].y = 0 + uWinH * iFlipY - iFlipY;
+			apt[1].x = apt[0].x + uFlipX * (g_iCaptionHeight + g_iBorderWidth);
 			apt[1].y = apt[0].y;
 			apt[2].x = apt[1].x;
-			apt[2].y = apt[0].y + uiFlipY * g_iBorderHeight;
-			apt[3].x = apt[1].x - uiFlipX * (g_iCaptionHeight);
+			apt[2].y = apt[0].y + uFlipY * g_iBorderHeight;
+			apt[3].x = apt[1].x - uFlipX * (g_iCaptionHeight);
 			apt[3].y = apt[2].y;
 			apt[4].x = apt[3].x;
-			apt[4].y = apt[2].y + uiFlipY * (g_iCaptionHeight);
+			apt[4].y = apt[2].y + uFlipY * (g_iCaptionHeight);
 			apt[5].x = apt[0].x;
 			apt[5].y = apt[4].y;
 
@@ -243,7 +243,7 @@ VOID NTStyleDrawWindowCaption(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 	INT iCaptionColor = 0;
 
 	RECT rc = { 0, 0, 0, 0 };
-	UINT uiw = 0;
+	UINT uWinW = 0;
 
 	// Check whether or not we're the active window
 	// and change colors based on that
@@ -252,12 +252,12 @@ VOID NTStyleDrawWindowCaption(_In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wP
 	iCaptionColor = bIsActiveWindow ? COLOR_ACTIVECAPTION : COLOR_INACTIVECAPTION;
 
 	// Get window width
-	uiw = pwi->rcWindow.right - pwi->rcWindow.left;
+	uWinW = pwi->rcWindow.right - pwi->rcWindow.left;
 
 	// Calculate the rect points
 	rc.left = g_iBorderWidth;
 	rc.top = g_iBorderHeight;
-	rc.right = uiw - rc.left;
+	rc.right = uWinW - rc.left;
 	rc.bottom = rc.top + g_iCaptionHeight + 1;
 
 	// Draw the caption rectangle
@@ -290,9 +290,9 @@ VOID NTStyleDrawWindowButtons(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi
 	RECT rc = { 0, 0, 0, 0 };
 	RECT rcT = { 0, 0, 0, 0 };
 
-	UINT uiw = 0;
-	UINT uiTriW = 0;
-	UINT uiTriH = 0;
+	UINT uWinW = 0;
+	UINT uTriW = 0;
+	UINT uTriH = 0;
 
 	UINT uiSysMenuSpace = (pwi->dwExStyle & WS_EX_MDICHILD) == WS_EX_MDICHILD ? 6 : 3;
 	BOOL bDrawMinBox = (pwi->dwStyle & WS_MINIMIZEBOX) == WS_MINIMIZEBOX;
@@ -301,7 +301,7 @@ VOID NTStyleDrawWindowButtons(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi
 	INT i;
 
 	// Get window width
-	uiw = pwi->rcWindow.right - pwi->rcWindow.left;
+	uWinW = pwi->rcWindow.right - pwi->rcWindow.left;
 
 	// Setup our basic rectangle
 	rc.top = g_iBorderHeight;
@@ -347,13 +347,13 @@ VOID NTStyleDrawWindowButtons(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi
 	{
 		// Setup our basic rectangle
 		rc.top = g_iBorderHeight;
-		rc.right = uiw - g_iBorderWidth;
+		rc.right = uWinW - g_iBorderWidth;
 		rc.bottom = rc.top + g_iCaptionHeight + 1;
 		rc.left = rc.right - g_iCaptionHeight - 1;
 
 		// Get triangle size
-		uiTriW = (g_iCaptionHeight) / 3;
-		uiTriH = uiTriW / 2;
+		uTriW = (g_iCaptionHeight) / 3;
+		uTriH = uTriW / 2;
 	}
 
 	/* BEGIN MAXIMIZEBOX */
@@ -399,10 +399,10 @@ VOID NTStyleDrawWindowButtons(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi
 
 			// Calculate the triangle points
 			apt[0].x = rcT.left + (rcT.right - rcT.left) / 2;
-			apt[0].y = rcT.top + (rcT.bottom - rcT.top) / 2 - uiTriH / 2 - (uiTriH / 2 * -bWindowMaximized);
-			apt[1].x = apt[0].x + uiTriW / 2;
-			apt[1].y = apt[0].y - uiTriH * uiModY;
-			apt[2].x = apt[1].x - uiTriW;
+			apt[0].y = rcT.top + (rcT.bottom - rcT.top) / 2 - uTriH / 2 - (uTriH / 2 * -bWindowMaximized);
+			apt[1].x = apt[0].x + uTriW / 2;
+			apt[1].y = apt[0].y - uTriH * uiModY;
+			apt[2].x = apt[1].x - uTriW;
 			apt[2].y = apt[1].y;
 
 			// These are necessary to close the gap
@@ -450,10 +450,10 @@ VOID NTStyleDrawWindowButtons(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi
 
 		// Calculate the triangle points
 		apt[0].x = rcT.left + (rcT.right - rcT.left) / 2;
-		apt[0].y = rcT.top + (rcT.bottom - rcT.top) / 2 + uiTriH / 2;
-		apt[1].x = apt[0].x + uiTriW / 2;
-		apt[1].y = apt[0].y - uiTriH;
-		apt[2].x = apt[1].x - uiTriW;
+		apt[0].y = rcT.top + (rcT.bottom - rcT.top) / 2 + uTriH / 2;
+		apt[1].x = apt[0].x + uTriW / 2;
+		apt[1].y = apt[0].y - uTriH;
+		apt[2].x = apt[1].x - uTriW;
 		apt[2].y = apt[1].y;
 
 		// These are necessary to close the gap
@@ -486,42 +486,17 @@ VOID NTStyleDrawWindowButtons(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi
 		Draws the highlight and
 		middle part of a button.
 	RETURNS - 
-		This function returns a
-		rectangle that is
-		centered within the high-
-		light area of the button.
+		This function returns
+		TRUE if successful
+		and FALSE otherwise
 \* * * */
-RECT NTStyleDrawButtonInterior(_In_ HDC hDC, _In_ HBRUSH hBr, _In_ HPEN hPn, _In_ RECT rc, _In_ BOOL bSelected)
+BOOL NTStyleDrawFrameControl(_In_ HDC hDC, _Inout_ RECT rc, _In_ UINT uType, _In_ UINT uState)
 {
-	RECT rcT = rc;
+	//COLOR_BTNFACE
+	//COLOR_BTNSHADOW
+	//COLOR_BTNHIGHLIGHT
 
-	// Draw background
-	hbr = GetSysColorBrush(COLOR_BTNSHADOW);
-	FillRect(hDC, &rc, hbr);
-
-	// Draw the frame
-	hbr = GetSysColorBrush(COLOR_WINDOWFRAME);
-	FrameRect(hDC, &rc, hbr);
-
-	// Draw the highlight
-	hpn = CreatePen(PS_SOLID, 0, (COLORREF)GetSysColor(COLOR_BTNHIGHLIGHT));
-	hpnInit = SelectObject(hDC, hpn);
-
-	MoveToEx(hDC, rc.right - 3, rc.top + 1, NULL);
-	LineTo(hDC, rc.left + 1, rc.top + 1);
-	LineTo(hDC, rc.left + 1, rc.bottom - 2);
-
-	// Draw the "background"
-	hbr = GetSysColorBrush(COLOR_BTNFACE);
-
-	rcT.top = rc.top + 2;
-	rcT.left = rc.left + 2;
-	rcT.bottom = rc.bottom - 3;
-	rcT.right = rc.right - 3;
-
-	FillRect(hDC, &rcT, hbr);
-
-	return;
+	return TRUE;
 }
 
 /* * * *\
@@ -543,7 +518,7 @@ VOID NTStyleDrawWindowTitle(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi, 
 	INT iCaptionColor = 0;
 	INT iCaptionTextColor = 0;
 
-	UINT uiw = 0;
+	UINT uWinW = 0;
 
 	RECT rc = { 0, 0, 0, 0 };
 	INT cTxtLen = 0;
@@ -577,7 +552,7 @@ VOID NTStyleDrawWindowTitle(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi, 
 	hftInit = SelectObject(hDC, hft);
 
 	// Get our window metrics
-	uiw = pwi->rcWindow.right - pwi->rcWindow.left;
+	uWinW = pwi->rcWindow.right - pwi->rcWindow.left;
 
 	g_iBorderHeight = pwi->cyWindowBorders - 1;
 	g_iBorderWidth = pwi->cxWindowBorders - 1;
@@ -585,7 +560,7 @@ VOID NTStyleDrawWindowTitle(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi, 
 	// Calculate the rect points for the text
 	rc.left = g_iBorderWidth + g_iCaptionHeight + 1;
 	rc.top = g_iBorderHeight;
-	rc.right = uiw - g_iCaptionHeight * bDrawMinBox
+	rc.right = uWinW - g_iCaptionHeight * bDrawMinBox
 		- g_iCaptionHeight * bDrawMaxBox;
 	rc.bottom = rc.top + g_iCaptionHeight;
 
