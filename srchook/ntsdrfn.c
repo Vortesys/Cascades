@@ -629,13 +629,13 @@ BOOL NTStyleDrawFrameControl(_In_ HDC hDC, _In_ RECT rc, _In_ UINT uType, _In_ U
 	// COLOR_BTNSHADOW
 	// COLOR_BTNHIGHLIGHT
 
-	if (uState == DFC_BUTTON & DFC_BUTTON)
+	if ((uState == DFC_BUTTON) & DFC_BUTTON)
 		//NTStyleDrawPushButton(hDC, &rc, uState, u);
 		return FALSE;
-	if (uState == DFC_BUTTON & DFC_BUTTON)
+	if ((uState == DFC_BUTTON) & DFC_BUTTON)
 		//NTStyleDrawPushButton();
 		return FALSE;
-	if (uState == DFC_BUTTON & DFC_BUTTON)
+	if ((uState == DFC_BUTTON) & DFC_BUTTON)
 		//NTStyleDrawPushButton();
 		return FALSE;
 
