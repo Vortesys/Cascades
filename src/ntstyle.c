@@ -38,23 +38,11 @@ int WINAPI wWinMain(
 	HHOOK hhkNTShk32 = NULL;
 	HHOOK hhkNTShk64 = NULL;
 
+	DWORD dwLastError = 0;
+	BOOL bSystem64 = TRUE;
+
 	// Get our own hInstance and save it for later
 	g_hAppInstance = hInstance;
-
-	// Load the 32-bit hook DLL
-	g_hDll32Instance = LoadLibrary(L"ntshk32.dll");
-
-	// Get the hook procedure of NTShook
-	if (g_hDll32Instance)
-		hkprcNTShk32 = (HOOKPROC)GetProcAddress(g_hDll32Instance, "NTStyleHookProc");
-	else
-		return GetLastError();
-
-	// Establish our WOW hook :)
-	if (hkprcNTShk32)
-		hhkNTShk32 = SetWindowsHookEx(WH_CALLWNDPROC, hkprcNTShk32, g_hDll32Instance, 0);
-	else
-		return GetLastError();
 
 	// Load the 64-bit hook DLL
 	g_hDll64Instance = LoadLibrary(L"ntshk64.dll");
@@ -63,15 +51,34 @@ int WINAPI wWinMain(
 	if (g_hDll64Instance)
 		hkprcNTShk64 = (HOOKPROC)GetProcAddress(g_hDll64Instance, "NTStyleHookProc");
 	else
-		return GetLastError();
+		dwLastError = GetLastError();
 
-	// Establish our hook :)
+	// Establish our hook
 	if (hkprcNTShk64)
 		hhkNTShk64 = SetWindowsHookEx(WH_CALLWNDPROC, hkprcNTShk64, g_hDll64Instance, 0);
 	else
-		return GetLastError();
+		dwLastError = GetLastError();
+
+	// If the hook failed, we can assume system arch
+	if (dwLastError = ERROR_MOD_NOT_FOUND)
+		bSystem64 = FALSE;
+
+	// Load the 32-bit hook DLL
+	g_hDll32Instance = LoadLibrary(L"ntshk32.dll");
+
+	// Get the hook procedure of NTShook
+	if (g_hDll32Instance)
+		hkprcNTShk32 = (HOOKPROC)GetProcAddress(g_hDll32Instance, "NTStyleHookProc");
+	else
+		dwLastError = GetLastError();
+
+	// Establish our WOW hook :)
+	if (hkprcNTShk32)
+		hhkNTShk32 = SetWindowsHookEx(WH_CALLWNDPROC, hkprcNTShk32, g_hDll32Instance, 0);
+	else
+		dwLastError = GetLastError();
 		
-	if (hhkNTShk32 && hhkNTShk64)
+	if (hhkNTShk32 || hhkNTShk64)
 	{
 		// Enumerate the existing windows and get them dwm-free :fire:
 		EnumWindows(&NTStyleEnumWindowProc, 0);
@@ -95,7 +102,7 @@ int WINAPI wWinMain(
 
 	PostQuitMessage(0);
 
-	return 0;
+	return dwLastError;
 }
 
 BOOL CALLBACK NTStyleEnumWindowProc(
