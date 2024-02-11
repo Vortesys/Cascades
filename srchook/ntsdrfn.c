@@ -372,7 +372,6 @@ VOID NTStyleDrawWindowButtons(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi
 		FillRect(hDC, &rcT, hbr);
 
 		// Draw the highlight
-		//DrawEdge(hDC, &rcT, EDGE_RAISED, BF_TOPLEFT | BF_MIDDLE | BF_ADJUST);
 		DrawFrameControl(hDC, &rcT, DFC_BUTTON, DFCS_BUTTONPUSH);
 
 		// Draw the frame
@@ -436,7 +435,7 @@ VOID NTStyleDrawWindowButtons(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi
 		FillRect(hDC, &rcT, hbr);
 
 		// Draw the highlight
-		DrawEdge(hDC, &rcT, EDGE_RAISED, BF_TOPLEFT | BF_MIDDLE | BF_ADJUST);
+		DrawFrameControl(hDC, &rcT, DFC_BUTTON, DFCS_BUTTONPUSH);
 
 		// Draw the frame
 		hbr = GetSysColorBrush(COLOR_WINDOWFRAME);
@@ -479,24 +478,6 @@ VOID NTStyleDrawWindowButtons(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi
 		DeleteObject(hpn);
 
 	return;
-}
-
-/* * * *\
-	NTStyleDrawButtonInterior -
-		Draws the highlight and
-		middle part of a button.
-	RETURNS - 
-		This function returns
-		TRUE if successful
-		and FALSE otherwise
-\* * * */
-BOOL NTStyleDrawFrameControl(_In_ HDC hDC, _Inout_ RECT rc, _In_ UINT uType, _In_ UINT uState)
-{
-	//COLOR_BTNFACE
-	//COLOR_BTNSHADOW
-	//COLOR_BTNHIGHLIGHT
-
-	return TRUE;
 }
 
 /* * * *\
@@ -627,4 +608,36 @@ VOID NTStyleGetWindowMetrics(VOID)
 	pass the boof
 	gimme sum
 	if [???] is dirty poop then(succubus train wreck )*/
+}
+
+/* * * *\
+	NTStyleDrawFrameControl -
+		Draws the control.
+	RETURNS -
+		This function returns
+		TRUE if successful
+		and FALSE otherwise
+\* * * */
+BOOL NTStyleDrawFrameControl(_In_ HDC hDC, _In_ RECT rc, _In_ UINT uType, _In_ UINT uState)
+{
+	// States and types:
+	// https://devblogs.microsoft.com/oldnewthing/20050802-13/?p=34743
+	// https://reactos.org/wiki/Techwiki:Win32k/SERVERINFO
+	
+	// Colors:
+	// COLOR_BTNFACE
+	// COLOR_BTNSHADOW
+	// COLOR_BTNHIGHLIGHT
+
+	if (uState == DFC_BUTTON & DFC_BUTTON)
+		//NTStyleDrawPushButton(hDC, &rc, uState, u);
+		return FALSE;
+	if (uState == DFC_BUTTON & DFC_BUTTON)
+		//NTStyleDrawPushButton();
+		return FALSE;
+	if (uState == DFC_BUTTON & DFC_BUTTON)
+		//NTStyleDrawPushButton();
+		return FALSE;
+
+	return TRUE;
 }
