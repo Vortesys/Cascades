@@ -94,6 +94,17 @@ __declspec(dllexport) LRESULT APIENTRY NTStyleHookProc(
 }
 
 /* * * *\
+	NTStyleSetHook -
+		NT Style Hook hook so
+		that we can actually
+		WOW these programs.
+\* * * */
+__declspec(dllexport) HHOOK APIENTRY NTStyleSetHook(_In_ INT idHook, _In_ HOOKPROC lpfn, _In_ HINSTANCE hmod, _In_ DWORD dwThreadId)
+{
+	return SetWindowsHookEx(idHook, lpfn, hmod, dwThreadId);
+}
+
+/* * * *\
 	NTStyleLockWindowUpdates -
 		Prevents a window from
 		updating for a small

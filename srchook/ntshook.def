@@ -2,3 +2,4 @@ LIBRARY
 EXPORTS
     NTStyleDisableWindowTheme @1
     NTStyleHookProc @2
+    NTStyleSetHook @4

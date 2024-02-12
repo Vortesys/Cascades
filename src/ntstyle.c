@@ -37,46 +37,79 @@ int WINAPI wWinMain(
 	HOOKPROC hkprcNTShk64 = NULL;
 	HHOOK hhkNTShk32 = NULL;
 	HHOOK hhkNTShk64 = NULL;
+	FARPROC fNTSWOW = NULL;
 
 	DWORD dwLastError = 0;
 	BOOL bSystem64 = TRUE;
 
+	SYSTEM_INFO si;
+
 	// Get our own hInstance and save it for later
 	g_hAppInstance = hInstance;
 
-	// Load the 64-bit hook DLL
-	g_hDll64Instance = LoadLibrary(L"ntshk64.dll");
+	// Get some system information to determine what
+	// copies of the style hook to load
+	GetSystemInfo(&si);
 
-	// Get the hook procedure of NTShook
-	if (g_hDll64Instance)
-		hkprcNTShk64 = (HOOKPROC)GetProcAddress(g_hDll64Instance, "NTStyleHookProc");
+	bSystem64 = (si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64);
+
+	if (bSystem64)
+	{
+		// Load the 64-bit hook DLL
+		g_hDll64Instance = LoadLibrary(L"ntshk64.dll");
+
+		// Get the hook procedure of NTShook
+		if (g_hDll64Instance)
+			hkprcNTShk64 = (HOOKPROC)GetProcAddress(g_hDll64Instance, "NTStyleHookProc");
+		else
+			dwLastError = GetLastError();
+
+		// Establish our hook
+		if (hkprcNTShk64)
+			hhkNTShk64 = SetWindowsHookEx(WH_CALLWNDPROC, hkprcNTShk64, g_hDll64Instance, 0);
+		else
+			dwLastError = GetLastError();
+
+		// Since we're 64 bit, we have to do some 
+		// trickery to load the 32-bit version of
+		// our NTShook DLL. Load our 32-bit hook DLL...
+		g_hDll32Instance = LoadLibrary(L"ntshk32.dll");
+
+		// Get the hook procedure of NTShook
+		if (g_hDll32Instance)
+			hkprcNTShk32 = (HOOKPROC)GetProcAddress(g_hDll32Instance, "NTStyleHookProc");
+		else
+			dwLastError = GetLastError();
+
+		// Get the hook creation procedure of NTShook
+		if (g_hDll32Instance)
+			fNTSWOW = GetProcAddress(g_hDll32Instance, "NTStyleSetHook");
+		else
+			dwLastError = GetLastError();
+
+		// And now use it to load the hook for us
+		if (hkprcNTShk32 && fNTSWOW)
+			hhkNTShk32 = fNTSWOW(WH_CALLWNDPROC, hkprcNTShk32, g_hDll32Instance, 0);
+		else
+			dwLastError = GetLastError();
+	}
 	else
-		dwLastError = GetLastError();
+	{
+		// Load the 32-bit hook DLL
+		g_hDll32Instance = LoadLibrary(L"ntshk32.dll");
 
-	// Establish our hook
-	if (hkprcNTShk64)
-		hhkNTShk64 = SetWindowsHookEx(WH_CALLWNDPROC, hkprcNTShk64, g_hDll64Instance, 0);
-	else
-		dwLastError = GetLastError();
+		// Get the hook procedure of NTShook
+		if (g_hDll32Instance)
+			hkprcNTShk32 = (HOOKPROC)GetProcAddress(g_hDll32Instance, "NTStyleHookProc");
+		else
+			dwLastError = GetLastError();
 
-	// If the hook failed, we can assume system arch
-	if (dwLastError = ERROR_MOD_NOT_FOUND)
-		bSystem64 = FALSE;
-
-	// Load the 32-bit hook DLL
-	g_hDll32Instance = LoadLibrary(L"ntshk32.dll");
-
-	// Get the hook procedure of NTShook
-	if (g_hDll32Instance)
-		hkprcNTShk32 = (HOOKPROC)GetProcAddress(g_hDll32Instance, "NTStyleHookProc");
-	else
-		dwLastError = GetLastError();
-
-	// Establish our WOW hook :)
-	if (hkprcNTShk32)
-		hhkNTShk32 = SetWindowsHookEx(WH_CALLWNDPROC, hkprcNTShk32, g_hDll32Instance, 0);
-	else
-		dwLastError = GetLastError();
+		// Establish our hook
+		if (hkprcNTShk32)
+			hhkNTShk32 = SetWindowsHookEx(WH_CALLWNDPROC, hkprcNTShk32, g_hDll32Instance, 0);
+		else
+			dwLastError = GetLastError();
+	}
 		
 	if (hhkNTShk32 || hhkNTShk64)
 	{
@@ -85,18 +118,25 @@ int WINAPI wWinMain(
 
 		// Start NT Style
 		if (!hhkNTShk32)
-			MessageBox(HWND_DESKTOP, L"Started NT Style.\nPress OK to close.", L"NT Style (AMD64)", MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL | MB_DEFAULT_DESKTOP_ONLY);
+			MessageBox(HWND_DESKTOP, L"Started NT Style.\nPress OK to close.", L"NT Style (AMD64)",
+				MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL | MB_DEFAULT_DESKTOP_ONLY);
 		else if (!hhkNTShk64)
-			MessageBox(HWND_DESKTOP, L"Started NT Style.\nPress OK to close.", L"NT Style (IA32)", MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL | MB_DEFAULT_DESKTOP_ONLY);
+			MessageBox(HWND_DESKTOP, L"Started NT Style.\nPress OK to close.", L"NT Style (IA32)",
+				MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL | MB_DEFAULT_DESKTOP_ONLY);
 		else
-			MessageBox(HWND_DESKTOP, L"Started NT Style.\nPress OK to close.", L"NT Style (AMD64 & WOW64)", MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL | MB_DEFAULT_DESKTOP_ONLY);
+			MessageBox(HWND_DESKTOP, L"Started NT Style.\nPress OK to close.", L"NT Style (AMD64 + WOW)",
+				MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL | MB_DEFAULT_DESKTOP_ONLY);
 	}
 
 	if (hhkNTShk32)
 		UnhookWindowsHookEx(hhkNTShk32);
-
 	if (hhkNTShk64)
 		UnhookWindowsHookEx(hhkNTShk64);
+
+	if (g_hDll32Instance)
+		FreeLibrary(g_hDll32Instance);
+	if (g_hDll64Instance)
+		FreeLibrary(g_hDll64Instance);
 
 	MessageBox(HWND_DESKTOP, L"Quitting NT Style...", L"NT Style", MB_OK | MB_ICONINFORMATION | MB_DEFAULT_DESKTOP_ONLY);
 
@@ -114,13 +154,11 @@ BOOL CALLBACK NTStyleEnumWindowProc(
 	{
 		FARPROC fLib = GetProcAddress(g_hDll64Instance, "NTStyleDisableWindowTheme");
 		fLib(hwnd);
-		
 	}
 	else if (g_hDll32Instance)
 	{
 		FARPROC fLib = GetProcAddress(g_hDll32Instance, "NTStyleDisableWindowTheme");
 		fLib(hwnd);
-
 	}
 
 	return TRUE;
