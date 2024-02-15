@@ -197,6 +197,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ntshook.h" />
+    <ClInclude Include="oebitmap.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
