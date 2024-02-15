@@ -89,7 +89,7 @@ int WINAPI wWinMain(
 
 		// And now use it to load the hook for us
 		if (hkprcNTShk32 && fNTSWOW)
-			hhkNTShk32 = fNTSWOW(WH_CALLWNDPROC, hkprcNTShk32, g_hDll32Instance, 0);
+			hhkNTShk32 = (HHOOK)fNTSWOW(WH_CALLWNDPROC, hkprcNTShk32, g_hDll32Instance, 0);
 		else
 			dwLastError = GetLastError();
 	}
@@ -128,6 +128,8 @@ int WINAPI wWinMain(
 				MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL | MB_DEFAULT_DESKTOP_ONLY);
 	}
 
+	MessageBox(HWND_DESKTOP, L"Quitting NT Style...", L"NT Style", MB_OK | MB_ICONINFORMATION | MB_DEFAULT_DESKTOP_ONLY);
+
 	if (hhkNTShk32)
 		UnhookWindowsHookEx(hhkNTShk32);
 	if (hhkNTShk64)
@@ -137,8 +139,6 @@ int WINAPI wWinMain(
 		FreeLibrary(g_hDll32Instance);
 	if (g_hDll64Instance)
 		FreeLibrary(g_hDll64Instance);
-
-	MessageBox(HWND_DESKTOP, L"Quitting NT Style...", L"NT Style", MB_OK | MB_ICONINFORMATION | MB_DEFAULT_DESKTOP_ONLY);
 
 	PostQuitMessage(0);
 

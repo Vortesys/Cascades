@@ -9,6 +9,7 @@
 
  // Includes
 #include "ntshook.h"
+#include "oebitmap.h"
 #include <strsafe.h>
 
 // System Metrics
@@ -54,26 +55,66 @@ VOID NTStyleDrawWindow(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lParam)
 			hdc = GetWindowDC(hWnd);
 
 		if (hdc)
+			hdcMem = CreateCompatibleDC(hdc);
+
+		if (hdcMem)
 		{
+			HBITMAP hbm = NULL;
+			HBRUSH hbr = NULL;
+
+			RECT rc = { 0, 0, 0, 0 };
+
 			// Get external window size
 			wi.cbSize = sizeof(WINDOWINFO);
 			GetWindowInfo(hWnd, &wi);
+
+			// Setup our newly created Memory DC
+			hbm = CreateCompatibleBitmap(hdc, wi.rcWindow.right - wi.rcWindow.left,
+				wi.rcWindow.bottom - wi.rcWindow.top);
+
+			SelectObject(hdcMem, hbm);
 
 			// Setup some metrics
 			g_iBorderHeight = wi.cyWindowBorders - 1;
 			g_iBorderWidth = wi.cxWindowBorders - 1;
 
+			// Draw the background for... transparency reasons
+			rc.right = wi.rcWindow.right - wi.rcWindow.left;
+			rc.bottom = wi.rcWindow.bottom - wi.rcWindow.top;
+			hbr = GetSysColorBrush(COLOR_APPWORKSPACE);
+			FillRect(hdcMem, &rc, hbr);
+
 			// Draw the window
 			// TODO: make caption return a rect for the window title
 			// so that the text can center itself a little better
-			NTStyleDrawWindowCaption(hdc, &wi, wParam, lParam);
-			NTStyleDrawWindowTitle(hWnd, hdc, &wi, wParam, lParam);
-			NTStyleDrawWindowButtons(hWnd, hdc, &wi, wParam, lParam);
-			NTStyleDrawWindowBorders(hdc, &wi, wParam, lParam);
+			NTStyleDrawWindowCaption(hdcMem, &wi, wParam, lParam);
+			NTStyleDrawWindowTitle(hWnd, hdcMem, &wi, wParam, lParam);
+			NTStyleDrawWindowButtons(hWnd, hdcMem, &wi, wParam, lParam);
+			NTStyleDrawWindowBorders(hdcMem, &wi, wParam, lParam);
 
 			// Blit it to our actual window
-			//BitBlt(hdcMem, 0, 0, wi.rcWindow.right - wi.rcWindow.left, wi.rcWindow.bottom - wi.rcWindow.top, hdc, 0, 0, SRCCOPY);
+			TransparentBlt(hdc, 0, 0, wi.rcWindow.right - wi.rcWindow.left,
+				wi.rcWindow.bottom - wi.rcWindow.top, hdcMem, 0, 0, 
+				wi.rcWindow.right - wi.rcWindow.left,
+				wi.rcWindow.bottom - wi.rcWindow.top, GetSysColor(COLOR_APPWORKSPACE)); //0xFF00FF
+			//BitBlt(hdc, 0, 0, wi.rcWindow.right - wi.rcWindow.left,
+				//wi.rcWindow.bottom - wi.rcWindow.top, hdcMem, 0, 0, SRCPAINT);
+			//MaskBlt(hdc, 0, 0, wi.rcWindow.right - wi.rcWindow.left,
+				//wi.rcWindow.bottom - wi.rcWindow.top, hdcMem, 0, 0,
+				//hbm, 0, 0, MAKEROP4(SRCCOPY, SRCPAINT));
+
+			// Cleanup
+			if (hdcMem)
+				DeleteDC(hdcMem);
+			if (hbr)
+				DeleteObject(hbr);
+			if (hbm)
+				DeleteObject(hbm);
 		}
+
+		// Cleanup
+		if (hdc)
+			ReleaseDC(hWnd, hdc);
 	}
 
 	return;
@@ -362,14 +403,13 @@ VOID NTStyleDrawWindowButtons(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi
 		WINDOWPLACEMENT wp;
 		BOOL bWindowMaximized;
 
+		HBITMAP hbmArrow = NULL;
+		BITMAP bm;
+
 		rcT.top = rc.top + 1;
 		rcT.right = rc.right - 1;
 		rcT.bottom = rc.bottom - 1;
 		rcT.left = rc.left + 1;
-
-		// Draw background
-		hbr = GetSysColorBrush(COLOR_BTNSHADOW);
-		FillRect(hDC, &rcT, hbr);
 
 		// Draw the highlight
 		DrawFrameControl(hDC, &rcT, DFC_BUTTON, DFCS_BUTTONPUSH);
@@ -378,6 +418,12 @@ VOID NTStyleDrawWindowButtons(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi
 		hbr = GetSysColorBrush(COLOR_WINDOWFRAME);
 		FrameRect(hDC, &rc, hbr);
 
+		// Draw the stock arrow
+		hbmArrow = LoadImage(NULL, MAKEINTRESOURCE(OBM_DNARROW), IMAGE_BITMAP, 0, 0, LR_SHARED);
+		GetObject(hbmArrow, sizeof(bm), &bm);
+		BitBlt(hDC, 10, 190, bm.bmWidth, bm.bmHeight, hDC, 0, 0, SRCCOPY);
+
+		/*
 		// Prepare the triangle brushes
 		hbr = GetSysColorBrush(COLOR_BTNTEXT);
 		hpn = CreatePen(PS_SOLID, 0, (COLORREF)GetSysColor(COLOR_BTNTEXT));
@@ -410,7 +456,7 @@ VOID NTStyleDrawWindowButtons(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi
 
 			// Draw the triangle
 			Polygon(hDC, apt, sizeof(apt) / sizeof(apt[0]));
-		}
+		}*/
 	}
 	/* END MAXIMIZEBOX */
 
@@ -429,10 +475,6 @@ VOID NTStyleDrawWindowButtons(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi
 		rcT.right = rc.right - 1;
 		rcT.bottom = rc.bottom - 1;
 		rcT.left = rc.left + 1;
-
-		// Draw background
-		hbr = GetSysColorBrush(COLOR_BTNSHADOW);
-		FillRect(hDC, &rcT, hbr);
 
 		// Draw the highlight
 		DrawFrameControl(hDC, &rcT, DFC_BUTTON, DFCS_BUTTONPUSH);

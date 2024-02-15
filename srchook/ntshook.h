@@ -10,6 +10,7 @@
 /* Pragmas */
 #pragma once
 #pragma comment(lib, "UxTheme.lib")
+#pragma comment(lib, "Msimg32.lib")
 
 /* Includes */
 #include <wtypes.h>
