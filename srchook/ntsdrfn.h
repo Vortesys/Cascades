@@ -15,12 +15,14 @@
 
 /* Definitions */
 // NT Style Draw Frame Control Types
+#define NSDFC_TYPE_BUTTON 0x00 // Standard window button
 #define NSDFC_TYPE_CAPTION 0x01 // Caption bar button
-#define NSDFC_TYPE_BUTTON 0x02 // Standard window button
 // NT Style Draw Frame Control Styles
 #define NSDFC_STYLE_NONE 0x00 // Standard
 #define NSDFC_STYLE_PRESSED 0x01 // Pressed
 #define NSDFC_STYLE_ACTIVE 0x02 // Active control
+#define NSDFC_STYLE_MINIMIZE 0x10 // Minimized caption arrow
+#define NSDFC_STYLE_MAXIMIZE 0x20 // Maximized caption arrow
 
 /* Function Prototypes */
 VOID NTStyleDrawWindow(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lParam);

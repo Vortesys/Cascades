@@ -335,8 +335,6 @@ VOID NTStyleDrawWindowButtons(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi
 	BOOL bDrawMinBox = (pwi->dwStyle & WS_MINIMIZEBOX) == WS_MINIMIZEBOX;
 	BOOL bDrawMaxBox = (pwi->dwStyle & WS_MAXIMIZEBOX) == WS_MAXIMIZEBOX;
 
-	INT i;
-
 	// Get window width
 	uWinW = pwi->rcWindow.right - pwi->rcWindow.left;
 
@@ -387,10 +385,6 @@ VOID NTStyleDrawWindowButtons(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi
 		rc.right = uWinW - g_iBorderWidth;
 		rc.bottom = rc.top + g_iCaptionHeight + 1;
 		rc.left = rc.right - g_iCaptionHeight - 1;
-
-		// Get triangle size
-		uTriW = (g_iCaptionHeight) / 3;
-		uTriH = uTriW / 2;
 	}
 
 	/* BEGIN MAXIMIZEBOX */
@@ -399,106 +393,25 @@ VOID NTStyleDrawWindowButtons(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi
 		WINDOWPLACEMENT wp;
 		BOOL bWindowMaximized;
 
-		HBITMAP hbmArrow = NULL;
-		BITMAP bm;
-
-		rcT.top = rc.top + 1;
-		rcT.right = rc.right - 1;
-		rcT.bottom = rc.bottom - 1;
-		rcT.left = rc.left + 1;
-
-		// Draw the highlight
-		DrawFrameControl(hDC, &rcT, DFC_BUTTON, DFCS_BUTTONPUSH);
-
-		// Draw the frame
-		hbr = GetSysColorBrush(COLOR_WINDOWFRAME);
-		FrameRect(hDC, &rc, hbr);
-
-		// Draw the stock arrow
-		hbmArrow = LoadImage(NULL, MAKEINTRESOURCE(OBM_DNARROW), IMAGE_BITMAP, 0, 0, LR_SHARED);
-		GetObject(hbmArrow, sizeof(bm), &bm);
-		BitBlt(hDC, 10, 190, bm.bmWidth, bm.bmHeight, hDC, 0, 0, SRCCOPY);
-
-		/*
-		// Prepare the triangle brushes
-		hbr = GetSysColorBrush(COLOR_BTNTEXT);
-		hpn = CreatePen(PS_SOLID, 0, (COLORREF)GetSysColor(COLOR_BTNTEXT));
-		hbrInit = SelectObject(hDC, hbr);
-		hpnInit = SelectObject(hDC, hpn);
-
 		wp.length = sizeof(WINDOWPLACEMENT);
 		GetWindowPlacement(hWnd, &wp);
 		bWindowMaximized = (wp.showCmd) == SW_MAXIMIZE;
 
-		i = 0;
-
-		for (i = 0; i < (bWindowMaximized + 1); i++)
-		{
-			POINT apt[4] = { 0, 0 };
-
-			UINT uiModY = i ? 1 : -1;
-
-			// Calculate the triangle points
-			apt[0].x = rcT.left + (rcT.right - rcT.left) / 2;
-			apt[0].y = rcT.top + (rcT.bottom - rcT.top) / 2 - uTriH / 2 - (uTriH / 2 * -bWindowMaximized);
-			apt[1].x = apt[0].x + uTriW / 2;
-			apt[1].y = apt[0].y - uTriH * uiModY;
-			apt[2].x = apt[1].x - uTriW;
-			apt[2].y = apt[1].y;
-
-			// These are necessary to close the gap
-			apt[3].x = apt[0].x;
-			apt[3].y = apt[0].y;
-
-			// Draw the triangle
-			Polygon(hDC, apt, sizeof(apt) / sizeof(apt[0]));
-		}*/
+		NTStyleDrawFrameControl(hDC, rc, NSDFC_TYPE_CAPTION,
+			bWindowMaximized ? NSDFC_STYLE_MAXIMIZE : NSDFC_STYLE_NONE);
 	}
 	/* END MAXIMIZEBOX */
 
 	/* BEGIN MINIMIZEBOX */
 	if (bDrawMinBox)
 	{
-		POINT apt[4] = { 0, 0 };
-
 		if (bDrawMaxBox)
 		{
 			rc.left -= g_iCaptionHeight;
 			rc.right -= g_iCaptionHeight;
 		}
 
-		rcT.top = rc.top + 1;
-		rcT.right = rc.right - 1;
-		rcT.bottom = rc.bottom - 1;
-		rcT.left = rc.left + 1;
-
-		// Draw the highlight
-		DrawFrameControl(hDC, &rcT, DFC_BUTTON, DFCS_BUTTONPUSH);
-
-		// Draw the frame
-		hbr = GetSysColorBrush(COLOR_WINDOWFRAME);
-		FrameRect(hDC, &rc, hbr);
-
-		// Prepare the triangle brushes
-		hbr = GetSysColorBrush(COLOR_BTNTEXT);
-		hpn = CreatePen(PS_SOLID, 0, (COLORREF)GetSysColor(COLOR_BTNTEXT));
-		hbrInit = SelectObject(hDC, hbr);
-		hpnInit = SelectObject(hDC, hpn);
-
-		// Calculate the triangle points
-		apt[0].x = rcT.left + (rcT.right - rcT.left) / 2;
-		apt[0].y = rcT.top + (rcT.bottom - rcT.top) / 2 + uTriH / 2;
-		apt[1].x = apt[0].x + uTriW / 2;
-		apt[1].y = apt[0].y - uTriH;
-		apt[2].x = apt[1].x - uTriW;
-		apt[2].y = apt[1].y;
-
-		// These are necessary to close the gap
-		apt[3].x = apt[0].x;
-		apt[3].y = apt[0].y;
-
-		// Draw the triangle
-		Polygon(hDC, apt, sizeof(apt) / sizeof(apt[0]));
+		NTStyleDrawFrameControl(hDC, rc, NSDFC_TYPE_CAPTION, NSDFC_STYLE_MINIMIZE);
 	}
 	/* END MINIMIZEBOX */
 
@@ -524,6 +437,7 @@ VOID NTStyleDrawWindowButtons(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi
 \* * * */
 VOID NTStyleDrawWindowTitle(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi, _In_ WPARAM wParam, _In_ LPARAM lParam)
 {
+	NONCLIENTMETRICS ncm;
 	HBRUSH hbrInit = NULL;
 	HBRUSH hbr = NULL;
 	HFONT hftInit = NULL;
@@ -543,17 +457,8 @@ VOID NTStyleDrawWindowTitle(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi, 
 	INT cTxtLen = 0;
 	LPWSTR pszTxt;
 
-	// Get the font object
-		/* It is not recommended that you employ this method
-		to obtain the current font used by dialogs and windows.
-		Instead, use the SystemParametersInfo function with the
-		SPI_GETNONCLIENTMETRICS parameter to retrieve the current
-		font. SystemParametersInfo will take into account the
-		current theme and provides font information for captions,
-		menus, and message dialogs. */
-
-		// Check whether or not we're the active window
-		// and change colors based on that
+	// Check whether or not we're the active window
+	// and change colors based on that
 	bIsActiveWindow = pwi->dwWindowStatus == WS_ACTIVECAPTION;
 	iCaptionTextColor = bIsActiveWindow ?
 		COLOR_CAPTIONTEXT : COLOR_INACTIVECAPTIONTEXT;
@@ -561,11 +466,17 @@ VOID NTStyleDrawWindowTitle(_In_ HWND hWnd, _In_ HDC hDC, _In_ PWINDOWINFO pwi, 
 		COLOR_ACTIVECAPTION : COLOR_INACTIVECAPTION;
 
 	hbr = GetSysColorBrush(iCaptionColor);
-	hft = (HFONT)GetStockObject(SYSTEM_FONT);
+
+	// Get the caption font
+	ncm.cbSize = sizeof(NONCLIENTMETRICS);
+	SystemParametersInfo(SPI_GETNONCLIENTMETRICS,
+		sizeof(NONCLIENTMETRICS), &ncm, 0);
+
+	hft = CreateFontIndirect(&ncm.lfCaptionFont);
 
 	// Set up our HDC for the text
 	SetTextColor(hDC, (COLORREF)GetSysColor(iCaptionTextColor));
-	SetBkColor(hDC, (COLORREF)GetSysColor(iCaptionColor));
+	SetBkMode(hDC, TRANSPARENT);
 
 	hbrInit = SelectObject(hDC, hbr);
 	hftInit = SelectObject(hDC, hft);
@@ -663,13 +574,63 @@ BOOL NTStyleDrawFrameControl(_In_ HDC hDC, _In_ RECT rc, _In_ UINT uType, _In_ U
 	// https://reactos.org/wiki/Techwiki:Win32k/SERVERINFO
 	
 	// Colors:
+	// COLOR_BTNTEXT
 	// COLOR_BTNFACE
 	// COLOR_BTNSHADOW
 	// COLOR_BTNHIGHLIGHT
 	switch (uType)
 	{
 	case (NSDFC_TYPE_CAPTION):
+	{
+		WCHAR pszGlyphMax[2] = TEXT("t"); // t/1
+		WCHAR pszGlyphMin[2] = TEXT("u"); // u/0
+		WCHAR pszGlyphMaxed[2] = TEXT("v"); // v/2
+		PWCHAR pszGlyph = pszGlyphMax;
+		HBRUSH hbr = NULL;
+		HFONT hftInit = NULL;
+		HFONT hft = NULL;
+		RECT rcT = { rc.left + 1, rc.top + 1,
+			rc.right - 1, rc.bottom - 1 };
+
+		// Draw the highlight
+		DrawFrameControl(hDC, &rcT, DFC_BUTTON, DFCS_BUTTONPUSH);
+
+		// Draw the frame
+		hbr = GetSysColorBrush(COLOR_WINDOWFRAME);
+		FrameRect(hDC, &rc, hbr);
+
+		// Get our caption font
+		hft = CreateFont(g_iCaptionHeight - (g_iCaptionHeight / 3), 0, 0, 0, 0,
+			FALSE, FALSE, FALSE, SYMBOL_CHARSET, OUT_DEFAULT_PRECIS,
+			CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY,
+			DEFAULT_PITCH | FF_DONTCARE, L"Marlett");
+		hftInit = SelectObject(hDC, hft);
+
+		if (uState == NSDFC_STYLE_MINIMIZE)
+			pszGlyph = pszGlyphMin;
+		else if (uState == NSDFC_STYLE_MAXIMIZE)
+			pszGlyph = pszGlyphMaxed;
+
+		// Set up our HDC for the text
+		SetTextColor(hDC, (COLORREF)GetSysColor(COLOR_BTNTEXT));
+		SetBkMode(hDC, TRANSPARENT);
+
+		// Draw the arrow
+		DrawText(hDC, pszGlyph, 1, &rcT, DT_CENTER
+			| DT_NOCLIP | DT_SINGLELINE | DT_VCENTER);
+
+		// Cleanup
+		if (hftInit)
+			SelectObject(hDC, hftInit);
+
+		if (hft)
+			DeleteObject(hft);
+
+		if (hbr)
+			DeleteObject(hbr);
+
 		break;
+	}
 	default:
 		return FALSE;
 		break;

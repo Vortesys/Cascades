@@ -9,6 +9,7 @@
 
 // Includes
 #include "ntshook.h"
+#include "ntsdrfn.h"
 #include "resource.h"
 #include <dwmapi.h>
 #include <uxtheme.h>
