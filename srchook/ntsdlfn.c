@@ -17,7 +17,38 @@
 /* Functions */
 
 /* * * *\
-	DwmSetWindowAttribute -
+	DwmGetWindowAttributeDelay -
+		Gets the value of Desktop Window Manager
+		(DWM) non-client rendering attributes
+		for a window.
+	RETURNS -
+		True if successful, false if unsuccessful.
+\* * * */
+HRESULT DwmGetWindowAttributeDelay(
+	HWND			hwnd,
+	DWORD			dwAttribute,
+	_In_ LPCVOID	pvAttribute,
+	DWORD			cbAttribute
+)
+{
+	HMODULE hLib = LoadLibrary(L"Dwmapi.dll");
+	HRESULT hRet = 0;
+
+	if (hLib)
+	{
+		FARPROC fLib = GetProcAddress(hLib, "DwmGetWindowAttribute");
+		if (hRet = (HRESULT)fLib(hwnd, dwAttribute, pvAttribute, cbAttribute))
+		{
+			FreeLibrary(hLib);
+			return hRet;
+		}
+	}
+
+	return 0;
+}
+
+/* * * *\
+	DwmSetWindowAttributeDelay -
 		Sets the value of Desktop Window Manager
 		(DWM) non-client rendering attributes
 		for a window.
