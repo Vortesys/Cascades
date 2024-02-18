@@ -24,6 +24,9 @@
     <ClInclude Include="oebitmap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ntsdrfn.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ntshook.c">

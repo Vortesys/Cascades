@@ -2,13 +2,14 @@
 	NTSDRFN.C -
 		Copyright © 2023 Brady McDermott, Vortesys
 	DESCRIPTION -
-		NT Style's drawing functions
+		NT Style's drawing functions.
 	LICENSE INFORMATION -
 		MIT License, see LICENSE.txt in the root folder
  \* * * * * * * */
 
  // Includes
 #include "ntshook.h"
+#include "ntsdrfn.h"
 #include "oebitmap.h"
 #include <strsafe.h>
 
@@ -97,11 +98,6 @@ VOID NTStyleDrawWindow(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lParam)
 				wi.rcWindow.bottom - wi.rcWindow.top, hdcMem, 0, 0, 
 				wi.rcWindow.right - wi.rcWindow.left,
 				wi.rcWindow.bottom - wi.rcWindow.top, GetSysColor(COLOR_APPWORKSPACE)); //0xFF00FF
-			//BitBlt(hdc, 0, 0, wi.rcWindow.right - wi.rcWindow.left,
-				//wi.rcWindow.bottom - wi.rcWindow.top, hdcMem, 0, 0, SRCPAINT);
-			//MaskBlt(hdc, 0, 0, wi.rcWindow.right - wi.rcWindow.left,
-				//wi.rcWindow.bottom - wi.rcWindow.top, hdcMem, 0, 0,
-				//hbm, 0, 0, MAKEROP4(SRCCOPY, SRCPAINT));
 
 			// Cleanup
 			if (hdcMem)
@@ -670,16 +666,14 @@ BOOL NTStyleDrawFrameControl(_In_ HDC hDC, _In_ RECT rc, _In_ UINT uType, _In_ U
 	// COLOR_BTNFACE
 	// COLOR_BTNSHADOW
 	// COLOR_BTNHIGHLIGHT
-
-	if ((uState == DFC_BUTTON) & DFC_BUTTON)
-		//NTStyleDrawPushButton(hDC, &rc, uState, u);
+	switch (uType)
+	{
+	case (NSDFC_TYPE_CAPTION):
+		break;
+	default:
 		return FALSE;
-	if ((uState == DFC_BUTTON) & DFC_BUTTON)
-		//NTStyleDrawPushButton();
-		return FALSE;
-	if ((uState == DFC_BUTTON) & DFC_BUTTON)
-		//NTStyleDrawPushButton();
-		return FALSE;
+		break;
+	}
 
 	return TRUE;
 }
