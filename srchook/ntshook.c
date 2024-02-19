@@ -69,6 +69,7 @@ __declspec(dllexport) LRESULT APIENTRY NTStyleHookProc(
 		case WM_DISPLAYCHANGE:
 		case WM_SYNCPAINT:
 		case WM_ACTIVATE:
+		case WM_SETTEXT:
 		case WM_PAINT:
 		case WM_MOVE:
 			NTStyleDrawWindow(pcwps->hwnd, pcwps->wParam, pcwps->lParam);

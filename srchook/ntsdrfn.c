@@ -632,7 +632,7 @@ BOOL NTStyleDrawFrameControl(_In_ HDC hDC, _In_ RECT rc, _In_ UINT uType, _In_ U
 		break;
 	}
 
-	case (NSDFC_TYPE_BUTTON)
+	case (NSDFC_TYPE_BUTTON):
 	{
 		break;
 	}
