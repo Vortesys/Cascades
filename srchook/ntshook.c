@@ -126,7 +126,7 @@ __declspec(dllexport) VOID APIENTRY NTStyleDisableWindowTheme(_In_ HWND hWnd)
 			sizeof(ncrp));
 
 	// Nuke the theming
-	SetWindowTheme(hWnd, L"", L"");
+	SetWindowThemeDelay(hWnd, L"", L"");
 	RedrawWindow(hWnd, NULL, NULL, RDW_FRAME);
 
 	return;

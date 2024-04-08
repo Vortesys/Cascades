@@ -77,3 +77,33 @@ HRESULT DwmSetWindowAttributeDelay(
 
 	return 0;
 }
+
+/* * * *\
+	DwmSetWindowAttributeDelay -
+		Sets the value of Desktop Window Manager
+		(DWM) non-client rendering attributes
+		for a window.
+	RETURNS -
+		True if successful, false if unsuccessful.
+\* * * */
+HRESULT SetWindowThemeDelay(
+	_In_ HWND		hwnd,
+	_In_ LPCWSTR	pszSubAppName,
+	_In_ LPCWSTR	pszSubIdList
+)
+{
+	HMODULE hLib = LoadLibrary(L"UxTheme.dll");
+	HRESULT hRet = 0;
+
+	if (hLib)
+	{
+		FARPROC fLib = GetProcAddress(hLib, "SetWindowTheme");
+		if (hRet = (HRESULT)fLib(hwnd, pszSubAppName, pszSubIdList))
+		{
+			FreeLibrary(hLib);
+			return hRet;
+		}
+	}
+
+	return 0;
+}
