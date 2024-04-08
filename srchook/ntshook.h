@@ -23,10 +23,9 @@ __declspec(dllexport) LRESULT APIENTRY NTStyleHookProc(_In_ UINT uMsg, _In_ WPAR
 __declspec(dllexport) HHOOK APIENTRY NTStyleSetHook(_In_ INT idHook, _In_ HOOKPROC lpfn, _In_ HINSTANCE hmod, _In_ DWORD dwThreadId);
 
 // Functions
-VOID NTStyleLockWindowUpdates(_In_ HWND hWnd);
-VOID NTStyleUnlockWindowUpdates(_In_ HWND hWnd);
 __declspec(dllexport) VOID APIENTRY NTStyleDisableWindowTheme(_In_ HWND hWnd);
 
 // Delay Load Functions
 HRESULT DwmGetWindowAttributeDelay(HWND hwnd, DWORD dwAttribute, _In_ LPCVOID pvAttribute, DWORD cbAttribute);
 HRESULT DwmSetWindowAttributeDelay(HWND hwnd, DWORD dwAttribute, _In_ LPCVOID pvAttribute, DWORD cbAttribute);
+HRESULT SetWindowThemeDelay(_In_ HWND hwnd, _In_ LPCWSTR pszSubAppName, _In_ LPCWSTR pszSubIdList);
