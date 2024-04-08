@@ -105,41 +105,6 @@ __declspec(dllexport) HHOOK APIENTRY NTStyleSetHook(_In_ INT idHook, _In_ HOOKPR
 }
 
 /* * * *\
-	NTStyleLockWindowUpdates -
-		Prevents a window from
-		updating for a small
-		period of time to prevent
-		flickering issues.
-\* * * */
-VOID NTStyleLockWindowUpdates(_In_ HWND hWnd)
-{
-	if (++g_iLockUpdateCount == 1) {
-		SetWindowLong(hWnd, GWL_STYLE,
-			GetWindowLong(hWnd, GWL_STYLE) & ~WS_VISIBLE);
-	}
-
-	return;
-}
-
-/* * * *\
-	NTStyleUnlockWindowUpdates -
-		Prevents a window from
-		updating for a small
-		period of time to prevent
-		flickering issues.
-\* * * */
-VOID NTStyleUnlockWindowUpdates(_In_ HWND hWnd)
-{
-	if (--g_iLockUpdateCount <= 0) {
-		SetWindowLong(hWnd, GWL_STYLE,
-			GetWindowLong(hWnd, GWL_STYLE) | WS_VISIBLE);
-		g_iLockUpdateCount = 0;
-	}
-
-	return;
-}
-
-/* * * *\
 	NTStyleDisableWindowTheme -
 		de-themify that window
 \* * * */
