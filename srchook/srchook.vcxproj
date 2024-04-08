@@ -210,6 +210,7 @@
     <ResourceCompile Include="resource.rc" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ntshook.def" />
     <None Include="version.inc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
