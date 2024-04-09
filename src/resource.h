@@ -1,6 +1,6 @@
 /* * * * * * * *\
 	RESOURCE.H -
-		Copyright (c) 2023 Vortesys
+		Copyright © 2024 Brady McDermott, Vortesys
 	DESCRIPTION -
 		NT Style's resource collection.
 		** NO DEPENDENCIES **

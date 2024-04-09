@@ -1,6 +1,6 @@
 /* * * * * * * *\
 	NTSDLFN.C -
-		Copyright © 2023 Brady McDermott, Vortesys
+		Copyright © 2024 Brady McDermott, Vortesys
 	DESCRIPTION -
 		Delay loaded functions, mostly for only testing
 		and disabling DWM on systems newer than Windows

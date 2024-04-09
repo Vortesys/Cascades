@@ -1,6 +1,6 @@
 /* * * * * * * *\
 	NTSTYLE.H -
-		Copyright © 2023 Brady McDermott, Vortesys
+		Copyright © 2024 Brady McDermott, Vortesys
 	DESCRIPTION -
 		NT Style's primary header file.
 	LICENSE INFORMATION -

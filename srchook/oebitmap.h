@@ -1,6 +1,6 @@
 /* * * * * * * *\
 	OEBITMAP.H -
-		Copyright © 2023 Brady McDermott, Vortesys
+		Copyright © 2024 Brady McDermott, Vortesys
 	DESCRIPTION -
 		Sourced from the internet. OEM Bitmap resource
 		identifiers for Windows.

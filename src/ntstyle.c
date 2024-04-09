@@ -1,6 +1,6 @@
 /* * * * * * * *\
 	NTSTYLE.C -
-		Copyright © 2023 Brady McDermott, Vortesys
+		Copyright © 2024 Brady McDermott, Vortesys
 	DESCRIPTION -
 		NT Style's main file.
 	LICENSE INFORMATION -
