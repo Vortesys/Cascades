@@ -14,6 +14,9 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
+/* Definitions */
+#define STATUS_UNSUCCESSFUL 0xC0000001
+
 /* Functions */
 
 /* * * *\
@@ -22,7 +25,7 @@
 		(DWM) non-client rendering attributes
 		for a window.
 	RETURNS -
-		True if successful, false if unsuccessful.
+		NTSTATUS result.
 \* * * */
 HRESULT DwmGetWindowAttributeDelay(
 	HWND			hwnd,
@@ -37,14 +40,16 @@ HRESULT DwmGetWindowAttributeDelay(
 	if (hLib)
 	{
 		FARPROC fLib = GetProcAddress(hLib, "DwmGetWindowAttribute");
-		if (hRet = (HRESULT)fLib(hwnd, dwAttribute, pvAttribute, cbAttribute))
-		{
-			FreeLibrary(hLib);
+
+		hRet = (HRESULT)fLib(hwnd, dwAttribute, pvAttribute, cbAttribute);
+
+		FreeLibrary(hLib);
+
+		if (SUCCEEDED(hRet))
 			return hRet;
-		}
 	}
 
-	return 0;
+	return STATUS_UNSUCCESSFUL;
 }
 
 /* * * *\
@@ -53,7 +58,7 @@ HRESULT DwmGetWindowAttributeDelay(
 		(DWM) non-client rendering attributes
 		for a window.
 	RETURNS -
-		True if successful, false if unsuccessful.
+		NTSTATUS result.
 \* * * */
 HRESULT DwmSetWindowAttributeDelay(
 	HWND			hwnd,
@@ -68,14 +73,16 @@ HRESULT DwmSetWindowAttributeDelay(
 	if (hLib)
 	{
 		FARPROC fLib = GetProcAddress(hLib, "DwmSetWindowAttribute");
-		if (hRet = (HRESULT)fLib(hwnd, dwAttribute, pvAttribute, cbAttribute))
-		{
-			FreeLibrary(hLib);
+
+		hRet = (HRESULT)fLib(hwnd, dwAttribute, pvAttribute, cbAttribute);
+
+		FreeLibrary(hLib);
+
+		if (SUCCEEDED(hRet))
 			return hRet;
-		}
 	}
 
-	return 0;
+	return STATUS_UNSUCCESSFUL;
 }
 
 /* * * *\
@@ -84,7 +91,7 @@ HRESULT DwmSetWindowAttributeDelay(
 		(DWM) non-client rendering attributes
 		for a window.
 	RETURNS -
-		True if successful, false if unsuccessful.
+		NTSTATUS result.
 \* * * */
 HRESULT SetWindowThemeDelay(
 	_In_ HWND		hwnd,
@@ -98,12 +105,14 @@ HRESULT SetWindowThemeDelay(
 	if (hLib)
 	{
 		FARPROC fLib = GetProcAddress(hLib, "SetWindowTheme");
-		if (hRet = (HRESULT)fLib(hwnd, pszSubAppName, pszSubIdList))
-		{
-			FreeLibrary(hLib);
+
+		hRet = (HRESULT)fLib(hwnd, pszSubAppName, pszSubIdList);
+
+		FreeLibrary(hLib);
+
+		if (SUCCEEDED(hRet))
 			return hRet;
-		}
 	}
 
-	return 0;
+	return STATUS_UNSUCCESSFUL;
 }
