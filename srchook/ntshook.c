@@ -127,7 +127,7 @@ __declspec(dllexport) VOID APIENTRY NTStyleDisableWindowTheme(_In_ HWND hWnd)
 
 	if (QueryFullProcessImageName(hProcess, 0, pszProcessName, &iProcessName))
 	{
-		if (StrStrI(pszProcessName, (LPWSTR)L"/explorer.exe") == NULL)
+		if (StrStrI(pszProcessName, (LPWSTR)L"explorer.exe") == NULL)
 		{
 			// Nuke DWM
 			DwmSetWindowAttributeDelay(hWnd,
