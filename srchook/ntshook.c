@@ -1,20 +1,21 @@
 /* * * * * * * *\
 	NTSHOOK.C -
-		Copyright © 2023 Brady McDermott, Vortesys
+		Copyright © 2024 Brady McDermott, Vortesys
 	DESCRIPTION -
 		Defines the entry point for the DLL application.
 	LICENSE INFORMATION -
 		MIT License, see LICENSE.txt in the root folder
  \* * * * * * * */
 
-// Includes
+/* Headers */
 #include "ntshook.h"
 #include "ntsdrfn.h"
 #include "resource.h"
 #include <dwmapi.h>
 #include <uxtheme.h>
+#include <shlwapi.h>
 
-// Global Variables
+/* Global Variables */
 static INT g_iSystemHasDWM = 2;
 static INT g_iLockUpdateCount;
 
@@ -112,22 +113,33 @@ __declspec(dllexport) VOID APIENTRY NTStyleDisableWindowTheme(_In_ HWND hWnd)
 {
 	enum DWMNCRENDERINGPOLICY ncrp = DWMNCRP_DISABLED;
 
-	WCHAR pszClassName[256] = L"";
+	HANDLE hProcess = NULL;
+	DWORD dwProcess = 0;
+	INT iProcessName = MAX_PATH;
+	WCHAR pszProcessName[MAX_PATH] = L"";
 
 	// DO NOT DO ANY OF THIS TO EXPLORER!!!
 	// EXPLORER NEEDS DWM!!!
-	GetClassName(hWnd, (LPWSTR)pszClassName, ARRAYSIZE(pszClassName));
+	if (GetWindowThreadProcessId(hWnd, &dwProcess) == 0)
+		return;
 
-	if(pszClassName != (LPWSTR)L"ImmersiveLauncher")
-		// Nuke DWM
-		DwmSetWindowAttributeDelay(hWnd,
-			DWMWA_NCRENDERING_POLICY,
-			&ncrp,
-			sizeof(ncrp));
+	hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, dwProcess);
 
-	// Nuke the theming
-	SetWindowThemeDelay(hWnd, L"", L"");
-	RedrawWindow(hWnd, NULL, NULL, RDW_FRAME);
+	if (QueryFullProcessImageName(hProcess, 0, pszProcessName, &iProcessName))
+	{
+		if (StrStrI(pszProcessName, (LPWSTR)L"/explorer.exe") == NULL)
+		{
+			// Nuke DWM
+			DwmSetWindowAttributeDelay(hWnd,
+				DWMWA_NCRENDERING_POLICY,
+				&ncrp,
+				sizeof(ncrp));
+
+			// Nuke the theming
+			SetWindowThemeDelay(hWnd, L"", L"");
+			RedrawWindow(hWnd, NULL, NULL, RDW_FRAME);
+		}
+	}
 
 	return;
 }

@@ -11,6 +11,7 @@
 #pragma once
 #pragma comment(lib, "UxTheme.lib")
 #pragma comment(lib, "Msimg32.lib")
+#pragma comment(lib, "Shlwapi.lib")
 
 /* Includes */
 #include <wtypes.h>
