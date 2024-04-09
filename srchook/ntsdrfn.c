@@ -7,12 +7,13 @@
 		MIT License, see LICENSE.txt in the root folder
  \* * * * * * * */
 
- // Includes
+/* Headers */
 #include "ntshook.h"
 #include "ntsdrfn.h"
 #include "oebitmap.h"
 #include <strsafe.h>
 
+/* Global Variables */
 // System Metrics
 static INT g_iCaptionHeight;
 static INT g_iBorderWidth;
@@ -30,6 +31,8 @@ static DWORD g_dwInactiveCaptionGradient;
 static DWORD g_dwInactiveCaptionText;
 static DWORD g_dwInactiveBorder;
 static DWORD g_dwWindowFrame;
+
+/* Functions */
 
 /* * * *\
 	NTStyleDrawWindow -
