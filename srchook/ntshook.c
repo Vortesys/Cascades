@@ -114,18 +114,18 @@ __declspec(dllexport) VOID APIENTRY NTStyleDisableWindowTheme(_In_ HWND hWnd)
 	enum DWMNCRENDERINGPOLICY ncrp = DWMNCRP_DISABLED;
 
 	HANDLE hProcess = NULL;
-	DWORD dwProcess = 0;
-	INT iProcessName = MAX_PATH;
+	DWORD dwProcessID = 0;
+	INT cchProcessName = MAX_PATH;
 	WCHAR pszProcessName[MAX_PATH] = L"";
 
 	// DO NOT DO ANY OF THIS TO EXPLORER!!!
 	// EXPLORER NEEDS DWM!!!
-	if (GetWindowThreadProcessId(hWnd, &dwProcess) == 0)
+	if (GetWindowThreadProcessId(hWnd, &dwProcessID) == 0)
 		return;
 
-	hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, dwProcess);
+	hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, dwProcessID);
 
-	if (QueryFullProcessImageName(hProcess, 0, pszProcessName, &iProcessName))
+	if (QueryFullProcessImageName(hProcess, 0, pszProcessName, &cchProcessName))
 	{
 		if (StrStrI(pszProcessName, (LPWSTR)L"\\explorer.exe") == NULL)
 		{
