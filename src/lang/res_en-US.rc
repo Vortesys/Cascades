@@ -1,0 +1,68 @@
+/* * * * * * * *\
+	RES_EN-US.RC -
+		Copyright (c) 2024 Brady McDermott, Vortesys
+	LANGUAGE -
+		English, US
+	TRANSLATION CREDITS -
+		Brady McDermott
+	DESCRIPTION -
+		This file contains the language-specific
+		resources for NT Style.
+		** NO DEPENDENCIES **
+	LICENSE INFORMATION -
+		MIT License, see LICENSE.txt in the root folder
+\* * * * * * * */
+
+/* Necessary Evil */
+#define APSTUDIO_HIDDEN_SYMBOLS
+#include <windows.h>
+#include "resource.h"
+#undef APSTUDIO_HIDDEN_SYMBOLS
+
+/* String Table */
+STRINGTABLE
+{
+	// Application
+#ifndef _DEBUG
+	IDS_APPTITLE, "NT Style" // 16
+#else
+	IDS_APPTITLE, "NT Style [DEBUG]" // 64
+#endif
+	IDS_PMCLASS,		"progmgr" // 16
+	IDS_DTCLASS,		"progman" // 16
+	IDS_GRPCLASS,		"pmgroup" // 16
+	IDS_WEBSITE,		"https://vortesys.github.io/index.html" // 64
+
+	// Menu commands
+	IDS_RUN			"R&un..."
+	IDS_TASKMGR		"&Task Manager"
+	IDS_EXIT		"E&xit"
+	IDS_SHUTDOWN	"S&hutdown..."
+
+	// Dialog strings
+	IDS_DLG_OK		"OK"
+	IDS_DLG_CANCEL	"Cancel"
+	IDS_DLG_BROWSE	"Browse..."
+
+	// Icon section strings
+	IDS_DLG_ICON	"Icon"
+	IDS_DLG_CHICON	"Change Icon..."
+
+	// Properties section strings
+	IDS_DLG_PROPS		"Properties"
+	IDS_DLG_NAME		"Name:"
+	IDS_DLG_DIRECTORY	"Directory:"
+	IDS_DLG_COMMGRP		"Create group for all users"
+
+	// Advanced section strings
+	IDS_DLG_ADVANCED	"Advanced"
+	IDS_DLG_WORKDIR		"Use different working directory"
+	IDS_DLG_HOTKEY		"Hotkey:"
+
+	// Dialog title strings
+	IDS_DLT_GRP_PROPS	"Group Properties" // 32
+	IDS_DLT_GRP_NEW		"New Group" // 16
+	IDS_DLT_ITEM_PROPS	"Item Properties" // 32
+	IDS_DLT_ITEM_NEW	"New Item" // 16
+	IDS_DLT_POWER		"Shut Down" // [Computer Name] 16 + 16
+}
