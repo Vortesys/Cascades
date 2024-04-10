@@ -167,6 +167,8 @@
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
+    <ResourceCompile Include="lang\dlg_en-US.rc" />
+    <ResourceCompile Include="lang\res_en-US.rc" />
     <ResourceCompile Include="resource.rc" />
   </ItemGroup>
   <ItemGroup>
