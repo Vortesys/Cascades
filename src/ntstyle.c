@@ -74,7 +74,8 @@ int WINAPI wWinMain(
 DWORD NTStyleCreateHook(
 	_In_ HINSTANCE hInst,
 	_In_ LPWSTR lpNTStyleHook,
-	_Outptr_opt_result_maybenull_ HHOOK hhkNTShk
+	_In_ BOOL bDisableTheming,
+	_Out_ HHOOK hhkNTShk
 )
 {
 	HINSTANCE hDllInstance = NULL;
@@ -99,7 +100,8 @@ DWORD NTStyleCreateHook(
 		dwLastError = GetLastError();
 
 	// Enumerate the existing windows and get them dwm-free :fire:
-	EnumWindows(&NTStyleEnumWindowProc, (LPARAM)hDllInstance);
+	if (bDisableTheming)
+		EnumWindows(&NTStyleEnumWindowProc, (LPARAM)hDllInstance);
 
 	if (hDllInstance)
 		FreeLibrary(hDllInstance);
@@ -116,9 +118,9 @@ BOOL CALLBACK NTStyleEnumWindowProc(
 	_In_ LPARAM lParam
 )
 {
-	if (lParam != NULL)
+	if ((HMODULE)lParam != NULL)
 	{
-		FARPROC fLib = GetProcAddress(lParam, "NTStyleDisableWindowTheme");
+		FARPROC fLib = GetProcAddress((HMODULE)lParam, "NTStyleDisableWindowTheme");
 		fLib(hwnd);
 
 		return TRUE;

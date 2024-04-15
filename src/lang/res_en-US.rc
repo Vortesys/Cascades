@@ -33,5 +33,5 @@ STRINGTABLE
 	// Themes [32 char]
 	IDS_THEME1, "Windows 3.x"
 	IDS_THEME2, "Windows 2.x"
-	IDS_THEME2, "Solaris CDE"
+	IDS_THEME3, "Solaris CDE"
 }

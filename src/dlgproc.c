@@ -34,20 +34,21 @@ INT_PTR CALLBACK NTStyleDialogProc(
 		case IDCANCEL:
 			SendMessage(hDlg, WM_CLOSE, 0, 0);
 			return TRUE;
-		case IDC_THEMES:
 
-		case IDC_THEMEOFF:
+		case IDC_THEMES:
+			return 0;
 
 		case IDC_START:
 		{
 			DWORD dwLastError = 0;
+
 			if (g_bSystem64)
-			{
-				dwLastError = NTStyleCreateHook(g_hAppInstance, L"ntshk64.dll", g_hhkNTShk64);
-			}
+				dwLastError = NTStyleCreateHook(g_hAppInstance, L"ntshk64.dll",
+					IsDlgButtonChecked(hDlg, IDC_THEMEOFF), g_hhkNTShk64);
 
 			// load that 32 bit ish
-			dwLastError = NTStyleCreateHook(g_hAppInstance, L"ntshk32.dll", g_hhkNTShk32);
+			dwLastError = NTStyleCreateHook(g_hAppInstance, L"ntshk32.dll",
+				IsDlgButtonChecked(hDlg, IDC_THEMEOFF), g_hhkNTShk32);
 
 			if (g_hhkNTShk32 || g_hhkNTShk64)
 			{
@@ -62,6 +63,7 @@ INT_PTR CALLBACK NTStyleDialogProc(
 					MessageBox(hDlg, L"Started NT Style.", L"NT Style (AMD64 + WOW)",
 						MB_OK | MB_ICONINFORMATION | MB_DEFAULT_DESKTOP_ONLY);
 			}
+			return 0;
 		}
 
 		case IDC_STOP:
@@ -69,7 +71,7 @@ INT_PTR CALLBACK NTStyleDialogProc(
 				UnhookWindowsHookEx(g_hhkNTShk32);
 			if (g_hhkNTShk64)
 				UnhookWindowsHookEx(g_hhkNTShk64);
-			return;
+			return 0;
 		}
 		break;
 

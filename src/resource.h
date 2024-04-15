@@ -30,27 +30,9 @@
 #define IDC_THEMES      40004
 
 /* String Table */
-#define IDS_APPTITLE		1
-#define IDS_WEBSITE			5
-// General Dialog
-#define IDS_DLG_OK			200
-#define IDS_DLG_CANCEL		201
-#define IDS_DLG_BROWSE		202
-// Icon Section
-#define IDS_DLG_ICON		203
-#define IDS_DLG_CHICON		204
-// Properties Section
-#define IDS_DLG_PROPS		205
-#define IDS_DLG_NAME		206
-#define IDS_DLG_DIRECTORY	207
-#define IDS_DLG_COMMGRP		208
-// Advanced Section
-#define IDS_DLG_ADVANCED	209
-#define IDS_DLG_WORKDIR		210
-#define IDS_DLG_HOTKEY		211
-// Dialog Title
-#define IDS_DLT_GRP_PROPS	300
-#define IDS_DLT_GRP_NEW		301
-#define IDS_DLT_ITEM_PROPS	302
-#define IDS_DLT_ITEM_NEW	303
-#define IDS_DLT_POWER		304
+#define IDS_APPTITLE	1
+#define IDS_WEBSITE		5
+// Dialog Theme Selection
+#define IDS_THEME1		200
+#define IDS_THEME2		201
+#define IDS_THEME3		202
