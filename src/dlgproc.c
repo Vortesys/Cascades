@@ -12,6 +12,7 @@
 #include "resource.h"
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#include <windowsx.h>
 
 /* Functions */
 
@@ -63,6 +64,10 @@ INT_PTR CALLBACK NTStyleDialogProc(
 					MessageBox(hDlg, L"Started NT Style.", L"NT Style (AMD64 + WOW)",
 						MB_OK | MB_ICONINFORMATION | MB_DEFAULT_DESKTOP_ONLY);
 			}
+
+			Button_Enable(GetDlgItem(hDlg, IDC_START), FALSE);
+			Button_Enable(GetDlgItem(hDlg, IDC_STOP), TRUE);
+
 			return 0;
 		}
 
@@ -71,9 +76,19 @@ INT_PTR CALLBACK NTStyleDialogProc(
 				UnhookWindowsHookEx(g_hhkNTShk32);
 			if (g_hhkNTShk64)
 				UnhookWindowsHookEx(g_hhkNTShk64);
+
+			Button_Enable(GetDlgItem(hDlg, IDC_START), TRUE);
+			Button_Enable(GetDlgItem(hDlg, IDC_STOP), FALSE);
+
 			return 0;
 		}
 		break;
+
+	case WM_INITDIALOG:
+		Button_SetCheck(GetDlgItem(hDlg, IDC_THEMEOFF), BST_CHECKED);
+		Button_Enable(GetDlgItem(hDlg, IDC_START), TRUE);
+		Button_Enable(GetDlgItem(hDlg, IDC_STOP), FALSE);
+		return TRUE;
 
 	case WM_CLOSE:
 		if (MessageBox(hDlg, L"Quit NT Style?", L"Close",
@@ -82,6 +97,7 @@ INT_PTR CALLBACK NTStyleDialogProc(
 		return TRUE;
 
 	case WM_DESTROY:
+		SendMessage(hDlg, WM_COMMAND, IDC_STOP, 0);
 		PostQuitMessage(0);
 		return TRUE;
 	}
