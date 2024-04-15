@@ -13,6 +13,12 @@
 #include "resource.h"
 #undef APSTUDIO_HIDDEN_SYMBOLS
 
+/* Language-based Resources */
+LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+#pragma code_page(65001) // UTF-8
+#include "lang\res_en-US.rc" // English (US)
+#include "lang\dlg_en-US.rc" // English (US)
+
 /* Icon Library */
 IDI_MAIN	ICON	icons\ntstyle.ico
 

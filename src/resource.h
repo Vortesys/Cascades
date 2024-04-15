@@ -17,26 +17,17 @@
 #define IDI_MAIN		1
 
 /* Dialogs */
-#define DLG_MAIN	1
+#define IDD_MAIN 101
 
 /* Dialog Controls */
 // Buttons
-#define IDD_OK				1
-#define IDD_CANCEL			2
-#define IDD_BROWSE			3
-#define IDD_BROWSE2			4
-#define IDD_CHICON			5
-// Radio Buttons
-#define IDD_WORKDIR			100
-#define IDD_COMMGROUP		101
-// Input Controls
-#define IDD_NAME			200
-#define IDD_PATH			201
-#define IDD_WORKPATH		202
-#define IDD_HOTKEY			203
-// Static Controls
-#define IDD_STAT_ICON		300
-#define IDD_STAT_WORKDIR	301
+#define IDC_STOP        40000
+#define IDC_START       40001
+#define IDC_CLOSE	    40002
+// Checkboxes
+#define IDC_THEMEOFF    40003
+// Dropdowns
+#define IDC_THEMES      40004
 
 /* String Table */
 #define IDS_APPTITLE		1
