@@ -84,9 +84,6 @@ INT_PTR CALLBACK NTStyleDialogProc(
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		return TRUE;
-
-	default:
-		return DefDlgProc(hDlg, uMsg, wParam, lParam);\
 	}
 	return 0;
 }
