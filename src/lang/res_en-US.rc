@@ -1,0 +1,37 @@
+/* * * * * * * *\
+	RES_EN-US.RC -
+		Copyright (c) 2024 Brady McDermott, Vortesys
+	LANGUAGE -
+		English, US
+	TRANSLATION CREDITS -
+		Brady McDermott
+	DESCRIPTION -
+		This file contains the language-specific
+		resources for NT Style.
+		** NO DEPENDENCIES **
+	LICENSE INFORMATION -
+		MIT License, see LICENSE.txt in the root folder
+\* * * * * * * */
+
+/* Necessary Evil */
+#define APSTUDIO_HIDDEN_SYMBOLS
+#include <windows.h>
+#include "resource.h"
+#undef APSTUDIO_HIDDEN_SYMBOLS
+
+/* String Table */
+STRINGTABLE
+{
+	// Application
+#ifndef _DEBUG
+	IDS_APPTITLE, "NT Style" // 16
+#else
+	IDS_APPTITLE, "NT Style [Debug]" // 64
+#endif
+	IDS_WEBSITE, "https://vortesys.github.io/index.html" // 64
+
+	// Themes [32 char]
+	IDS_THEME1, "Windows 3.x"
+	IDS_THEME2, "Windows 2.x"
+	IDS_THEME3, "Solaris CDE"
+}

@@ -160,6 +160,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="dlgproc.c" />
     <ClCompile Include="ntstyle.c" />
   </ItemGroup>
   <ItemGroup>
@@ -167,10 +168,15 @@
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
+    <ResourceCompile Include="lang\dlg_en-US.rc" />
+    <ResourceCompile Include="lang\res_en-US.rc" />
     <ResourceCompile Include="resource.rc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="version.inc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="ntstyle.exe.manifest" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
