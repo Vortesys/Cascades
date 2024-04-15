@@ -5,18 +5,23 @@
 		NT Style's main file.
 	LICENSE INFORMATION -
 		MIT License, see LICENSE.txt in the root folder
- \* * * * * * * */
+\* * * * * * * */
 
- /* Headers */
+/* Headers */
 #include "ntstyle.h"
 #include "resource.h"
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#include <CommCtrl.h>
 
 // Handles
 HINSTANCE	g_hAppInstance;
 HHOOK		g_hhkNTShk32 = NULL;
 HHOOK		g_hhkNTShk64 = NULL;
+// Strings
+WCHAR		g_szAppTitle[64];
+// Other
+BOOL g_bSystem64 = TRUE;
 
 /* Functions */
 
@@ -32,53 +37,34 @@ int WINAPI wWinMain(
 )
 {
 	MSG msg = { 0 };
-
-	FARPROC fNTSWOW = NULL;
-
-	DWORD dwLastError = 0;
-	BOOL bSystem64 = TRUE;
-
+	HWND hDlg;
 	SYSTEM_INFO si;
 
 	// Get our own hInstance and save it for later
 	g_hAppInstance = hInstance;
 
+	// Create our main window dialog
+	InitCommonControls();
+	hDlg = CreateDialogParam(g_hAppInstance, MAKEINTRESOURCE(IDD_MAIN), 0, NTStyleDialogProc, 0);
+	ShowWindow(hDlg, nCmdShow);
+
 	// Get some system information to determine what
 	// copies of the style hook to load
 	GetSystemInfo(&si);
 
-	bSystem64 = (si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64);
+	g_bSystem64 = (si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64);
 
-	if (bSystem64)
+	// Enter the dialog message loop.
+	while (GetMessage(&msg, NULL, 0, 0) > 0)
 	{
-		dwLastError = NTStyleCreateHook(g_hAppInstance, L"ntshk64.dll", g_hhkNTShk64);
+		if (!IsDialogMessage(hDlg, &msg))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
 	}
 
-	// load that 32 bit ish
-	dwLastError = NTStyleCreateHook(g_hAppInstance, L"ntshk32.dll", g_hhkNTShk32);
-		
-	if (g_hhkNTShk32 || g_hhkNTShk64)
-	{
-		// Start NT Style
-		if (!g_hhkNTShk32)
-			MessageBox(HWND_DESKTOP, L"Started NT Style.\nPress OK to close.", L"NT Style (AMD64)",
-				MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL | MB_DEFAULT_DESKTOP_ONLY);
-		else if (!g_hhkNTShk64)
-			MessageBox(HWND_DESKTOP, L"Started NT Style.\nPress OK to close.", L"NT Style (IA32)",
-				MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL | MB_DEFAULT_DESKTOP_ONLY);
-		else
-			MessageBox(HWND_DESKTOP, L"Started NT Style.\nPress OK to close.", L"NT Style (AMD64 + WOW)",
-				MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL | MB_DEFAULT_DESKTOP_ONLY);
-	}
-
-	if (g_hhkNTShk32)
-		UnhookWindowsHookEx(g_hhkNTShk32);
-	if (g_hhkNTShk64)
-		UnhookWindowsHookEx(g_hhkNTShk64);
-
-	PostQuitMessage(0);
-
-	return dwLastError;
+	return 0;
 }
 
 /* * * *\
@@ -88,13 +74,14 @@ int WINAPI wWinMain(
 DWORD NTStyleCreateHook(
 	_In_ HINSTANCE hInst,
 	_In_ LPWSTR lpNTStyleHook,
-	_Out_ HHOOK hhkNTShk
+	_Outptr_opt_result_maybenull_ HHOOK hhkNTShk
 )
 {
 	HINSTANCE hDllInstance = NULL;
 	HOOKPROC hkprc = NULL;
-
 	DWORD dwLastError = 0;
+
+	hhkNTShk = NULL;
 
 	// Load the hook DLL
 	hDllInstance = LoadLibrary(lpNTStyleHook);
@@ -117,7 +104,7 @@ DWORD NTStyleCreateHook(
 	if (hDllInstance)
 		FreeLibrary(hDllInstance);
 
-	return hhkNTShk;
+	return dwLastError;
 }
 
 /* * * *\

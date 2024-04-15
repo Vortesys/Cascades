@@ -160,6 +160,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="dlgproc.c" />
     <ClCompile Include="ntstyle.c" />
   </ItemGroup>
   <ItemGroup>
@@ -173,6 +174,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="version.inc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="ntstyle.exe.manifest" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

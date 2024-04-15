@@ -21,6 +21,9 @@
     <ClCompile Include="ntstyle.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="dlgproc.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ntstyle.h">
@@ -45,5 +48,10 @@
     <None Include="version.inc">
       <Filter>Resource Files</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="ntstyle.exe.manifest">
+      <Filter>Source Files</Filter>
+    </Manifest>
   </ItemGroup>
 </Project>
