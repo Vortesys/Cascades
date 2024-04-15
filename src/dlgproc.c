@@ -45,11 +45,11 @@ INT_PTR CALLBACK NTStyleDialogProc(
 
 			if (g_bSystem64)
 				dwLastError = NTStyleCreateHook(g_hAppInstance, L"ntshk64.dll",
-					IsDlgButtonChecked(hDlg, IDC_THEMEOFF), g_hhkNTShk64);
+					(Button_GetCheck(GetDlgItem(hDlg, IDC_THEMEOFF)) == BST_CHECKED), g_hhkNTShk64);
 
 			// load that 32 bit ish
 			dwLastError = NTStyleCreateHook(g_hAppInstance, L"ntshk32.dll",
-				IsDlgButtonChecked(hDlg, IDC_THEMEOFF), g_hhkNTShk32);
+				(Button_GetCheck(GetDlgItem(hDlg, IDC_THEMEOFF)) == BST_CHECKED), g_hhkNTShk32);
 
 			if (g_hhkNTShk32 || g_hhkNTShk64)
 			{
