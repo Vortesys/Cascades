@@ -12,3 +12,7 @@ The [releases page](https://github.com/freedom7341/NTStyle/releases/latest) has 
 
 ## How can I help?
 Submitting [issues](/issues) and reporting or commenting on bugs that you find is a massive help. The next level is to contribute and create a [pull request](/pulls).
+
+## What does it look like right now?
+![image](https://github.com/Vortesys/NTStyle/assets/36094486/8c676043-1558-4b65-a270-2441b7f8406d)
+![image](https://github.com/Vortesys/NTStyle/assets/36094486/a4a9735c-500b-439f-af45-33ebc4c28185)
