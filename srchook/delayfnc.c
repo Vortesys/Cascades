@@ -1,5 +1,5 @@
 /* * * * * * * *\
-	NTSDLFN.C -
+	DELAYFNC.C -
 		Copyright © 2024 Brady McDermott, Vortesys
 	DESCRIPTION -
 		Delay loaded functions, mostly for only testing
@@ -13,9 +13,6 @@
 #include "ntshook.h"
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
-
-/* Definitions */
-#define STATUS_UNSUCCESSFUL 0xC0000001
 
 /* Functions */
 

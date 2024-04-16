@@ -200,11 +200,13 @@
     <ClInclude Include="ntshook.h" />
     <ClInclude Include="oebitmap.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="usrapihk.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ntsdlfn.c" />
+    <ClCompile Include="delayfnc.c" />
     <ClCompile Include="ntsdrfn.c" />
     <ClCompile Include="ntshook.c" />
+    <ClCompile Include="usrapihk.c" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />

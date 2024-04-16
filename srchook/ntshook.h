@@ -16,6 +16,9 @@
 /* Includes */
 #include <wtypes.h>
 
+/* Definitions */
+#define STATUS_UNSUCCESSFUL 0xC0000001
+
 /* Global Variables */
 
 /* Function Prototypes */

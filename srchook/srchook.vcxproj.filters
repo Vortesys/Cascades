@@ -30,15 +30,21 @@
     <ClInclude Include="ntsdrfn.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="usrapihk.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ntshook.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ntsdlfn.c">
+    <ClCompile Include="delayfnc.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ntsdrfn.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="usrapihk.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
