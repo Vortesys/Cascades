@@ -65,6 +65,7 @@ __declspec(dllexport) LRESULT APIENTRY NTStyleHookProc(
 
 		switch (pcwps->message)
 		{
+		// Drawing Messages
 		case WM_CREATE:
 			NTStyleDisableWindowTheme(pcwps->hwnd);
 		case WM_DISPLAYCHANGE:
@@ -81,6 +82,20 @@ __declspec(dllexport) LRESULT APIENTRY NTStyleHookProc(
 		case WM_NCPAINT:
 			NTStyleDrawWindow(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
 			return 0;
+		
+		// Collision Messages
+			/*
+		case WM_NCLBUTTONUP:
+			break;
+			
+		case WM_NCLBUTTONDBLCLK:
+			break;
+			
+		case WM_NCRBUTTONUP:
+			break;
+			
+		case WM_NCHITTEST:
+			break;*/
 
 		default:
 			break;
