@@ -248,6 +248,10 @@ __declspec(dllexport) BOOL CALLBACK NtStyleRemoveUserHook(UAPIHK State, PUSERAPI
 	return UnregisterUserApiHook();
 }
 
+/* * * *\
+	NtStyleDefWindowProcA -
+		User32 stub.
+\* * * */
 static LRESULT CALLBACK NtStyleDefWindowProcA(
 	_In_ HWND hWnd,
 	_In_ UINT Msg,
@@ -257,6 +261,10 @@ static LRESULT CALLBACK NtStyleDefWindowProcA(
 	return g_user32ApiHook.DefWindowProcA(hWnd, Msg, wParam, lParam);
 }
 
+/* * * *\
+	NtStyleDefWindowProcW -
+		User32 stub.
+\* * * */
 static LRESULT CALLBACK NtStyleDefWindowProcW(
 	_In_ HWND hWnd,
 	_In_ UINT Msg,
@@ -266,37 +274,67 @@ static LRESULT CALLBACK NtStyleDefWindowProcW(
 	return g_user32ApiHook.DefWindowProcW(hWnd, Msg, wParam, lParam);
 }
 
-static LRESULT CALLBACK NtStylePreWindowProc()
+/* * * *\
+	NtStylePreWindowProc -
+		User32 stub.
+\* * * */
+static LRESULT CALLBACK NtStylePreWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam, ULONG_PTR ret, PDWORD unknown)
 {
 	return 0;
 }
 
-static LRESULT CALLBACK NtStylePostWindowProc()
+/* * * *\
+	NtStylePostWindowProc -
+		User32 stub.
+\* * * */
+static LRESULT CALLBACK NtStylePostWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam, ULONG_PTR ret, PDWORD unknown)
 {
 	return 0;
 }
 
-static LRESULT CALLBACK NtStyleDlgPreWindowProc()
+/* * * *\
+	NtStyleDlgPreWindowProc -
+		User32 stub.
+\* * * */
+static LRESULT CALLBACK NtStyleDlgPreWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam, ULONG_PTR ret, PDWORD unknown)
 {
 	return 0;
 }
 
-static LRESULT CALLBACK NtStyleDlgPostWindowProc()
+/* * * *\
+	NtStyleDlgPostWindowProc -
+		User32 stub.
+\* * * */
+static LRESULT CALLBACK NtStyleDlgPostWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam, ULONG_PTR ret, PDWORD unknown)
 {
 	return 0;
 }
 
-static LRESULT CALLBACK NtStyleSetWindowRgn()
+/* * * *\
+	NtStyleSetWindowRgn -
+		User32 stub.
+\* * * */
+static LRESULT CALLBACK NtStyleSetWindowRgn(HWND hWnd, HRGN hRgn, BOOL bRedraw)
 {
-	return 0;
+	return g_user32ApiHook.SetWindowRgn(hWnd, hRgn, bRedraw);
 }
 
-static LRESULT CALLBACK NtStyleGetScrollInfo()
+/* * * *\
+	NtStyleGetScrollInfo -
+		User32 stub.
+\* * * */
+static LRESULT CALLBACK NtStyleGetScrollInfo(HWND hwnd, int fnBar, LPSCROLLINFO lpsi)
 {
-	return 0;
+	// ReactOS UxTheme tracks the scrollbar itself - if we change the metrics of
+	// anything then we're going to have to change some stuff up here.
+	return g_user32ApiHook.GetScrollInfo(hwnd, fnBar, lpsi);
 }
 
-static LRESULT CALLBACK NtStyleSetScrollInfo()
+/* * * *\
+	NtStyleSetScrollInfo -
+		User32 stub.
+\* * * */
+static LRESULT CALLBACK NtStyleSetScrollInfo(HWND hWnd, int fnBar, LPCSCROLLINFO lpsi, BOOL bRedraw)
 {
-	return 0;
+	return g_user32ApiHook.SetScrollInfo(hWnd, fnBar, lpsi, bRedraw);
 }
