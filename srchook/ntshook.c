@@ -3,24 +3,27 @@
 		Copyright © 2024 Brady McDermott, Vortesys
 	DESCRIPTION -
 		Defines the entry point for the DLL application.
+		User hook functions are modeled after the ReactOS
+		implementation of UxTheme.
 	LICENSE INFORMATION -
 		MIT License, see LICENSE.txt in the root folder
  \* * * * * * * */
 
 /* Headers */
 #include "ntshook.h"
-#include "ntsdrfn.h"
+#include "draw.h"
+#include "usrapihk.h"
 #include "resource.h"
 #include <dwmapi.h>
 #include <uxtheme.h>
 #include <shlwapi.h>
 
 /* Global Variables */
-static INT g_iSystemHasDWM = 2;
-static INT g_iLockUpdateCount;
-
-// Handles
-HINSTANCE	g_hDllInstance;
+USERAPIHOOK g_user32ApiHook;
+BYTE gabDWPmessages[UAHOWP_MAX_SIZE];
+BYTE gabMSGPmessages[UAHOWP_MAX_SIZE];
+BYTE gabDLGPmessages[UAHOWP_MAX_SIZE];
+BOOL g_bThemeHooksActive = FALSE;
 
 /* * * *\
 	DllMain -
@@ -65,6 +68,10 @@ __declspec(dllexport) LRESULT APIENTRY NtStyleHookProc(
 
 		switch (pcwps->message)
 		{
+		//case WM_CREATE:
+		//	NTStyleDisableWindowTheme(pcwps->hwnd);
+		//	break;
+
 		// Collision Messages
 			/*
 		case WM_NCLBUTTONUP:
@@ -128,4 +135,168 @@ __declspec(dllexport) VOID APIENTRY NtStyleDisableWindowTheme(_In_ HWND hWnd)
 	}
 
 	return;
+}
+
+/* * * *\
+	NtStyleInstallUserHook -
+		Load the User32 API hook.
+\* * * */
+__declspec(dllexport) BOOL CALLBACK NtStyleInstallUserHook()
+{
+	USERAPIHOOKINFO uah;
+
+	uah.m_size = sizeof(uah);
+	uah.m_dllname1 = L"ntshk64.dll";
+	uah.m_funname1 = L"NtStyleInitUserHook";
+	uah.m_dllname2 = NULL;
+	uah.m_funname2 = NULL;
+	//uah.m_dllname1 = NULL;
+	//uah.m_funname1 = NULL;
+	//uah.m_dllname2 = L"ntshk64.dll";
+	//uah.m_funname2 = L"NtStyleInitUserHook";
+
+	return RegisterUserApiHook(&uah);
+}
+
+/* * * *\
+	NtStyleInitUserHook -
+		Initialize the User32 API hook.
+\* * * */
+__declspec(dllexport) BOOL CALLBACK NtStyleInitUserHook(UAPIHK State, PUSERAPIHOOK puah)
+{
+	// Don't initialize if the state isn't appropriate.
+	if (!puah || State != uahLoadInit)
+	{
+		g_bThemeHooksActive = FALSE;
+		return TRUE;
+	}
+
+	/* Store the original functions from user32 */
+	g_user32ApiHook = *puah;
+
+	puah->DefWindowProcA = NtStyleDefWindowProcA;
+	puah->DefWindowProcW = NtStyleDefWindowProcW;
+	puah->PreWndProc = NtStylePreWindowProc;
+	puah->PostWndProc = NtStylePostWindowProc;
+	puah->PreDefDlgProc = NtStyleDlgPreWindowProc;
+	puah->PostDefDlgProc = NtStyleDlgPostWindowProc;
+	puah->DefWndProcArray.MsgBitArray = gabDWPmessages;
+	puah->DefWndProcArray.Size = UAHOWP_MAX_SIZE;
+	puah->WndProcArray.MsgBitArray = gabMSGPmessages;
+	puah->WndProcArray.Size = UAHOWP_MAX_SIZE;
+	puah->DlgProcArray.MsgBitArray = gabDLGPmessages;
+	puah->DlgProcArray.Size = UAHOWP_MAX_SIZE;
+
+	puah->SetWindowRgn = NtStyleSetWindowRgn;
+	puah->GetScrollInfo = NtStyleGetScrollInfo;
+	puah->SetScrollInfo = NtStyleSetScrollInfo;
+
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_NCPAINT);
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_NCACTIVATE);
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_NCMOUSEMOVE);
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_NCMOUSELEAVE);
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_NCHITTEST);
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_NCLBUTTONDOWN);
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_NCUAHDRAWCAPTION);
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_NCUAHDRAWFRAME);
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_SETTEXT);
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_WINDOWPOSCHANGED);
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_CONTEXTMENU);
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_STYLECHANGED);
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_SETICON);
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_NCDESTROY);
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_SYSCOMMAND);
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_CTLCOLORMSGBOX);
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_CTLCOLORBTN);
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_CTLCOLORSTATIC);
+
+	UAH_HOOK_MESSAGE(puah->WndProcArray, WM_CREATE);
+	UAH_HOOK_MESSAGE(puah->WndProcArray, WM_SETTINGCHANGE);
+	UAH_HOOK_MESSAGE(puah->WndProcArray, WM_DRAWITEM);
+	UAH_HOOK_MESSAGE(puah->WndProcArray, WM_MEASUREITEM);
+	UAH_HOOK_MESSAGE(puah->WndProcArray, WM_WINDOWPOSCHANGING);
+	UAH_HOOK_MESSAGE(puah->WndProcArray, WM_WINDOWPOSCHANGED);
+	UAH_HOOK_MESSAGE(puah->WndProcArray, WM_STYLECHANGING);
+	UAH_HOOK_MESSAGE(puah->WndProcArray, WM_STYLECHANGED);
+	UAH_HOOK_MESSAGE(puah->WndProcArray, WM_NCCREATE);
+	UAH_HOOK_MESSAGE(puah->WndProcArray, WM_NCDESTROY);
+	UAH_HOOK_MESSAGE(puah->WndProcArray, WM_NCPAINT);
+	UAH_HOOK_MESSAGE(puah->WndProcArray, WM_MENUCHAR);
+	UAH_HOOK_MESSAGE(puah->WndProcArray, WM_MDISETMENU);
+	UAH_HOOK_MESSAGE(puah->WndProcArray, WM_THEMECHANGED);
+	UAH_HOOK_MESSAGE(puah->WndProcArray, WM_UAHINIT);
+
+	puah->DlgProcArray.MsgBitArray = gabDLGPmessages;
+	puah->DlgProcArray.Size = UAHOWP_MAX_SIZE;
+
+	UAH_HOOK_MESSAGE(puah->DlgProcArray, WM_INITDIALOG);
+	UAH_HOOK_MESSAGE(puah->DlgProcArray, WM_CTLCOLORMSGBOX);
+	UAH_HOOK_MESSAGE(puah->DlgProcArray, WM_CTLCOLORBTN);
+	UAH_HOOK_MESSAGE(puah->DlgProcArray, WM_CTLCOLORDLG);
+	UAH_HOOK_MESSAGE(puah->DlgProcArray, WM_CTLCOLORSTATIC);
+	UAH_HOOK_MESSAGE(puah->DlgProcArray, WM_PRINTCLIENT);
+
+	return TRUE;
+}
+
+/* * * *\
+	NtStyleRemoveUserHook -
+		Initialize the User32 API hook.
+\* * * */
+__declspec(dllexport) BOOL CALLBACK NtStyleRemoveUserHook(UAPIHK State, PUSERAPIHOOK pu)
+{
+	return UnregisterUserApiHook();
+}
+
+static LRESULT CALLBACK NtStyleDefWindowProcA(
+	_In_ HWND hWnd,
+	_In_ UINT Msg,
+	_In_ WPARAM wParam,
+	_In_ LPARAM lParam)
+{
+	return g_user32ApiHook.DefWindowProcA(hWnd, Msg, wParam, lParam);
+}
+
+static LRESULT CALLBACK NtStyleDefWindowProcW(
+	_In_ HWND hWnd,
+	_In_ UINT Msg,
+	_In_ WPARAM wParam,
+	_In_ LPARAM lParam)
+{
+	return g_user32ApiHook.DefWindowProcW(hWnd, Msg, wParam, lParam);
+}
+
+static LRESULT CALLBACK NtStylePreWindowProc()
+{
+	return 0;
+}
+
+static LRESULT CALLBACK NtStylePostWindowProc()
+{
+	return 0;
+}
+
+static LRESULT CALLBACK NtStyleDlgPreWindowProc()
+{
+	return 0;
+}
+
+static LRESULT CALLBACK NtStyleDlgPostWindowProc()
+{
+	return 0;
+}
+
+static LRESULT CALLBACK NtStyleSetWindowRgn()
+{
+	return 0;
+}
+
+static LRESULT CALLBACK NtStyleGetScrollInfo()
+{
+	return 0;
+}
+
+static LRESULT CALLBACK NtStyleSetScrollInfo()
+{
+	return 0;
 }

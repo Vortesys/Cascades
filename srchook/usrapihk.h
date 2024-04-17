@@ -3,8 +3,8 @@
 		Copyright © 2024 Brady McDermott, Vortesys
 	DESCRIPTION -
 		User32 UserApiHook function prototypes. Info
-		sourced primarily from the ReactOS wiki and
-		Mozilla's bug tracker.
+		and structures sourced primarily from the ReactOS
+		wiki, source code and Mozilla's bug tracker.
 	LICENSE INFORMATION -
 		MIT License, see LICENSE.txt in the root folder
 \* * * * * * * */
@@ -14,6 +14,19 @@
 
 /* Includes */
 #include <wtypes.h>
+
+/* Definitions */
+#define WM_UAHINIT			0x0000031b
+#define WM_UAHDRAWMENU		0x00000091
+#define WM_UAHDRAWITEM		0x00000092 // WM_DRAWITEM
+#define WM_UAHINITMENU		0x00000093
+#define WM_UAHMEASUREITEM	0x00000094 // WM_MEASUREITEM
+#define WM_UAHDRAWMENUNC	0x00000095
+#define WM_NCUAHDRAWCAPTION	0x000000AE
+#define WM_NCUAHDRAWFRAME	0x000000AF
+#define UAH_HOOK_MESSAGE(uahowp, msg) uahowp.MsgBitArray[msg/8] |= (1 << (msg % 8));
+#define UAH_IS_MESSAGE_HOOKED(uahowp, msg) (uahowp.MsgBitArray[msg/8] & (1 << (msg % 8)))
+#define UAHOWP_MAX_SIZE WM_USER/8
 
 /* Structures */
 typedef struct _USERAPIHOOKINFO
@@ -66,6 +79,3 @@ typedef enum _UAPIHK
 	uahStop,
 	uahShutdown
 } UAPIHK, * PUAPIHK;
-
-/* Function Prototypes */
-BOOL WINAPI RegisterUserApiHook(PUSERAPIHOOKINFO ApiHookInfo);

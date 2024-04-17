@@ -27,7 +27,7 @@
     <ClInclude Include="oebitmap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ntsdrfn.h">
+    <ClInclude Include="draw.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="usrapihk.h">
@@ -41,10 +41,7 @@
     <ClCompile Include="delayfnc.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ntsdrfn.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="usrapihk.c">
+    <ClCompile Include="draw.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

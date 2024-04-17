@@ -196,7 +196,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="ntsdrfn.h" />
+    <ClInclude Include="draw.h" />
     <ClInclude Include="ntshook.h" />
     <ClInclude Include="oebitmap.h" />
     <ClInclude Include="resource.h" />
@@ -204,9 +204,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="delayfnc.c" />
-    <ClCompile Include="ntsdrfn.c" />
+    <ClCompile Include="draw.c" />
     <ClCompile Include="ntshook.c" />
-    <ClCompile Include="usrapihk.c" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />

@@ -32,3 +32,5 @@ __declspec(dllexport) VOID APIENTRY NtStyleDisableWindowTheme(_In_ HWND hWnd);
 HRESULT DwmGetWindowAttributeDelay(HWND hwnd, DWORD dwAttribute, _In_ LPCVOID pvAttribute, DWORD cbAttribute);
 HRESULT DwmSetWindowAttributeDelay(HWND hwnd, DWORD dwAttribute, _In_ LPCVOID pvAttribute, DWORD cbAttribute);
 HRESULT SetWindowThemeDelay(_In_ HWND hwnd, _In_ LPCWSTR pszSubAppName, _In_ LPCWSTR pszSubIdList);
+BOOL WINAPI RegisterUserApiHook(PUSERAPIHOOKINFO ApiHookInfo);
+BOOL WINAPI UnregisterUserApiHook(VOID);

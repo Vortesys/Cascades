@@ -51,7 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="ntstyle.exe.manifest">
-      <Filter>Source Files</Filter>
+      <Filter>Resource Files</Filter>
     </Manifest>
   </ItemGroup>
 </Project>
