@@ -45,7 +45,7 @@ int WINAPI wWinMain(
 
 	// Create our main window dialog
 	InitCommonControls();
-	hDlg = CreateDialogParam(g_hAppInstance, MAKEINTRESOURCE(IDD_MAIN), 0, NTStyleDialogProc, 0);
+	hDlg = CreateDialogParam(g_hAppInstance, MAKEINTRESOURCE(IDD_MAIN), 0, NtStyleDialogProc, 0);
 	ShowWindow(hDlg, nCmdShow);
 
 	// Get some system information to determine what
@@ -68,10 +68,10 @@ int WINAPI wWinMain(
 }
 
 /* * * *\
-	NTStyleCreateHook -
+	NtStyleCreateHook -
 		NT Style's hook creation function.
 \* * * */
-DWORD NTStyleCreateHook(
+DWORD NtStyleCreateHook(
 	_In_ HINSTANCE hInst,
 	_In_ LPWSTR lpNTStyleHook,
 	_In_ BOOL bDisableTheming,
@@ -89,7 +89,7 @@ DWORD NTStyleCreateHook(
 
 	// Get the hook procedure of NTShook
 	if (hDllInstance)
-		hkprc = (HOOKPROC)GetProcAddress(hDllInstance, "NTStyleHookProc");
+		hkprc = (HOOKPROC)GetProcAddress(hDllInstance, "NtStyleHookProc");
 	else
 		dwLastError = GetLastError();
 
@@ -101,7 +101,7 @@ DWORD NTStyleCreateHook(
 
 	// Enumerate the existing windows and get them dwm-free :fire:
 	if (bDisableTheming)
-		EnumWindows(&NTStyleEnumWindowProc, (LPARAM)hDllInstance);
+		EnumWindows(&NtStyleEnumWindowProc, (LPARAM)hDllInstance);
 
 	if (hDllInstance)
 		FreeLibrary(hDllInstance);
@@ -110,17 +110,17 @@ DWORD NTStyleCreateHook(
 }
 
 /* * * *\
-	NTStyleEnumWindowProc -
+	NtStyleEnumWindowProc -
 		NT Style's window enumeration procedure.
 \* * * */
-BOOL CALLBACK NTStyleEnumWindowProc(
+BOOL CALLBACK NtStyleEnumWindowProc(
 	_In_ HWND hwnd,
 	_In_ LPARAM lParam
 )
 {
 	if ((HMODULE)lParam != NULL)
 	{
-		FARPROC fLib = GetProcAddress((HMODULE)lParam, "NTStyleDisableWindowTheme");
+		FARPROC fLib = GetProcAddress((HMODULE)lParam, "NtStyleDisableWindowTheme");
 		fLib(hwnd);
 
 		return TRUE;

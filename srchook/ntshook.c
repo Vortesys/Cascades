@@ -44,11 +44,11 @@ BOOL APIENTRY DllMain(
 }
 
 /* * * *\
-	NTStyleHookProc -
+	NtStyleHookProc -
 		NT Style Hook procedure
 		Uses WH_CALLWNDPROC.
 \* * * */
-__declspec(dllexport) LRESULT APIENTRY NTStyleHookProc(
+__declspec(dllexport) LRESULT APIENTRY NtStyleHookProc(
 	_In_ UINT uMsg,
 	_In_ WPARAM wParam,
 	_In_ LPARAM lParam
@@ -65,24 +65,6 @@ __declspec(dllexport) LRESULT APIENTRY NTStyleHookProc(
 
 		switch (pcwps->message)
 		{
-		// Drawing Messages
-		case WM_CREATE:
-			NTStyleDisableWindowTheme(pcwps->hwnd);
-		case WM_DISPLAYCHANGE:
-		case WM_SYNCPAINT:
-		case WM_ACTIVATE:
-		case WM_SETTEXT:
-		case WM_PAINT:
-		case WM_MOVE:
-			NTStyleDrawWindow(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
-			break;
-
-		case WM_NCACTIVATE:
-		case WM_NCCALCSIZE:
-		case WM_NCPAINT:
-			NTStyleDrawWindow(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
-			return 0;
-		
 		// Collision Messages
 			/*
 		case WM_NCLBUTTONUP:
@@ -110,21 +92,10 @@ __declspec(dllexport) LRESULT APIENTRY NTStyleHookProc(
 }
 
 /* * * *\
-	NTStyleSetHook -
-		NT Style Hook hook so
-		that we can actually
-		WOW these programs.
-\* * * */
-__declspec(dllexport) HHOOK APIENTRY NTStyleSetHook(_In_ INT idHook, _In_ HOOKPROC lpfn, _In_ HINSTANCE hmod, _In_ DWORD dwThreadId)
-{
-	return SetWindowsHookEx(idHook, lpfn, hmod, dwThreadId);
-}
-
-/* * * *\
-	NTStyleDisableWindowTheme -
+	NtStyleDisableWindowTheme -
 		de-themify that window
 \* * * */
-__declspec(dllexport) VOID APIENTRY NTStyleDisableWindowTheme(_In_ HWND hWnd)
+__declspec(dllexport) VOID APIENTRY NtStyleDisableWindowTheme(_In_ HWND hWnd)
 {
 	enum DWMNCRENDERINGPOLICY ncrp = DWMNCRP_DISABLED;
 
