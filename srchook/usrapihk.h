@@ -69,4 +69,3 @@ typedef enum _UAPIHK
 
 /* Function Prototypes */
 BOOL WINAPI RegisterUserApiHook(PUSERAPIHOOKINFO ApiHookInfo);
-DWORD CALLBACK UserApiHookProc(UAPIHK State, PUSERAPIHOOK Info);

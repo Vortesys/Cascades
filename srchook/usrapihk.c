@@ -32,4 +32,3 @@ BOOL WINAPI RegisterUserApiHook(PUSERAPIHOOKINFO ApiHookInfo)
 
 	return FALSE;
 }
-DWORD CALLBACK UserApiHookProc(UAPIHK State, PUSERAPIHOOK Info);
