@@ -10,10 +10,12 @@
 /* Headers */
 #include "ntstyle.h"
 #include "resource.h"
+#include "..\common\usrapihk.h"
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <CommCtrl.h>
 
+/* Variables */
 // Handles
 HINSTANCE	g_hAppInstance;
 HHOOK		g_hhkNTShk32 = NULL;
@@ -21,7 +23,7 @@ HHOOK		g_hhkNTShk64 = NULL;
 // Strings
 WCHAR		g_szAppTitle[64];
 // Other
-BOOL g_bSystem64 = TRUE;
+BOOL		g_bSystem64 = TRUE;
 
 /* Functions */
 
@@ -71,42 +73,46 @@ int WINAPI wWinMain(
 	NtStyleCreateHook -
 		NT Style's hook creation function.
 \* * * */
-DWORD NtStyleCreateHook(
-	_In_ HINSTANCE hInst,
-	_In_ LPWSTR lpNTStyleHook,
-	_In_ BOOL bDisableTheming,
-	_Out_ HHOOK hhkNTShk
-)
+DWORD NtStyleCreateHook()
 {
-	HINSTANCE hDllInstance = NULL;
-	HOOKPROC hkprc = NULL;
-	DWORD dwLastError = 0;
+	HMODULE hLib = LoadLibrary(L"ntshk64.dll");
+	BOOL bRet = 0;
 
-	hhkNTShk = NULL;
+	if (hLib)
+	{
+		FARPROC fLib = GetProcAddress(hLib, "RegisterUserApiHook");
 
-	// Load the hook DLL
-	hDllInstance = LoadLibrary(lpNTStyleHook);
+		bRet = (BOOL)fLib(ApiHookInfo);
 
-	// Get the hook procedure of NTShook
-	if (hDllInstance)
-		hkprc = (HOOKPROC)GetProcAddress(hDllInstance, "NtStyleHookProc");
-	else
-		dwLastError = GetLastError();
+		FreeLibrary(hLib);
 
-	// Establish our hook
-	if (hkprc)
-		hhkNTShk = SetWindowsHookEx(WH_CALLWNDPROC, hkprc, hDllInstance, 0);
-	else
-		dwLastError = GetLastError();
+		return bRet;
+	}
 
-	// Enumerate the existing windows and get them dwm-free :fire:
-	if (bDisableTheming)
-		EnumWindows(&NtStyleEnumWindowProc, (LPARAM)hDllInstance);
+	return FALSE;
+}
 
-	if (hDllInstance)
-		FreeLibrary(hDllInstance);
+/* * * *\
+	NtStyleRemoveHook -
+		NT Style's hook removal function.
+\* * * */
+DWORD NtStyleRemoveHook()
+{
+	HMODULE hLib = LoadLibrary(L"ntshk64.dll");
+	BOOL bRet = 0;
 
-	return dwLastError;
+	if (hLib)
+	{
+		FARPROC fLib = GetProcAddress(hLib, "RegisterUserApiHook");
+
+		bRet = (BOOL)fLib(ApiHookInfo);
+
+		FreeLibrary(hLib);
+
+		return bRet;
+	}
+
+	return FALSE;
 }
 
 /* * * *\

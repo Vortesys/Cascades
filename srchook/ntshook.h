@@ -27,6 +27,9 @@ __declspec(dllexport) LRESULT APIENTRY NtStyleHookProc(_In_ UINT uMsg, _In_ WPAR
 
 // Functions
 __declspec(dllexport) VOID APIENTRY NtStyleDisableWindowTheme(_In_ HWND hWnd);
+__declspec(dllexport) BOOL CALLBACK NtStyleInstallUserHook();
+__declspec(dllexport) BOOL CALLBACK NtStyleInitUserHook(UAPIHK State, PUSERAPIHOOK puah);
+__declspec(dllexport) BOOL CALLBACK NtStyleRemoveUserHook();
 static LRESULT CALLBACK NtStyleDefWindowProcA(_In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam, _In_ LPARAM lParam);
 static LRESULT CALLBACK NtStyleDefWindowProcW(_In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam, _In_ LPARAM lParam);
 static LRESULT CALLBACK NtStyleDlgPreWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam, ULONG_PTR ret, PDWORD unknown);

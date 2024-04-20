@@ -2,7 +2,6 @@ LIBRARY
 EXPORTS
     NtStyleDisableWindowTheme @1
     NtStyleHookProc @2
-    NtStyleSetHook @4
-    NtStyleInstallUserHook @8
-    NtStyleInitUserHook @16
-    NtStyleRemoveUserHook @32
+    NtStyleInstallUserHook @4
+    NtStyleInitUserHook @8
+    NtStyleRemoveUserHook @16

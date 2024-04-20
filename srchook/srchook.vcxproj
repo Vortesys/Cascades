@@ -200,7 +200,6 @@
     <ClInclude Include="ntshook.h" />
     <ClInclude Include="oebitmap.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="usrapihk.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="delayfnc.c" />
@@ -212,7 +211,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ntshook.def" />
-    <None Include="version.inc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

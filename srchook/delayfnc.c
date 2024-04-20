@@ -11,7 +11,7 @@
 
  /* Headers */
 #include "ntshook.h"
-#include "usrapihk.h"
+#include "..\common\usrapihk.h"
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 

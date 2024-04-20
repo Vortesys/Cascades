@@ -12,7 +12,7 @@
 /* Headers */
 #include "ntshook.h"
 #include "draw.h"
-#include "usrapihk.h"
+#include "..\common\usrapihk.h"
 #include "resource.h"
 #include <dwmapi.h>
 #include <uxtheme.h>
@@ -243,7 +243,7 @@ __declspec(dllexport) BOOL CALLBACK NtStyleInitUserHook(UAPIHK State, PUSERAPIHO
 	NtStyleRemoveUserHook -
 		Initialize the User32 API hook.
 \* * * */
-__declspec(dllexport) BOOL CALLBACK NtStyleRemoveUserHook(UAPIHK State, PUSERAPIHOOK pu)
+__declspec(dllexport) BOOL CALLBACK NtStyleRemoveUserHook()
 {
 	return UnregisterUserApiHook();
 }
