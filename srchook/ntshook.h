@@ -15,6 +15,7 @@
 
 /* Includes */
 #include <wtypes.h>
+#include "..\common\usrapihk.h"
 
 /* Definitions */
 #define STATUS_UNSUCCESSFUL 0xC0000001
@@ -32,6 +33,8 @@ __declspec(dllexport) BOOL CALLBACK NtStyleInitUserHook(UAPIHK State, PUSERAPIHO
 __declspec(dllexport) BOOL CALLBACK NtStyleRemoveUserHook();
 static LRESULT CALLBACK NtStyleDefWindowProcA(_In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam, _In_ LPARAM lParam);
 static LRESULT CALLBACK NtStyleDefWindowProcW(_In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam, _In_ LPARAM lParam);
+static LRESULT CALLBACK NtStylePreWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam, ULONG_PTR ret, PDWORD unknown);
+static LRESULT CALLBACK NtStylePostWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam, ULONG_PTR ret, PDWORD unknown);
 static LRESULT CALLBACK NtStyleDlgPreWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam, ULONG_PTR ret, PDWORD unknown);
 static LRESULT CALLBACK NtStyleDlgPostWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam, ULONG_PTR ret, PDWORD unknown);
 static LRESULT CALLBACK NtStyleSetWindowRgn(HWND hWnd, HRGN hRgn, BOOL bRedraw);

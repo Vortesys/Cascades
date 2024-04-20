@@ -70,42 +70,24 @@ int WINAPI wWinMain(
 }
 
 /* * * *\
-	NtStyleCreateHook -
-		NT Style's hook creation function.
+	NtStyleToggleHook -
+		NT Style's hook creation and removal function.
 \* * * */
-DWORD NtStyleCreateHook()
+BOOL NtStyleToggleHook(BOOL bInstall)
 {
 	HMODULE hLib = LoadLibrary(L"ntshk64.dll");
 	BOOL bRet = 0;
 
 	if (hLib)
 	{
-		FARPROC fLib = GetProcAddress(hLib, "RegisterUserApiHook");
+		FARPROC fLib;
 
-		bRet = (BOOL)fLib(ApiHookInfo);
+		if (bInstall)
+			fLib = GetProcAddress(hLib, "NtStyleInstallUserHook");
+		else
+			fLib = GetProcAddress(hLib, "NtStyleRemoveUserHook");
 
-		FreeLibrary(hLib);
-
-		return bRet;
-	}
-
-	return FALSE;
-}
-
-/* * * *\
-	NtStyleRemoveHook -
-		NT Style's hook removal function.
-\* * * */
-DWORD NtStyleRemoveHook()
-{
-	HMODULE hLib = LoadLibrary(L"ntshk64.dll");
-	BOOL bRet = 0;
-
-	if (hLib)
-	{
-		FARPROC fLib = GetProcAddress(hLib, "RegisterUserApiHook");
-
-		bRet = (BOOL)fLib(ApiHookInfo);
+		bRet = (BOOL)fLib();
 
 		FreeLibrary(hLib);
 

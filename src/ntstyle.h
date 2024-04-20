@@ -27,8 +27,7 @@ extern BOOL			g_bSystem64;
 /* Function Prototypes */
 // NTSTYLE.C
 BOOL CALLBACK NtStyleEnumWindowProc(_In_ HWND hwnd, _In_ LPARAM lParam);
-DWORD NtStyleCreateHook();
-DWORD NtStyleRemoveHook();
+BOOL NtStyleToggleHook(BOOL bInstall);
 
 // DLGPROC.C
 INT_PTR CALLBACK NtStyleDialogProc(_In_ HWND hDlg, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam);
