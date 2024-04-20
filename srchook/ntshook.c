@@ -7,7 +7,7 @@
 		implementation of UxTheme.
 	LICENSE INFORMATION -
 		MIT License, see LICENSE.txt in the root folder
- \* * * * * * * */
+\* * * * * * * */
 
 /* Headers */
 #include "ntshook.h"
@@ -44,58 +44,6 @@ BOOL APIENTRY DllMain(
 		break;
 	}
 	return TRUE;
-}
-
-/* * * *\
-	NtStyleHookProc -
-		NT Style Hook procedure
-		Uses WH_CALLWNDPROC.
-\* * * */
-__declspec(dllexport) LRESULT APIENTRY NtStyleHookProc(
-	_In_ UINT uMsg,
-	_In_ WPARAM wParam,
-	_In_ LPARAM lParam
-)
-{
-	PCWPSTRUCT pcwps;
-
-	// Switch case for window painting
-	switch (uMsg)
-	{
-	/* BEGIN HC_ACTION */
-	case HC_ACTION:
-		pcwps = (CWPSTRUCT*)lParam;
-
-		switch (pcwps->message)
-		{
-		//case WM_CREATE:
-		//	NTStyleDisableWindowTheme(pcwps->hwnd);
-		//	break;
-
-		// Collision Messages
-			/*
-		case WM_NCLBUTTONUP:
-			break;
-			
-		case WM_NCLBUTTONDBLCLK:
-			break;
-			
-		case WM_NCRBUTTONUP:
-			break;
-			
-		case WM_NCHITTEST:
-			break;*/
-
-		default:
-			break;
-		}
-	/* END HC_ACTION */
-
-	default:
-		break;
-	}
-
-	return CallNextHookEx(NULL, uMsg, wParam, lParam);
 }
 
 /* * * *\
@@ -146,14 +94,10 @@ __declspec(dllexport) BOOL CALLBACK NtStyleInstallUserHook()
 	USERAPIHOOKINFO uah;
 
 	uah.m_size = sizeof(uah);
-	uah.m_dllname1 = L"ntshk64.dll";
-	uah.m_funname1 = L"NtStyleInitUserHook";
-	uah.m_dllname2 = NULL;
-	uah.m_funname2 = NULL;
-	//uah.m_dllname1 = NULL;
-	//uah.m_funname1 = NULL;
-	//uah.m_dllname2 = L"ntshk64.dll";
-	//uah.m_funname2 = L"NtStyleInitUserHook";
+	uah.m_dllname1 = NULL;
+	uah.m_funname1 = NULL;
+	uah.m_dllname2 = L"ntshk64.dll";
+	uah.m_funname2 = L"NtStyleInitUserHook";
 
 	return RegisterUserApiHook(&uah);
 }
@@ -258,7 +202,7 @@ static LRESULT CALLBACK NtStyleDefWindowProcA(
 	_In_ WPARAM wParam,
 	_In_ LPARAM lParam)
 {
-	return g_user32ApiHook.DefWindowProcA(hWnd, Msg, wParam, lParam);
+	return NtStyleWndProc(hWnd, Msg, wParam, lParam, g_user32ApiHook.DefWindowProcA);
 }
 
 /* * * *\
@@ -271,7 +215,7 @@ static LRESULT CALLBACK NtStyleDefWindowProcW(
 	_In_ WPARAM wParam,
 	_In_ LPARAM lParam)
 {
-	return g_user32ApiHook.DefWindowProcW(hWnd, Msg, wParam, lParam);
+	return NtStyleWndProc(hWnd, Msg, wParam, lParam, g_user32ApiHook.DefWindowProcW);
 }
 
 /* * * *\
@@ -280,6 +224,14 @@ static LRESULT CALLBACK NtStyleDefWindowProcW(
 \* * * */
 static LRESULT CALLBACK NtStylePreWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam, ULONG_PTR ret, PDWORD unknown)
 {
+	// TODO: SET/CHECK/MODIFY WINDOW REGION - ELIMINATE UGLY BASIC CORNERS!!!
+	switch (Msg)
+	{
+	case WM_CREATE:
+		NtStyleDisableWindowTheme(hWnd);
+		break;
+	}
+
 	return 0;
 }
 
@@ -337,4 +289,68 @@ static LRESULT CALLBACK NtStyleGetScrollInfo(HWND hwnd, int fnBar, LPSCROLLINFO 
 static LRESULT CALLBACK NtStyleSetScrollInfo(HWND hWnd, int fnBar, LPCSCROLLINFO lpsi, BOOL bRedraw)
 {
 	return g_user32ApiHook.SetScrollInfo(hWnd, fnBar, lpsi, bRedraw);
+}
+
+/* * * *\
+	NtStyleWndProc -
+		NT Style's Window Procedure functions.
+\* * * */
+LRESULT CALLBACK NtStyleWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam, WNDPROC DefWndProc)
+{
+	switch (Msg)
+	{
+	case WM_NCPAINT:
+		//
+		// WM_NCUAHDRAWCAPTION : wParam are DC_* flags.
+		//
+	case WM_NCUAHDRAWCAPTION:
+		//
+		// WM_NCUAHDRAWFRAME : wParam is HDC, lParam are DC_ACTIVE and or DC_REDRAWHUNGWND.
+		//
+	case WM_NCUAHDRAWFRAME:
+	case WM_NCACTIVATE:
+		//if ((GetWindowLongW(hWnd, GWL_STYLE) & WS_CAPTION) != WS_CAPTION)
+			//return TRUE;
+		//return TRUE;
+	case WM_NCMOUSEMOVE:
+	case WM_NCMOUSELEAVE:
+	case WM_NCLBUTTONDOWN:
+		//switch (wParam)
+		//{
+		//case HTMINBUTTON:
+		//case HTMAXBUTTON:
+		//case HTCLOSE:
+		//{
+			//ThemeHandleButton(hWnd, wParam);
+			//return 0;
+		//}
+		//default:
+			//return DefWndProc(hWnd, Msg, wParam, lParam);
+		//}
+	//case WM_NCHITTEST:
+	//{
+		//POINT Point;
+		//Point.x = GET_X_LPARAM(lParam);
+		//Point.y = GET_Y_LPARAM(lParam);
+		//return DefWndNCHitTest(hWnd, Point);
+	//}
+	case WM_SYSCOMMAND:
+	//{
+		//if ((wParam & 0xfff0) == SC_VSCROLL ||
+			//(wParam & 0xfff0) == SC_HSCROLL)
+		//{
+			//POINT Pt;
+			//Pt.x = (short)LOWORD(lParam);
+			//Pt.y = (short)HIWORD(lParam);
+			//NC_TrackScrollBar(hWnd, wParam, Pt);
+			//return 0;
+		//}
+		//else
+		//{
+			return DefWndProc(hWnd, Msg, wParam, lParam);
+		//}
+	//}
+	default:
+		return DefWndProc(hWnd, Msg, wParam, lParam);
+	}
 }

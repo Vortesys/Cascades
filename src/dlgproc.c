@@ -5,7 +5,7 @@
 		NT Style's primary dialog procedures.
 	LICENSE INFORMATION -
 		MIT License, see LICENSE.txt in the root folder
- \* * * * * * * */
+\* * * * * * * */
 
 /* Headers */
 #include "ntstyle.h"
@@ -43,7 +43,7 @@ INT_PTR CALLBACK NtStyleDialogProc(
 		{
 			if (NtStyleToggleHook(TRUE))
 			{
-				MessageBox(hDlg, L"Started NT Style.", L"NT Style (AMD64)",
+				MessageBox(hDlg, L"Started NT Style.", L"NT Style",
 					MB_OK | MB_ICONINFORMATION | MB_DEFAULT_DESKTOP_ONLY);
 
 				Button_Enable(GetDlgItem(hDlg, IDC_START), FALSE);
@@ -51,7 +51,7 @@ INT_PTR CALLBACK NtStyleDialogProc(
 			}
 			else
 			{
-				MessageBox(hDlg, L"Failed to start NT Style.", L"NT Style (AMD64)",
+				MessageBox(hDlg, L"Failed to start NT Style.", L"NT Style",
 					MB_OK | MB_ICONINFORMATION | MB_DEFAULT_DESKTOP_ONLY);
 			}
 
@@ -66,7 +66,7 @@ INT_PTR CALLBACK NtStyleDialogProc(
 			}
 			else
 			{
-				MessageBox(hDlg, L"Failed to stop NT Style.", L"NT Style (AMD64)",
+				MessageBox(hDlg, L"Failed to stop NT Style.", L"NT Style",
 					MB_OK | MB_ICONINFORMATION | MB_DEFAULT_DESKTOP_ONLY);
 			}
 

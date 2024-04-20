@@ -7,7 +7,7 @@
 		Vista. Also contains the RegisterUserApiHook.
 	LICENSE INFORMATION -
 		MIT License, see LICENSE.txt in the root folder
- \* * * * * * * */
+\* * * * * * * */
 
  /* Headers */
 #include "ntshook.h"
