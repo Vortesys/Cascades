@@ -32,10 +32,10 @@
 typedef struct _USERAPIHOOKINFO
 {
 	DWORD	m_size;
-	LPCWSTR	m_dllname1; // DLL 1
 	LPCWSTR	m_funname1; // Callback function
-	LPCWSTR	m_dllname2; // DLL 2
+	LPCWSTR	m_dllname1; // DLL 1
 	LPCWSTR	m_funname2; // Callback function
+	LPCWSTR	m_dllname2; // DLL 2
 } USERAPIHOOKINFO, * PUSERAPIHOOKINFO;
 
 typedef LRESULT(CALLBACK* WNDPROC_OWP)(HWND, UINT, WPARAM, LPARAM, ULONG_PTR, PDWORD);
