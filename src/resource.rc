@@ -24,7 +24,7 @@ IDI_MAIN	ICON	icons\ntstyle.ico
 
 /* Version Information */
 #define APSTUDIO_HIDDEN_SYMBOLS
-#define VER_FILEDESCRIPTION_STR     "NT Style"
+#define VER_FILEDESCRIPTION_STR     "NT Style theming utility for Windows."
 #define VER_INTERNALNAME_STR        "ntstyle\0"
 #define VER_ORIGINALFILENAME_STR    "NTSTYLE.EXE"
 #define VER_PRODUCTNAME_STR         "NT Style"
