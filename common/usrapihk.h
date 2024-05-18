@@ -31,7 +31,6 @@
 /* Structures */
 typedef struct _USERAPIHOOKINFO
 {
-	DWORD	m_size;
 	LPCWSTR	m_funname1; // Callback function
 	LPCWSTR	m_dllname1; // DLL 1
 	LPCWSTR	m_funname2; // Callback function
