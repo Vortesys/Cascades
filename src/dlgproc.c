@@ -5,7 +5,7 @@
 		NT Style's primary dialog procedures.
 	LICENSE INFORMATION -
 		MIT License, see LICENSE.txt in the root folder
- \* * * * * * * */
+\* * * * * * * */
 
 /* Headers */
 #include "ntstyle.h"
@@ -17,10 +17,10 @@
 /* Functions */
 
 /* * * *\
-	NTStyleDialogProc -
+	NtStyleDialogProc -
 		NT Style's dialog procedure.
 \* * * */
-INT_PTR CALLBACK NTStyleDialogProc(
+INT_PTR CALLBACK NtStyleDialogProc(
 	_In_ HWND hDlg,
 	_In_ UINT uMsg,
 	_In_ WPARAM wParam,
@@ -41,44 +41,34 @@ INT_PTR CALLBACK NTStyleDialogProc(
 
 		case IDC_START:
 		{
-			DWORD dwLastError = 0;
-
-			if (g_bSystem64)
-				dwLastError = NTStyleCreateHook(g_hAppInstance, L"ntshk64.dll",
-					(Button_GetCheck(GetDlgItem(hDlg, IDC_THEMEOFF)) == BST_CHECKED), g_hhkNTShk64);
-
-			// load that 32 bit ish
-			dwLastError = NTStyleCreateHook(g_hAppInstance, L"ntshk32.dll",
-				(Button_GetCheck(GetDlgItem(hDlg, IDC_THEMEOFF)) == BST_CHECKED), g_hhkNTShk32);
-
-			if (g_hhkNTShk32 || g_hhkNTShk64)
+			if (NtStyleToggleHook(TRUE))
 			{
-				// Start NT Style
-				if (!g_hhkNTShk32)
-					MessageBox(hDlg, L"Started NT Style.", L"NT Style (AMD64)",
-						MB_OK | MB_ICONINFORMATION | MB_DEFAULT_DESKTOP_ONLY);
-				else if (!g_hhkNTShk64)
-					MessageBox(hDlg, L"Started NT Style.", L"NT Style (IA32)",
-						MB_OK | MB_ICONINFORMATION | MB_DEFAULT_DESKTOP_ONLY);
-				else
-					MessageBox(hDlg, L"Started NT Style.", L"NT Style (AMD64 + WOW)",
-						MB_OK | MB_ICONINFORMATION | MB_DEFAULT_DESKTOP_ONLY);
-			}
+				MessageBox(hDlg, L"Started NT Style.", L"NT Style",
+					MB_OK | MB_ICONINFORMATION | MB_DEFAULT_DESKTOP_ONLY);
 
-			Button_Enable(GetDlgItem(hDlg, IDC_START), FALSE);
-			Button_Enable(GetDlgItem(hDlg, IDC_STOP), TRUE);
+				Button_Enable(GetDlgItem(hDlg, IDC_START), FALSE);
+				Button_Enable(GetDlgItem(hDlg, IDC_STOP), TRUE);
+			}
+			else
+			{
+				MessageBox(hDlg, L"Failed to start NT Style.", L"NT Style",
+					MB_OK | MB_ICONINFORMATION | MB_DEFAULT_DESKTOP_ONLY);
+			}
 
 			return 0;
 		}
 
 		case IDC_STOP:
-			if (g_hhkNTShk32)
-				UnhookWindowsHookEx(g_hhkNTShk32);
-			if (g_hhkNTShk64)
-				UnhookWindowsHookEx(g_hhkNTShk64);
-
-			Button_Enable(GetDlgItem(hDlg, IDC_START), TRUE);
-			Button_Enable(GetDlgItem(hDlg, IDC_STOP), FALSE);
+			if (NtStyleToggleHook(FALSE))
+			{
+				Button_Enable(GetDlgItem(hDlg, IDC_START), FALSE);
+				Button_Enable(GetDlgItem(hDlg, IDC_STOP), TRUE);
+			}
+			else
+			{
+				MessageBox(hDlg, L"Failed to stop NT Style.", L"NT Style",
+					MB_OK | MB_ICONINFORMATION | MB_DEFAULT_DESKTOP_ONLY);
+			}
 
 			return 0;
 		}

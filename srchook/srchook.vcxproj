@@ -196,14 +196,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="ntsdrfn.h" />
+    <ClInclude Include="draw.h" />
     <ClInclude Include="ntshook.h" />
     <ClInclude Include="oebitmap.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ntsdlfn.c" />
-    <ClCompile Include="ntsdrfn.c" />
+    <ClCompile Include="delayfnc.c" />
+    <ClCompile Include="draw.c" />
     <ClCompile Include="ntshook.c" />
   </ItemGroup>
   <ItemGroup>
@@ -211,7 +211,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ntshook.def" />
-    <None Include="version.inc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

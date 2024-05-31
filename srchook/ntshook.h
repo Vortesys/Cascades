@@ -15,18 +15,36 @@
 
 /* Includes */
 #include <wtypes.h>
+#include "..\common\usrapihk.h"
+
+/* Definitions */
+#define STATUS_UNSUCCESSFUL 0xC0000001
 
 /* Global Variables */
 
 /* Function Prototypes */
-// Hook Procedure
-__declspec(dllexport) LRESULT APIENTRY NTStyleHookProc(_In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam);
-__declspec(dllexport) HHOOK APIENTRY NTStyleSetHook(_In_ INT idHook, _In_ HOOKPROC lpfn, _In_ HINSTANCE hmod, _In_ DWORD dwThreadId);
+__declspec(dllexport) VOID APIENTRY NtStyleDisableWindowTheme(_In_ HWND hWnd);
 
-// Functions
-__declspec(dllexport) VOID APIENTRY NTStyleDisableWindowTheme(_In_ HWND hWnd);
+// Hook Functions
+__declspec(dllexport) BOOL CALLBACK NtStyleInstallUserHook();
+__declspec(dllexport) BOOL CALLBACK NtStyleInitUserHook(UAPIHK State, PUSERAPIHOOK puah);
+__declspec(dllexport) BOOL CALLBACK NtStyleRemoveUserHook();
+
+// Window Management
+static LRESULT CALLBACK NtStyleDefWindowProcA(_In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam, _In_ LPARAM lParam);
+static LRESULT CALLBACK NtStyleDefWindowProcW(_In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam, _In_ LPARAM lParam);
+static LRESULT CALLBACK NtStylePreWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam, ULONG_PTR ret, PDWORD unknown);
+static LRESULT CALLBACK NtStylePostWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam, ULONG_PTR ret, PDWORD unknown);
+static LRESULT CALLBACK NtStyleDlgPreWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam, ULONG_PTR ret, PDWORD unknown);
+static LRESULT CALLBACK NtStyleDlgPostWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam, ULONG_PTR ret, PDWORD unknown);
+static LRESULT CALLBACK NtStyleSetWindowRgn(HWND hWnd, HRGN hRgn, BOOL bRedraw);
+static LRESULT CALLBACK NtStyleGetScrollInfo(HWND hwnd, int fnBar, LPSCROLLINFO lpsi);
+static LRESULT CALLBACK NtStyleSetScrollInfo(HWND hWnd, int fnBar, LPCSCROLLINFO lpsi, BOOL bRedraw);
+LRESULT CALLBACK NtStyleWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam, WNDPROC DefWndProc);
 
 // Delay Load Functions
 HRESULT DwmGetWindowAttributeDelay(HWND hwnd, DWORD dwAttribute, _In_ LPCVOID pvAttribute, DWORD cbAttribute);
 HRESULT DwmSetWindowAttributeDelay(HWND hwnd, DWORD dwAttribute, _In_ LPCVOID pvAttribute, DWORD cbAttribute);
 HRESULT SetWindowThemeDelay(_In_ HWND hwnd, _In_ LPCWSTR pszSubAppName, _In_ LPCWSTR pszSubIdList);
+BOOL WINAPI RegisterUserApiHook(PUSERAPIHOOKINFO ApiHookInfo);
+BOOL WINAPI UnregisterUserApiHook(VOID);

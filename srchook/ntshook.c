@@ -3,24 +3,27 @@
 		Copyright © 2024 Brady McDermott, Vortesys
 	DESCRIPTION -
 		Defines the entry point for the DLL application.
+		User hook functions are modeled after the ReactOS
+		implementation of UxTheme.
 	LICENSE INFORMATION -
 		MIT License, see LICENSE.txt in the root folder
- \* * * * * * * */
+\* * * * * * * */
 
 /* Headers */
 #include "ntshook.h"
-#include "ntsdrfn.h"
+#include "draw.h"
+#include "..\common\usrapihk.h"
 #include "resource.h"
 #include <dwmapi.h>
 #include <uxtheme.h>
 #include <shlwapi.h>
 
 /* Global Variables */
-static INT g_iSystemHasDWM = 2;
-static INT g_iLockUpdateCount;
-
-// Handles
-HINSTANCE	g_hDllInstance;
+USERAPIHOOK g_user32ApiHook;
+BYTE gabDWPmessages[UAHOWP_MAX_SIZE];
+BYTE gabMSGPmessages[UAHOWP_MAX_SIZE];
+BYTE gabDLGPmessages[UAHOWP_MAX_SIZE];
+BOOL g_bThemeHooksActive = FALSE;
 
 /* * * *\
 	DllMain -
@@ -44,87 +47,10 @@ BOOL APIENTRY DllMain(
 }
 
 /* * * *\
-	NTStyleHookProc -
-		NT Style Hook procedure
-		Uses WH_CALLWNDPROC.
-\* * * */
-__declspec(dllexport) LRESULT APIENTRY NTStyleHookProc(
-	_In_ UINT uMsg,
-	_In_ WPARAM wParam,
-	_In_ LPARAM lParam
-)
-{
-	PCWPSTRUCT pcwps;
-
-	// Switch case for window painting
-	switch (uMsg)
-	{
-	/* BEGIN HC_ACTION */
-	case HC_ACTION:
-		pcwps = (CWPSTRUCT*)lParam;
-
-		switch (pcwps->message)
-		{
-		// Drawing Messages
-		case WM_CREATE:
-			NTStyleDisableWindowTheme(pcwps->hwnd);
-		case WM_DISPLAYCHANGE:
-		case WM_SYNCPAINT:
-		case WM_ACTIVATE:
-		case WM_SETTEXT:
-		case WM_PAINT:
-		case WM_MOVE:
-			NTStyleDrawWindow(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
-			break;
-
-		case WM_NCACTIVATE:
-		case WM_NCCALCSIZE:
-		case WM_NCPAINT:
-			NTStyleDrawWindow(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
-			return 0;
-		
-		// Collision Messages
-			/*
-		case WM_NCLBUTTONUP:
-			break;
-			
-		case WM_NCLBUTTONDBLCLK:
-			break;
-			
-		case WM_NCRBUTTONUP:
-			break;
-			
-		case WM_NCHITTEST:
-			break;*/
-
-		default:
-			break;
-		}
-	/* END HC_ACTION */
-
-	default:
-		break;
-	}
-
-	return CallNextHookEx(NULL, uMsg, wParam, lParam);
-}
-
-/* * * *\
-	NTStyleSetHook -
-		NT Style Hook hook so
-		that we can actually
-		WOW these programs.
-\* * * */
-__declspec(dllexport) HHOOK APIENTRY NTStyleSetHook(_In_ INT idHook, _In_ HOOKPROC lpfn, _In_ HINSTANCE hmod, _In_ DWORD dwThreadId)
-{
-	return SetWindowsHookEx(idHook, lpfn, hmod, dwThreadId);
-}
-
-/* * * *\
-	NTStyleDisableWindowTheme -
+	NtStyleDisableWindowTheme -
 		de-themify that window
 \* * * */
-__declspec(dllexport) VOID APIENTRY NTStyleDisableWindowTheme(_In_ HWND hWnd)
+__declspec(dllexport) VOID APIENTRY NtStyleDisableWindowTheme(_In_ HWND hWnd)
 {
 	enum DWMNCRENDERINGPOLICY ncrp = DWMNCRP_DISABLED;
 
@@ -157,4 +83,273 @@ __declspec(dllexport) VOID APIENTRY NTStyleDisableWindowTheme(_In_ HWND hWnd)
 	}
 
 	return;
+}
+
+/* * * *\
+	NtStyleInstallUserHook -
+		Load the User32 API hook.
+\* * * */
+__declspec(dllexport) BOOL CALLBACK NtStyleInstallUserHook()
+{
+	USERAPIHOOKINFO uah;
+
+	uah.m_funname1 = L"NtStyleInitUserHook";
+	uah.m_dllname1 = L"ntshk64.dll";
+	uah.m_funname2 = L"NtStyleInitUserHook";
+	uah.m_dllname2 = L"ntshk64.dll";
+
+	return RegisterUserApiHook(&uah);
+}
+
+/* * * *\
+	NtStyleInitUserHook -
+		Initialize the User32 API hook.
+\* * * */
+__declspec(dllexport) BOOL CALLBACK NtStyleInitUserHook(UAPIHK State, PUSERAPIHOOK puah)
+{
+	// Don't initialize if the state isn't appropriate.
+	if (!puah || State != uahLoadInit)
+	{
+		g_bThemeHooksActive = FALSE;
+		return TRUE;
+	}
+
+	/* Store the original functions from user32 */
+	g_user32ApiHook = *puah;
+
+	puah->DefWindowProcA = NtStyleDefWindowProcA;
+	puah->DefWindowProcW = NtStyleDefWindowProcW;
+	puah->PreWndProc = NtStylePreWindowProc;
+	puah->PostWndProc = NtStylePostWindowProc;
+	puah->PreDefDlgProc = NtStyleDlgPreWindowProc;
+	puah->PostDefDlgProc = NtStyleDlgPostWindowProc;
+	puah->DefWndProcArray.MsgBitArray = gabDWPmessages;
+	puah->DefWndProcArray.Size = UAHOWP_MAX_SIZE;
+	puah->WndProcArray.MsgBitArray = gabMSGPmessages;
+	puah->WndProcArray.Size = UAHOWP_MAX_SIZE;
+	puah->DlgProcArray.MsgBitArray = gabDLGPmessages;
+	puah->DlgProcArray.Size = UAHOWP_MAX_SIZE;
+
+	puah->SetWindowRgn = NtStyleSetWindowRgn;
+	puah->GetScrollInfo = NtStyleGetScrollInfo;
+	puah->SetScrollInfo = NtStyleSetScrollInfo;
+
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_NCPAINT);
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_NCACTIVATE);
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_NCMOUSEMOVE);
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_NCMOUSELEAVE);
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_NCHITTEST);
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_NCLBUTTONDOWN);
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_NCUAHDRAWCAPTION);
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_NCUAHDRAWFRAME);
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_SETTEXT);
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_WINDOWPOSCHANGED);
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_CONTEXTMENU);
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_STYLECHANGED);
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_SETICON);
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_NCDESTROY);
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_SYSCOMMAND);
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_CTLCOLORMSGBOX);
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_CTLCOLORBTN);
+	UAH_HOOK_MESSAGE(puah->DefWndProcArray, WM_CTLCOLORSTATIC);
+
+	UAH_HOOK_MESSAGE(puah->WndProcArray, WM_CREATE);
+	UAH_HOOK_MESSAGE(puah->WndProcArray, WM_SETTINGCHANGE);
+	UAH_HOOK_MESSAGE(puah->WndProcArray, WM_DRAWITEM);
+	UAH_HOOK_MESSAGE(puah->WndProcArray, WM_MEASUREITEM);
+	UAH_HOOK_MESSAGE(puah->WndProcArray, WM_WINDOWPOSCHANGING);
+	UAH_HOOK_MESSAGE(puah->WndProcArray, WM_WINDOWPOSCHANGED);
+	UAH_HOOK_MESSAGE(puah->WndProcArray, WM_STYLECHANGING);
+	UAH_HOOK_MESSAGE(puah->WndProcArray, WM_STYLECHANGED);
+	UAH_HOOK_MESSAGE(puah->WndProcArray, WM_NCCREATE);
+	UAH_HOOK_MESSAGE(puah->WndProcArray, WM_NCDESTROY);
+	UAH_HOOK_MESSAGE(puah->WndProcArray, WM_NCPAINT);
+	UAH_HOOK_MESSAGE(puah->WndProcArray, WM_MENUCHAR);
+	UAH_HOOK_MESSAGE(puah->WndProcArray, WM_MDISETMENU);
+	UAH_HOOK_MESSAGE(puah->WndProcArray, WM_THEMECHANGED);
+	UAH_HOOK_MESSAGE(puah->WndProcArray, WM_UAHINIT);
+
+	puah->DlgProcArray.MsgBitArray = gabDLGPmessages;
+	puah->DlgProcArray.Size = UAHOWP_MAX_SIZE;
+
+	UAH_HOOK_MESSAGE(puah->DlgProcArray, WM_INITDIALOG);
+	UAH_HOOK_MESSAGE(puah->DlgProcArray, WM_CTLCOLORMSGBOX);
+	UAH_HOOK_MESSAGE(puah->DlgProcArray, WM_CTLCOLORBTN);
+	UAH_HOOK_MESSAGE(puah->DlgProcArray, WM_CTLCOLORDLG);
+	UAH_HOOK_MESSAGE(puah->DlgProcArray, WM_CTLCOLORSTATIC);
+	UAH_HOOK_MESSAGE(puah->DlgProcArray, WM_PRINTCLIENT);
+
+	return TRUE;
+}
+
+/* * * *\
+	NtStyleRemoveUserHook -
+		Initialize the User32 API hook.
+\* * * */
+__declspec(dllexport) BOOL CALLBACK NtStyleRemoveUserHook()
+{
+	return UnregisterUserApiHook();
+}
+
+/* * * *\
+	NtStyleDefWindowProcA -
+		User32 stub.
+\* * * */
+static LRESULT CALLBACK NtStyleDefWindowProcA(
+	_In_ HWND hWnd,
+	_In_ UINT Msg,
+	_In_ WPARAM wParam,
+	_In_ LPARAM lParam)
+{
+	return NtStyleWndProc(hWnd, Msg, wParam, lParam, g_user32ApiHook.DefWindowProcA);
+}
+
+/* * * *\
+	NtStyleDefWindowProcW -
+		User32 stub.
+\* * * */
+static LRESULT CALLBACK NtStyleDefWindowProcW(
+	_In_ HWND hWnd,
+	_In_ UINT Msg,
+	_In_ WPARAM wParam,
+	_In_ LPARAM lParam)
+{
+	return NtStyleWndProc(hWnd, Msg, wParam, lParam, g_user32ApiHook.DefWindowProcW);
+}
+
+/* * * *\
+	NtStylePreWindowProc -
+		User32 stub.
+\* * * */
+static LRESULT CALLBACK NtStylePreWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam, ULONG_PTR ret, PDWORD unknown)
+{
+	// TODO: SET/CHECK/MODIFY WINDOW REGION - ELIMINATE UGLY BASIC CORNERS!!!
+	switch (Msg)
+	{
+	case WM_CREATE:
+		NtStyleDisableWindowTheme(hWnd);
+		break;
+	}
+
+	return 0;
+}
+
+/* * * *\
+	NtStylePostWindowProc -
+		User32 stub.
+\* * * */
+static LRESULT CALLBACK NtStylePostWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam, ULONG_PTR ret, PDWORD unknown)
+{
+	return 0;
+}
+
+/* * * *\
+	NtStyleDlgPreWindowProc -
+		User32 stub.
+\* * * */
+static LRESULT CALLBACK NtStyleDlgPreWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam, ULONG_PTR ret, PDWORD unknown)
+{
+	return 0;
+}
+
+/* * * *\
+	NtStyleDlgPostWindowProc -
+		User32 stub.
+\* * * */
+static LRESULT CALLBACK NtStyleDlgPostWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam, ULONG_PTR ret, PDWORD unknown)
+{
+	return 0;
+}
+
+/* * * *\
+	NtStyleSetWindowRgn -
+		User32 stub.
+\* * * */
+static LRESULT CALLBACK NtStyleSetWindowRgn(HWND hWnd, HRGN hRgn, BOOL bRedraw)
+{
+	return g_user32ApiHook.SetWindowRgn(hWnd, hRgn, bRedraw);
+}
+
+/* * * *\
+	NtStyleGetScrollInfo -
+		User32 stub.
+\* * * */
+static LRESULT CALLBACK NtStyleGetScrollInfo(HWND hwnd, int fnBar, LPSCROLLINFO lpsi)
+{
+	// ReactOS UxTheme tracks the scrollbar itself - if we change the metrics of
+	// anything then we're going to have to change some stuff up here.
+	return g_user32ApiHook.GetScrollInfo(hwnd, fnBar, lpsi);
+}
+
+/* * * *\
+	NtStyleSetScrollInfo -
+		User32 stub.
+\* * * */
+static LRESULT CALLBACK NtStyleSetScrollInfo(HWND hWnd, int fnBar, LPCSCROLLINFO lpsi, BOOL bRedraw)
+{
+	return g_user32ApiHook.SetScrollInfo(hWnd, fnBar, lpsi, bRedraw);
+}
+
+/* * * *\
+	NtStyleWndProc -
+		NT Style's Window Procedure functions.
+\* * * */
+LRESULT CALLBACK NtStyleWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam, WNDPROC DefWndProc)
+{
+	switch (Msg)
+	{
+	case WM_NCPAINT:
+		//
+		// WM_NCUAHDRAWCAPTION : wParam are DC_* flags.
+		//
+	case WM_NCUAHDRAWCAPTION:
+		//
+		// WM_NCUAHDRAWFRAME : wParam is HDC, lParam are DC_ACTIVE and or DC_REDRAWHUNGWND.
+		//
+	case WM_NCUAHDRAWFRAME:
+	case WM_NCACTIVATE:
+		//if ((GetWindowLongW(hWnd, GWL_STYLE) & WS_CAPTION) != WS_CAPTION)
+			//return TRUE;
+		//return TRUE;
+	case WM_NCMOUSEMOVE:
+	case WM_NCMOUSELEAVE:
+	case WM_NCLBUTTONDOWN:
+		//switch (wParam)
+		//{
+		//case HTMINBUTTON:
+		//case HTMAXBUTTON:
+		//case HTCLOSE:
+		//{
+			//ThemeHandleButton(hWnd, wParam);
+			//return 0;
+		//}
+		//default:
+			//return DefWndProc(hWnd, Msg, wParam, lParam);
+		//}
+	//case WM_NCHITTEST:
+	//{
+		//POINT Point;
+		//Point.x = GET_X_LPARAM(lParam);
+		//Point.y = GET_Y_LPARAM(lParam);
+		//return DefWndNCHitTest(hWnd, Point);
+	//}
+	case WM_SYSCOMMAND:
+	//{
+		//if ((wParam & 0xfff0) == SC_VSCROLL ||
+			//(wParam & 0xfff0) == SC_HSCROLL)
+		//{
+			//POINT Pt;
+			//Pt.x = (short)LOWORD(lParam);
+			//Pt.y = (short)HIWORD(lParam);
+			//NC_TrackScrollBar(hWnd, wParam, Pt);
+			//return 0;
+		//}
+		//else
+		//{
+			return DefWndProc(hWnd, Msg, wParam, lParam);
+		//}
+	//}
+	default:
+		return DefWndProc(hWnd, Msg, wParam, lParam);
+	}
 }

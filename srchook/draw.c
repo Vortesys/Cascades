@@ -1,15 +1,15 @@
 /* * * * * * * *\
-	NTSDRFN.C -
+	DRAW.C -
 		Copyright © 2024 Brady McDermott, Vortesys
 	DESCRIPTION -
 		NT Style's drawing functions.
 	LICENSE INFORMATION -
 		MIT License, see LICENSE.txt in the root folder
- \* * * * * * * */
+\* * * * * * * */
 
 /* Headers */
 #include "ntshook.h"
-#include "ntsdrfn.h"
+#include "draw.h"
 #include "oebitmap.h"
 #include <strsafe.h>
 

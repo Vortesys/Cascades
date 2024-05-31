@@ -168,6 +168,7 @@
     <ClCompile Include="ntstyle.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\common\usrapihk.h" />
     <ClInclude Include="ntstyle.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
@@ -177,10 +178,10 @@
     <ResourceCompile Include="resource.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="version.inc" />
+    <Manifest Include="ntstyle.exe.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="ntstyle.exe.manifest" />
+    <None Include="..\common\version.inc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

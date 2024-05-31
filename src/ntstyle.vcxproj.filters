@@ -16,6 +16,9 @@
     <Filter Include="Resource Files\en-US">
       <UniqueIdentifier>{d681401a-a069-441c-82e8-4bba44ebd993}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Common Files">
+      <UniqueIdentifier>{5de2b196-5c95-4426-b53a-6e9402331a6b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ntstyle.c">
@@ -32,6 +35,9 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\common\usrapihk.h">
+      <Filter>Common Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc">
@@ -45,13 +51,13 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="version.inc">
+    <Manifest Include="ntstyle.exe.manifest">
       <Filter>Resource Files</Filter>
-    </None>
+    </Manifest>
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="ntstyle.exe.manifest">
-      <Filter>Source Files</Filter>
-    </Manifest>
+    <None Include="..\common\version.inc">
+      <Filter>Common Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

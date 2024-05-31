@@ -10,10 +10,12 @@
 /* Headers */
 #include "ntstyle.h"
 #include "resource.h"
+#include "..\common\usrapihk.h"
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <CommCtrl.h>
 
+/* Variables */
 // Handles
 HINSTANCE	g_hAppInstance;
 HHOOK		g_hhkNTShk32 = NULL;
@@ -21,7 +23,7 @@ HHOOK		g_hhkNTShk64 = NULL;
 // Strings
 WCHAR		g_szAppTitle[64];
 // Other
-BOOL g_bSystem64 = TRUE;
+BOOL		g_bSystem64 = TRUE;
 
 /* Functions */
 
@@ -45,7 +47,7 @@ int WINAPI wWinMain(
 
 	// Create our main window dialog
 	InitCommonControls();
-	hDlg = CreateDialogParam(g_hAppInstance, MAKEINTRESOURCE(IDD_MAIN), 0, NTStyleDialogProc, 0);
+	hDlg = CreateDialogParam(g_hAppInstance, MAKEINTRESOURCE(IDD_MAIN), 0, NtStyleDialogProc, 0);
 	ShowWindow(hDlg, nCmdShow);
 
 	// Get some system information to determine what
@@ -68,59 +70,45 @@ int WINAPI wWinMain(
 }
 
 /* * * *\
-	NTStyleCreateHook -
-		NT Style's hook creation function.
+	NtStyleToggleHook -
+		NT Style's hook creation and removal function.
 \* * * */
-DWORD NTStyleCreateHook(
-	_In_ HINSTANCE hInst,
-	_In_ LPWSTR lpNTStyleHook,
-	_In_ BOOL bDisableTheming,
-	_Out_ HHOOK hhkNTShk
-)
+BOOL NtStyleToggleHook(BOOL bInstall)
 {
-	HINSTANCE hDllInstance = NULL;
-	HOOKPROC hkprc = NULL;
-	DWORD dwLastError = 0;
+	HMODULE hLib = LoadLibrary(L"ntshk64.dll");
+	BOOL bRet = 0;
 
-	hhkNTShk = NULL;
+	if (hLib)
+	{
+		FARPROC fLib;
 
-	// Load the hook DLL
-	hDllInstance = LoadLibrary(lpNTStyleHook);
+		if (bInstall)
+			fLib = GetProcAddress(hLib, "NtStyleInstallUserHook");
+		else
+			fLib = GetProcAddress(hLib, "NtStyleRemoveUserHook");
 
-	// Get the hook procedure of NTShook
-	if (hDllInstance)
-		hkprc = (HOOKPROC)GetProcAddress(hDllInstance, "NTStyleHookProc");
-	else
-		dwLastError = GetLastError();
+		bRet = (BOOL)fLib();
 
-	// Establish our hook
-	if (hkprc)
-		hhkNTShk = SetWindowsHookEx(WH_CALLWNDPROC, hkprc, hDllInstance, 0);
-	else
-		dwLastError = GetLastError();
+		FreeLibrary(hLib);
 
-	// Enumerate the existing windows and get them dwm-free :fire:
-	if (bDisableTheming)
-		EnumWindows(&NTStyleEnumWindowProc, (LPARAM)hDllInstance);
+		return bRet;
+	}
 
-	if (hDllInstance)
-		FreeLibrary(hDllInstance);
-
-	return dwLastError;
+	return FALSE;
 }
 
 /* * * *\
-	NTStyleEnumWindowProc -
+	NtStyleEnumWindowProc -
 		NT Style's window enumeration procedure.
 \* * * */
-BOOL CALLBACK NTStyleEnumWindowProc(
+BOOL CALLBACK NtStyleEnumWindowProc(
 	_In_ HWND hwnd,
 	_In_ LPARAM lParam
 )
 {
 	if ((HMODULE)lParam != NULL)
 	{
-		FARPROC fLib = GetProcAddress((HMODULE)lParam, "NTStyleDisableWindowTheme");
+		FARPROC fLib = GetProcAddress((HMODULE)lParam, "NtStyleDisableWindowTheme");
 		fLib(hwnd);
 
 		return TRUE;

@@ -11,6 +11,7 @@
 #define APSTUDIO_HIDDEN_SYMBOLS
 #include <windows.h>
 #include "resource.h"
+#undef APSTUDIO_HIDDEN_SYMBOLS
 
 /* Bitmaps */
 IDB_MAX BITMAP images\max.bmp
@@ -22,7 +23,12 @@ IDB_RES_S BITMAP images\resd.bmp
 IDB_MENU BITMAP images\menu.bmp
 
 /* Version Information */
-#include "version.inc"
+#define APSTUDIO_HIDDEN_SYMBOLS
+#define VER_FILEDESCRIPTION_STR     "NT Style Hook"
+#define VER_INTERNALNAME_STR        "ntshook\0"
+#define VER_ORIGINALFILENAME_STR    "NTSHOOK.DLL"
+#define VER_PRODUCTNAME_STR         "NT Style Hook"
+#include "..\common\version.inc"
 #undef APSTUDIO_HIDDEN_SYMBOLS
 
 VS_VERSION_INFO VERSIONINFO

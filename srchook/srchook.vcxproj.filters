@@ -27,7 +27,7 @@
     <ClInclude Include="oebitmap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ntsdrfn.h">
+    <ClInclude Include="draw.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -35,10 +35,10 @@
     <ClCompile Include="ntshook.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ntsdlfn.c">
+    <ClCompile Include="delayfnc.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ntsdrfn.c">
+    <ClCompile Include="draw.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -48,9 +48,6 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="version.inc">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="ntshook.def">
       <Filter>Export Definitions</Filter>
     </None>
