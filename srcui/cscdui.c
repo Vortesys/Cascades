@@ -1,5 +1,5 @@
 /* * * * * * * *\
-	CASCADES.C -
+	CSCDUI.C -
 		Copyright © 2024 Brady McDermott, Vortesys
 	DESCRIPTION -
 		Cascades UI main file.
@@ -8,7 +8,7 @@
 \* * * * * * * */
 
 /* Headers */
-#include "cascades.h"
+#include "cscdui.h"
 #include "resource.h"
 #include "..\common\usrapihk.h"
 #define WIN32_LEAN_AND_MEAN

@@ -21,7 +21,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="cascades.c">
+    <ClCompile Include="cscdui.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="dlgproc.c">
@@ -29,7 +29,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cascades.h">
+    <ClInclude Include="cscdui.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">

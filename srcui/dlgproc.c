@@ -2,13 +2,13 @@
 	DLGPROC.C -
 		Copyright © 2024 Brady McDermott, Vortesys
 	DESCRIPTION -
-		Primary dialog procedures for Cascades.
+		Primary dialog procedures for Cascades UI.
 	LICENSE INFORMATION -
 		MIT License, see LICENSE.txt in the root folder
 \* * * * * * * */
 
 /* Headers */
-#include "cascades.h"
+#include "cscdui.h"
 #include "resource.h"
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>

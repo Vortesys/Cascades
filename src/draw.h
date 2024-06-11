@@ -2,7 +2,7 @@
 	DRAW.H -
 		Copyright © 2024 Brady McDermott, Vortesys
 	DESCRIPTION -
-		NT Style's drawing functions.
+		The header for control drawing functions.
 	LICENSE INFORMATION -
 		MIT License, see LICENSE.txt in the root folder
 \* * * * * * * */

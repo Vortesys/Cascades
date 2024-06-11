@@ -2,7 +2,7 @@
 	RESOURCE.H -
 		Copyright © 2024 Brady McDermott, Vortesys
 	DESCRIPTION -
-		NT Style Hook's resource collection.
+		Cascades' Hook's resource collection.
 		** NO DEPENDENCIES **
 	LICENSE INFORMATION -
 		MIT License, see LICENSE.txt in the root folder

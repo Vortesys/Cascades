@@ -24,7 +24,7 @@
     <ProjectGuid>{2334a6ab-5ae6-4e88-9906-3d9559f01120}</ProjectGuid>
     <RootNamespace>srcui</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>cascades</ProjectName>
+    <ProjectName>Cascades UI</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -165,11 +165,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="dlgproc.c" />
-    <ClCompile Include="cascades.c" />
+    <ClCompile Include="cscdui.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\common\usrapihk.h" />
-    <ClInclude Include="cascades.h" />
+    <ClInclude Include="cscdui.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>

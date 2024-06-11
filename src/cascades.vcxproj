@@ -24,7 +24,7 @@
     <ProjectGuid>{f3917bf2-0c25-4c6d-b2eb-ee462dc22f14}</ProjectGuid>
     <RootNamespace>src</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>cscdhook</ProjectName>
+    <ProjectName>Cascades</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
