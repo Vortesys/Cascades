@@ -111,7 +111,7 @@
       <EntryPointSymbol>
       </EntryPointSymbol>
       <NoEntryPoint>false</NoEntryPoint>
-      <ModuleDefinitionFile>ntshook.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>cscdhook.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -141,7 +141,7 @@
       <MinimumRequiredVersion>5.02</MinimumRequiredVersion>
       <NoEntryPoint>false</NoEntryPoint>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
-      <ModuleDefinitionFile>ntshook.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>cscdhook.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -164,7 +164,7 @@
       <EntryPointSymbol>
       </EntryPointSymbol>
       <NoEntryPoint>false</NoEntryPoint>
-      <ModuleDefinitionFile>ntshook.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>cscdhook.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -192,7 +192,7 @@
       <MinimumRequiredVersion>5.02</MinimumRequiredVersion>
       <NoEntryPoint>false</NoEntryPoint>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
-      <ModuleDefinitionFile>ntshook.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>cscdhook.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

@@ -94,11 +94,12 @@ __declspec(dllexport) BOOL CALLBACK NtStyleInstallUserHook()
 	USERAPIHOOKINFO uah;
 
 	uah.m_funname1 = L"NtStyleInitUserHook";
-	uah.m_dllname1 = L"ntshk64.dll";
+	uah.m_dllname1 = L"cscdhk64.dll";
 	uah.m_funname2 = L"NtStyleInitUserHook";
-	uah.m_dllname2 = L"ntshk64.dll";
+	uah.m_dllname2 = L"cscdhk64.dll";
 
 	return RegisterUserApiHook(&uah);
+	//return RegisterUserApiHookWin32(NULL, &NtStyleInitUserHook);
 }
 
 /* * * *\
