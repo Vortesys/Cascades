@@ -13,51 +13,43 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Resource Files\en-US">
-      <UniqueIdentifier>{d681401a-a069-441c-82e8-4bba44ebd993}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Common Files">
-      <UniqueIdentifier>{5de2b196-5c95-4426-b53a-6e9402331a6b}</UniqueIdentifier>
+    <Filter Include="Export Definitions">
+      <UniqueIdentifier>{7f059b2e-68f3-469c-a305-b1d7f134436f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ntstyle.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dlgproc.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="ntstyle.h">
+    <ClInclude Include="cscdhook.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\common\usrapihk.h">
-      <Filter>Common Files</Filter>
+    <ClInclude Include="oebitmap.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="draw.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="cscdhook.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="delayfnc.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="draw.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
-    <ResourceCompile Include="lang\dlg_en-US.rc">
-      <Filter>Resource Files\en-US</Filter>
-    </ResourceCompile>
-    <ResourceCompile Include="lang\res_en-US.rc">
-      <Filter>Resource Files\en-US</Filter>
-    </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="ntstyle.exe.manifest">
-      <Filter>Resource Files</Filter>
-    </Manifest>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\common\version.inc">
-      <Filter>Common Files</Filter>
+    <None Include="ntshook.def">
+      <Filter>Export Definitions</Filter>
     </None>
   </ItemGroup>
 </Project>

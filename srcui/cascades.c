@@ -1,14 +1,14 @@
 /* * * * * * * *\
-	NTSTYLE.C -
+	CASCADES.C -
 		Copyright © 2024 Brady McDermott, Vortesys
 	DESCRIPTION -
-		NT Style's main file.
+		Cascades UI main file.
 	LICENSE INFORMATION -
 		MIT License, see LICENSE.txt in the root folder
 \* * * * * * * */
 
 /* Headers */
-#include "ntstyle.h"
+#include "cascades.h"
 #include "resource.h"
 #include "..\common\usrapihk.h"
 #define WIN32_LEAN_AND_MEAN
@@ -18,8 +18,6 @@
 /* Variables */
 // Handles
 HINSTANCE	g_hAppInstance;
-HHOOK		g_hhkNTShk32 = NULL;
-HHOOK		g_hhkNTShk64 = NULL;
 // Strings
 WCHAR		g_szAppTitle[64];
 // Other
@@ -29,7 +27,7 @@ BOOL		g_bSystem64 = TRUE;
 
 /* * * *\
 	wWinMain -
-		NT Style's entry point and message loop.
+		Main entry point and message loop.
 \* * * */
 int WINAPI wWinMain(
 	_In_ HINSTANCE hInstance,
@@ -75,7 +73,7 @@ int WINAPI wWinMain(
 \* * * */
 BOOL NtStyleToggleHook(BOOL bInstall)
 {
-	HMODULE hLib = LoadLibrary(L"ntshk64.dll");
+	HMODULE hLib = LoadLibrary(L"cscdhk64.dll");
 	BOOL bRet = 0;
 
 	if (hLib)

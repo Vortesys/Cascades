@@ -7,8 +7,7 @@
 		Brady McDermott
 	DESCRIPTION -
 		This file contains the language-specific
-		resources for NT Style.
-		** NO DEPENDENCIES **
+		resources for Cascades.
 	LICENSE INFORMATION -
 		MIT License, see LICENSE.txt in the root folder
 \* * * * * * * */
@@ -24,9 +23,9 @@ STRINGTABLE
 {
 	// Application
 #ifndef _DEBUG
-	IDS_APPTITLE, "NT Style" // 16
+	IDS_APPTITLE, "Cascades" // 16
 #else
-	IDS_APPTITLE, "NT Style [Debug]" // 64
+	IDS_APPTITLE, "Cascades [Debug]" // 64
 #endif
 	IDS_WEBSITE, "https://vortesys.github.io/index.html" // 64
 

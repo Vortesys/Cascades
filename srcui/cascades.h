@@ -1,8 +1,8 @@
 /* * * * * * * *\
-	NTSTYLE.H -
+	CASCADES.H -
 		Copyright © 2024 Brady McDermott, Vortesys
 	DESCRIPTION -
-		NT Style's primary header file.
+		Primary header file.
 	LICENSE INFORMATION -
 		MIT License, see LICENSE.txt in the root folder
 \* * * * * * * */
@@ -17,8 +17,6 @@
 /* Global Variables */
 // Handles
 extern HINSTANCE	g_hAppInstance;
-extern HHOOK		g_hhkNTShk32;
-extern HHOOK		g_hhkNTShk64;
 // Strings
 extern WCHAR		g_szAppTitle[64];
 // Other

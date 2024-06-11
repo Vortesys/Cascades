@@ -1,8 +1,8 @@
 /* * * * * * * *\
-	NTSHOOK.H -
+	CSCDHOOK.H -
 		Copyright © 2024 Brady McDermott, Vortesys
 	DESCRIPTION -
-		NT Style Hook's primary header file.
+		Hook portion's primary header file.
 	LICENSE INFORMATION -
 		MIT License, see LICENSE.txt in the root folder
 \* * * * * * * */
@@ -47,4 +47,5 @@ HRESULT DwmGetWindowAttributeDelay(HWND hwnd, DWORD dwAttribute, _In_ LPCVOID pv
 HRESULT DwmSetWindowAttributeDelay(HWND hwnd, DWORD dwAttribute, _In_ LPCVOID pvAttribute, DWORD cbAttribute);
 HRESULT SetWindowThemeDelay(_In_ HWND hwnd, _In_ LPCWSTR pszSubAppName, _In_ LPCWSTR pszSubIdList);
 BOOL WINAPI RegisterUserApiHook(PUSERAPIHOOKINFO ApiHookInfo);
+BOOL WINAPI RegisterUserApiHookWin32(HINSTANCE hInstance, FARPROC pfUserHook);
 BOOL WINAPI UnregisterUserApiHook(VOID);

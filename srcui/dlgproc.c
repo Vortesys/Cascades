@@ -2,13 +2,13 @@
 	DLGPROC.C -
 		Copyright © 2024 Brady McDermott, Vortesys
 	DESCRIPTION -
-		NT Style's primary dialog procedures.
+		Primary dialog procedures for Cascades.
 	LICENSE INFORMATION -
 		MIT License, see LICENSE.txt in the root folder
 \* * * * * * * */
 
 /* Headers */
-#include "ntstyle.h"
+#include "cascades.h"
 #include "resource.h"
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
@@ -17,8 +17,8 @@
 /* Functions */
 
 /* * * *\
-	NtStyleDialogProc -
-		NT Style's dialog procedure.
+	CascadesDialogProc -
+		Main dialog procedure.
 \* * * */
 INT_PTR CALLBACK NtStyleDialogProc(
 	_In_ HWND hDlg,
@@ -43,7 +43,7 @@ INT_PTR CALLBACK NtStyleDialogProc(
 		{
 			if (NtStyleToggleHook(TRUE))
 			{
-				MessageBox(hDlg, L"Started NT Style.", L"NT Style",
+				MessageBox(hDlg, L"Started Cascades.", L"Cascades",
 					MB_OK | MB_ICONINFORMATION | MB_DEFAULT_DESKTOP_ONLY);
 
 				Button_Enable(GetDlgItem(hDlg, IDC_START), FALSE);
@@ -51,7 +51,7 @@ INT_PTR CALLBACK NtStyleDialogProc(
 			}
 			else
 			{
-				MessageBox(hDlg, L"Failed to start NT Style.", L"NT Style",
+				MessageBox(hDlg, L"Failed to start Cascades.", L"Cascades",
 					MB_OK | MB_ICONINFORMATION | MB_DEFAULT_DESKTOP_ONLY);
 			}
 
@@ -66,7 +66,7 @@ INT_PTR CALLBACK NtStyleDialogProc(
 			}
 			else
 			{
-				MessageBox(hDlg, L"Failed to stop NT Style.", L"NT Style",
+				MessageBox(hDlg, L"Failed to stop Cascades.", L"Cascades",
 					MB_OK | MB_ICONINFORMATION | MB_DEFAULT_DESKTOP_ONLY);
 			}
 
@@ -81,7 +81,7 @@ INT_PTR CALLBACK NtStyleDialogProc(
 		return TRUE;
 
 	case WM_CLOSE:
-		if (MessageBox(hDlg, L"Quit NT Style?", L"Close",
+		if (MessageBox(hDlg, L"Quit Cascades?", L"Close",
 			MB_ICONQUESTION | MB_YESNO) == IDYES)
 			DestroyWindow(hDlg);
 		return TRUE;

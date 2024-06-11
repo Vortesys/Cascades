@@ -10,7 +10,7 @@
 \* * * * * * * */
 
  /* Headers */
-#include "ntshook.h"
+#include "cscdhook.h"
 #include "..\common\usrapihk.h"
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
@@ -134,6 +134,35 @@ BOOL WINAPI RegisterUserApiHook(PUSERAPIHOOKINFO ApiHookInfo)
 		bRet = (BOOL)fLib(ApiHookInfo);
 
 		FreeLibrary(hLib);
+
+		return bRet;
+	}
+
+	return FALSE;
+}
+
+/* * * *\
+	RegisterUserApiHookWin32 -
+		Registers a DLL and its initialization function
+		to User32 for theming controls.
+	RETURNS -
+		TRUE if successful.
+\* * * */
+BOOL WINAPI RegisterUserApiHookWin32(HINSTANCE hInstance, FARPROC pfUserHook)
+{
+	HMODULE hLib = LoadLibrary(L"user32.dll");
+	BOOL bRet = 0;
+
+	if (hLib)
+	{
+		FARPROC fLib = GetProcAddress(hLib, "RegisterUserApiHook");
+
+		bRet = (BOOL)fLib(hInstance, pfUserHook);
+
+		FreeLibrary(hLib);
+
+		if (bRet)
+			MessageBox(HWND_DESKTOP, L"oh my goodness gracious", L"Wowzers!", MB_ABORTRETRYIGNORE);
 
 		return bRet;
 	}

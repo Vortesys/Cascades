@@ -2,13 +2,13 @@
 	DRAW.C -
 		Copyright © 2024 Brady McDermott, Vortesys
 	DESCRIPTION -
-		NT Style's drawing functions.
+		Drawing functions, titlebars, borders, etc.
 	LICENSE INFORMATION -
 		MIT License, see LICENSE.txt in the root folder
 \* * * * * * * */
 
 /* Headers */
-#include "ntshook.h"
+#include "cscdhook.h"
 #include "draw.h"
 #include "oebitmap.h"
 #include <strsafe.h>

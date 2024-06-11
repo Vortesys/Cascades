@@ -1,16 +1,16 @@
 /* * * * * * * *\
-	NTSHOOK.C -
+	CSCDHOOK.C -
 		Copyright © 2024 Brady McDermott, Vortesys
 	DESCRIPTION -
 		Defines the entry point for the DLL application.
-		User hook functions are modeled after the ReactOS
-		implementation of UxTheme.
+		User hook functions are modeled after an examination
+		of wbload (WindowBlinds) by win32ss.
 	LICENSE INFORMATION -
 		MIT License, see LICENSE.txt in the root folder
 \* * * * * * * */
 
 /* Headers */
-#include "ntshook.h"
+#include "cscdhook.h"
 #include "draw.h"
 #include "..\common\usrapihk.h"
 #include "resource.h"

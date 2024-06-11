@@ -2,7 +2,7 @@
 	RESOURCE.RC -
 		Copyright © 2024 Brady McDermott, Vortesys
 	DESCRIPTION -
-		This file contains NT Style Hook's resources.
+		This file contains resource definitions.
 	LICENSE INFORMATION -
 		MIT License, see LICENSE.txt in the root folder
 \* * * * * * * */
@@ -13,21 +13,21 @@
 #include "resource.h"
 #undef APSTUDIO_HIDDEN_SYMBOLS
 
-/* Bitmaps */
-IDB_MAX BITMAP images\max.bmp
-IDB_MAX_S BITMAP images\maxd.bmp
-IDB_MIN BITMAP images\min.bmp
-IDB_MIN_S BITMAP images\mind.bmp
-IDB_RES BITMAP images\res.bmp
-IDB_RES_S BITMAP images\resd.bmp
-IDB_MENU BITMAP images\menu.bmp
+/* Language-based Resources */
+LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+#pragma code_page(65001) // UTF-8
+#include "lang\res_en-US.rc" // English (US)
+#include "lang\dlg_en-US.rc" // English (US)
+
+/* Icon Library */
+IDI_MAIN	ICON	icons\cascades.ico
 
 /* Version Information */
 #define APSTUDIO_HIDDEN_SYMBOLS
-#define VER_FILEDESCRIPTION_STR     "NT Style Hook"
-#define VER_INTERNALNAME_STR        "ntshook\0"
-#define VER_ORIGINALFILENAME_STR    "NTSHOOK.DLL"
-#define VER_PRODUCTNAME_STR         "NT Style Hook"
+#define VER_FILEDESCRIPTION_STR     "Cascades theming utility for Windows."
+#define VER_INTERNALNAME_STR        "cascades\0"
+#define VER_ORIGINALFILENAME_STR    "CASCADES.EXE"
+#define VER_PRODUCTNAME_STR         "Cascades"
 #include "..\common\version.inc"
 #undef APSTUDIO_HIDDEN_SYMBOLS
 

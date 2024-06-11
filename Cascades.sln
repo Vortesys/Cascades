@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33723.286
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cascades", "src\cascades.vcxproj", "{2334A6AB-5AE6-4E88-9906-3D9559F01120}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cscdui", "srcui\cscdui.vcxproj", "{2334A6AB-5AE6-4E88-9906-3D9559F01120}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cscdhook", "srchook\cscdhook.vcxproj", "{F3917BF2-0C25-4C6D-B2EB-EE462DC22F14}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cascades", "src\cascades.vcxproj", "{F3917BF2-0C25-4C6D-B2EB-EE462DC22F14}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
