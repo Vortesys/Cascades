@@ -81,7 +81,19 @@ BOOL NtStyleToggleHook(BOOL bInstall)
 		FARPROC fLib;
 
 		if (bInstall)
-			fLib = GetProcAddress(hLib, "NtStyleInstallUserHook");
+		{
+			//fLib = GetProcAddress(hLib, "NtStyleInstallUserHook");
+			USERAPIHOOKINFO uah;
+
+			MessageBox(NULL, L"NtStyleInstallUserHook called", L"Cascades", MB_OK);
+
+			uah.m_funname1 = L"NtStyleInitUserHook";
+			uah.m_dllname1 = L"cscdhk64.dll";
+			uah.m_funname2 = L"NtStyleInitUserHook";
+			uah.m_dllname2 = L"cscdhk64.dll";
+
+			return RegisterUserApiHookDelay(&uah);
+		}
 		else
 			fLib = GetProcAddress(hLib, "NtStyleRemoveUserHook");
 

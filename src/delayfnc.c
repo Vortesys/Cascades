@@ -18,111 +18,13 @@
 /* Functions */
 
 /* * * *\
-	DwmGetWindowAttributeDelay -
-		Gets the value of Desktop Window Manager
-		(DWM) non-client rendering attributes
-		for a window.
-	RETURNS -
-		NTSTATUS result.
-\* * * */
-HRESULT DwmGetWindowAttributeDelay(
-	HWND			hwnd,
-	DWORD			dwAttribute,
-	_In_ LPCVOID	pvAttribute,
-	DWORD			cbAttribute
-)
-{
-	HMODULE hLib = LoadLibrary(L"Dwmapi.dll");
-	HRESULT hRet = 0;
-
-	if (hLib)
-	{
-		FARPROC fLib = GetProcAddress(hLib, "DwmGetWindowAttribute");
-
-		hRet = (HRESULT)fLib(hwnd, dwAttribute, pvAttribute, cbAttribute);
-
-		FreeLibrary(hLib);
-
-		if (SUCCEEDED(hRet))
-			return hRet;
-	}
-
-	return STATUS_UNSUCCESSFUL;
-}
-
-/* * * *\
-	DwmSetWindowAttributeDelay -
-		Sets the value of Desktop Window Manager
-		(DWM) non-client rendering attributes
-		for a window.
-	RETURNS -
-		NTSTATUS result.
-\* * * */
-HRESULT DwmSetWindowAttributeDelay(
-	HWND			hwnd,
-	DWORD			dwAttribute,
-	_In_ LPCVOID	pvAttribute,
-	DWORD			cbAttribute
-)
-{
-	HMODULE hLib = LoadLibrary(L"Dwmapi.dll");
-	HRESULT hRet = 0;
-
-	if (hLib)
-	{
-		FARPROC fLib = GetProcAddress(hLib, "DwmSetWindowAttribute");
-
-		hRet = (HRESULT)fLib(hwnd, dwAttribute, pvAttribute, cbAttribute);
-
-		FreeLibrary(hLib);
-
-		if (SUCCEEDED(hRet))
-			return hRet;
-	}
-
-	return STATUS_UNSUCCESSFUL;
-}
-
-/* * * *\
-	DwmSetWindowAttributeDelay -
-		Sets the value of Desktop Window Manager
-		(DWM) non-client rendering attributes
-		for a window.
-	RETURNS -
-		NTSTATUS result.
-\* * * */
-HRESULT SetWindowThemeDelay(
-	_In_ HWND		hwnd,
-	_In_ LPCWSTR	pszSubAppName,
-	_In_ LPCWSTR	pszSubIdList
-)
-{
-	HMODULE hLib = LoadLibrary(L"UxTheme.dll");
-	HRESULT hRet = 0;
-
-	if (hLib)
-	{
-		FARPROC fLib = GetProcAddress(hLib, "SetWindowTheme");
-
-		hRet = (HRESULT)fLib(hwnd, pszSubAppName, pszSubIdList);
-
-		FreeLibrary(hLib);
-
-		if (SUCCEEDED(hRet))
-			return hRet;
-	}
-
-	return STATUS_UNSUCCESSFUL;
-}
-
-/* * * *\
-	RegisterUserApiHook -
+	RegisterUserApiHookDelay -
 		Registers a DLL and its initialization function
 		to User32 for theming controls.
 	RETURNS -
 		TRUE if successful.
 \* * * */
-BOOL WINAPI RegisterUserApiHook(PUSERAPIHOOKINFO ApiHookInfo)
+BOOL WINAPI RegisterUserApiHookDelay(PUSERAPIHOOKINFO ApiHookInfo)
 {
 	HMODULE hLib = LoadLibrary(L"user32.dll");
 	BOOL bRet = 0;
@@ -142,41 +44,12 @@ BOOL WINAPI RegisterUserApiHook(PUSERAPIHOOKINFO ApiHookInfo)
 }
 
 /* * * *\
-	RegisterUserApiHookWin32 -
-		Registers a DLL and its initialization function
-		to User32 for theming controls.
+	UnregisterUserApiHookDelay -
+		Unregisters a hook from User32.
 	RETURNS -
 		TRUE if successful.
 \* * * */
-BOOL WINAPI RegisterUserApiHookWin32(HINSTANCE hInstance, FARPROC pfUserHook)
-{
-	HMODULE hLib = LoadLibrary(L"user32.dll");
-	BOOL bRet = 0;
-
-	if (hLib)
-	{
-		FARPROC fLib = GetProcAddress(hLib, "RegisterUserApiHook");
-
-		bRet = (BOOL)fLib(hInstance, pfUserHook);
-
-		FreeLibrary(hLib);
-
-		if (bRet)
-			MessageBox(HWND_DESKTOP, L"oh my goodness gracious", L"Wowzers!", MB_ABORTRETRYIGNORE);
-
-		return bRet;
-	}
-
-	return FALSE;
-}
-
-/* * * *\
-	UnregisterUserApiHook -
-		Unregisters a DLL from User32.
-	RETURNS -
-		TRUE if successful.
-\* * * */
-BOOL WINAPI UnregisterUserApiHook(VOID)
+BOOL WINAPI UnregisterUserApiHookDelay(VOID)
 {
 	HMODULE hLib = LoadLibrary(L"user32.dll");
 	BOOL bRet = 0;

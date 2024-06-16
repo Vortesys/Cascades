@@ -23,7 +23,6 @@
 /* Global Variables */
 
 /* Function Prototypes */
-__declspec(dllexport) VOID APIENTRY NtStyleDisableWindowTheme(_In_ HWND hWnd);
 
 // Hook Functions
 __declspec(dllexport) BOOL CALLBACK NtStyleInstallUserHook();
@@ -43,9 +42,5 @@ static LRESULT CALLBACK NtStyleSetScrollInfo(HWND hWnd, int fnBar, LPCSCROLLINFO
 LRESULT CALLBACK NtStyleWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam, WNDPROC DefWndProc);
 
 // Delay Load Functions
-HRESULT DwmGetWindowAttributeDelay(HWND hwnd, DWORD dwAttribute, _In_ LPCVOID pvAttribute, DWORD cbAttribute);
-HRESULT DwmSetWindowAttributeDelay(HWND hwnd, DWORD dwAttribute, _In_ LPCVOID pvAttribute, DWORD cbAttribute);
-HRESULT SetWindowThemeDelay(_In_ HWND hwnd, _In_ LPCWSTR pszSubAppName, _In_ LPCWSTR pszSubIdList);
-BOOL WINAPI RegisterUserApiHook(PUSERAPIHOOKINFO ApiHookInfo);
-BOOL WINAPI RegisterUserApiHookWin32(HINSTANCE hInstance, FARPROC pfUserHook);
-BOOL WINAPI UnregisterUserApiHook(VOID);
+BOOL WINAPI RegisterUserApiHookDelay(PUSERAPIHOOKINFO ApiHookInfo);
+BOOL WINAPI UnregisterUserApiHookDelay(VOID);

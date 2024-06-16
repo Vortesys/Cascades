@@ -47,45 +47,6 @@ BOOL APIENTRY DllMain(
 }
 
 /* * * *\
-	NtStyleDisableWindowTheme -
-		de-themify that window
-\* * * */
-__declspec(dllexport) VOID APIENTRY NtStyleDisableWindowTheme(_In_ HWND hWnd)
-{
-	enum DWMNCRENDERINGPOLICY ncrp = DWMNCRP_DISABLED;
-
-	HANDLE hProcess = NULL;
-	DWORD dwProcessID = 0;
-	INT cchProcessName = MAX_PATH;
-	WCHAR pszProcessName[MAX_PATH] = L"";
-
-	// DO NOT DO ANY OF THIS TO EXPLORER!!!
-	// EXPLORER NEEDS DWM!!!
-	if (GetWindowThreadProcessId(hWnd, &dwProcessID) == 0)
-		return;
-
-	hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, dwProcessID);
-
-	if (QueryFullProcessImageName(hProcess, 0, pszProcessName, &cchProcessName))
-	{
-		if (StrStrI(pszProcessName, (LPWSTR)L"\\explorer.exe") == NULL)
-		{
-			// Nuke DWM
-			DwmSetWindowAttributeDelay(hWnd,
-				DWMWA_NCRENDERING_POLICY,
-				&ncrp,
-				sizeof(ncrp));
-
-			// Nuke the theming
-			SetWindowThemeDelay(hWnd, L"", L"");
-			RedrawWindow(hWnd, NULL, NULL, RDW_FRAME);
-		}
-	}
-
-	return;
-}
-
-/* * * *\
 	NtStyleInstallUserHook -
 		Load the User32 API hook.
 \* * * */
@@ -93,13 +54,14 @@ __declspec(dllexport) BOOL CALLBACK NtStyleInstallUserHook()
 {
 	USERAPIHOOKINFO uah;
 
+	MessageBox(NULL, L"NtStyleInstallUserHook called", L"Cascades", MB_OK);
+
 	uah.m_funname1 = L"NtStyleInitUserHook";
 	uah.m_dllname1 = L"cscdhk64.dll";
 	uah.m_funname2 = L"NtStyleInitUserHook";
 	uah.m_dllname2 = L"cscdhk64.dll";
 
-	return RegisterUserApiHook(&uah);
-	//return RegisterUserApiHookWin32(NULL, &NtStyleInitUserHook);
+	return RegisterUserApiHookDelay(&uah);
 }
 
 /* * * *\
@@ -108,12 +70,16 @@ __declspec(dllexport) BOOL CALLBACK NtStyleInstallUserHook()
 \* * * */
 __declspec(dllexport) BOOL CALLBACK NtStyleInitUserHook(UAPIHK State, PUSERAPIHOOK puah)
 {
+	MessageBox(NULL, L"NtStyleInitUserHook called", L"Cascades", MB_OK);
+
 	// Don't initialize if the state isn't appropriate.
 	if (!puah || State != uahLoadInit)
 	{
 		g_bThemeHooksActive = FALSE;
 		return TRUE;
 	}
+
+	MessageBox(NULL, L"NtStyleInitUserHook initializing", L"Cascades", MB_OK);
 
 	/* Store the original functions from user32 */
 	g_user32ApiHook = *puah;
@@ -189,7 +155,7 @@ __declspec(dllexport) BOOL CALLBACK NtStyleInitUserHook(UAPIHK State, PUSERAPIHO
 \* * * */
 __declspec(dllexport) BOOL CALLBACK NtStyleRemoveUserHook()
 {
-	return UnregisterUserApiHook();
+	return UnregisterUserApiHookDelay();
 }
 
 /* * * *\
@@ -228,7 +194,7 @@ static LRESULT CALLBACK NtStylePreWindowProc(HWND hWnd, UINT Msg, WPARAM wParam,
 	switch (Msg)
 	{
 	case WM_CREATE:
-		NtStyleDisableWindowTheme(hWnd);
+		MessageBox(NULL, L"Window procedure called", L"Cascades", MB_OK);
 		break;
 	}
 
