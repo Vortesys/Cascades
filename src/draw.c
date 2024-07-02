@@ -8,7 +8,7 @@
 \* * * * * * * */
 
 /* Headers */
-#include "cscdhook.h"
+#include "main.h"
 #include "draw.h"
 #include "oebitmap.h"
 #include <strsafe.h>

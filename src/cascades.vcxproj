@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -74,22 +74,22 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
-    <TargetName>cscdhk64</TargetName>
+    <TargetName>cascades</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
-    <TargetName>cscdhk32</TargetName>
+    <TargetName>cascades</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
-    <TargetName>cscdhk32</TargetName>
+    <TargetName>cascades</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
-    <TargetName>cscdhk64</TargetName>
+    <TargetName>cascades</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -111,7 +111,7 @@
       <EntryPointSymbol>
       </EntryPointSymbol>
       <NoEntryPoint>false</NoEntryPoint>
-      <ModuleDefinitionFile>cscdhook.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>export.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -141,7 +141,7 @@
       <MinimumRequiredVersion>5.02</MinimumRequiredVersion>
       <NoEntryPoint>false</NoEntryPoint>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
-      <ModuleDefinitionFile>cscdhook.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>export.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -164,7 +164,7 @@
       <EntryPointSymbol>
       </EntryPointSymbol>
       <NoEntryPoint>false</NoEntryPoint>
-      <ModuleDefinitionFile>cscdhook.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>export.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -192,24 +192,27 @@
       <MinimumRequiredVersion>5.02</MinimumRequiredVersion>
       <NoEntryPoint>false</NoEntryPoint>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
-      <ModuleDefinitionFile>cscdhook.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>export.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="draw.h" />
-    <ClInclude Include="cscdhook.h" />
+    <ClInclude Include="main.h" />
     <ClInclude Include="oebitmap.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="thmfunc.h" />
+    <ClInclude Include="usrapihk.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="delayfnc.c" />
     <ClCompile Include="draw.c" />
-    <ClCompile Include="cscdhook.c" />
+    <ClCompile Include="main.c" />
+    <ClCompile Include="thmfunc.c" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="export.def" />
     <None Include="ntshook.def" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

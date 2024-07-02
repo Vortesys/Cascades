@@ -10,7 +10,6 @@
 /* Headers */
 #include "cscdui.h"
 #include "resource.h"
-#include "..\common\usrapihk.h"
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <CommCtrl.h>
@@ -81,21 +80,9 @@ BOOL NtStyleToggleHook(BOOL bInstall)
 		FARPROC fLib;
 
 		if (bInstall)
-		{
-			//fLib = GetProcAddress(hLib, "NtStyleInstallUserHook");
-			USERAPIHOOKINFO uah;
-
-			MessageBox(NULL, L"NtStyleInstallUserHook called", L"Cascades", MB_OK);
-
-			uah.m_funname1 = L"NtStyleInitUserHook";
-			uah.m_dllname1 = L"cscdhk64.dll";
-			uah.m_funname2 = L"NtStyleInitUserHook";
-			uah.m_dllname2 = L"cscdhk64.dll";
-
-			return RegisterUserApiHookDelay(&uah);
-		}
+			fLib = GetProcAddress(hLib, "InstallUserHook");
 		else
-			fLib = GetProcAddress(hLib, "NtStyleRemoveUserHook");
+			fLib = GetProcAddress(hLib, "RemoveUserHook");
 
 		bRet = (BOOL)fLib();
 

@@ -1,0 +1,5 @@
+LIBRARY CASCADES
+EXPORTS
+    InstallUserHook @1
+    InitUserHook @2
+    RemoveUserHook @3

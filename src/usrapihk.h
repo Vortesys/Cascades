@@ -4,16 +4,13 @@
 	DESCRIPTION -
 		User32 UserApiHook function prototypes. Info
 		and structures sourced primarily from the ReactOS
-		wiki, source code and Mozilla's bug tracker.
+		wiki, source code and Win32ss (Shane Forunier).
 	LICENSE INFORMATION -
 		MIT License, see LICENSE.txt in the root folder
 \* * * * * * * */
 
 /* Pragmas */
 #pragma once
-
-/* Includes */
-#include <wtypes.h>
 
 /* Definitions */
 #define WM_UAHINIT			0x0000031b
@@ -29,19 +26,31 @@
 #define UAHOWP_MAX_SIZE WM_USER/8
 
 /* Structures */
+
+// NT 5.1
+typedef struct _USERAPIHOOKINFO_XP
+{
+	HINSTANCE hInstance; // hInstance
+	FARPROC CallbackFunc; // Callback function
+} USERAPIHOOKINFO_XP, * PUSERAPIHOOKINFO_XP;
+typedef BOOL(WINAPI* RUAH_XP)(PUSERAPIHOOKINFO_XP);
+
+// NT 5.2 and newer
 typedef struct _USERAPIHOOKINFO
 {
-	LPCWSTR	m_funname1; // Callback function
-	LPCWSTR	m_dllname1; // DLL 1
-	LPCWSTR	m_funname2; // Callback function
-	LPCWSTR	m_dllname2; // DLL 2
+	DWORD m_size; // Size of the structure
+	LPCWSTR m_dllname1; // DLL 1
+	LPCWSTR m_funname1; // Callback function
+	LPCWSTR m_dllname2; // DLL 2
+	LPCWSTR m_funname2; // Callback function
 } USERAPIHOOKINFO, * PUSERAPIHOOKINFO;
+typedef BOOL(WINAPI* RUAH)(PUSERAPIHOOKINFO);
 
 typedef LRESULT(CALLBACK* WNDPROC_OWP)(HWND, UINT, WPARAM, LPARAM, ULONG_PTR, PDWORD);
 
 typedef struct _UAHOWP
 {
-	BYTE*	MsgBitArray;
+	BYTE* MsgBitArray;
 	DWORD	Size;
 } UAHOWP, * PUAHOWP;
 
@@ -78,3 +87,7 @@ typedef enum _UAPIHK
 	uahStop,
 	uahShutdown
 } UAPIHK, * PUAPIHK;
+
+/* Function Prototypes */
+BOOL WINAPI RegisterUserApiHook(PUSERAPIHOOKINFO ApiHookInfo);
+BOOL WINAPI UnregisterUserApiHook(VOID);

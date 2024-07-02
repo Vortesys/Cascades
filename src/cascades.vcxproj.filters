@@ -18,7 +18,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cscdhook.h">
+    <ClInclude Include="main.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
@@ -30,15 +30,21 @@
     <ClInclude Include="draw.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="usrapihk.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="thmfunc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="cscdhook.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="delayfnc.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="draw.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="thmfunc.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -50,6 +56,9 @@
   <ItemGroup>
     <None Include="ntshook.def">
       <Filter>Export Definitions</Filter>
+    </None>
+    <None Include="export.def">
+      <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
 </Project>

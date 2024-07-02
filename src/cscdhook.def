@@ -1,5 +1,0 @@
-LIBRARY
-EXPORTS
-    NtStyleInstallUserHook @1
-    NtStyleInitUserHook @2
-    NtStyleRemoveUserHook @4
