@@ -62,6 +62,7 @@ LRESULT CALLBACK ThemePreWindowProc(
 	switch (Msg)
 	{
 	case WM_CREATE:
+		MessageBox(NULL, L"Hurrah! WM_CREATE!", L"Cascades", MB_OK);
 		OutputDebugString(L"Hurrah! WM_CREATE!");
 		break;
 	default:
