@@ -34,7 +34,7 @@ LRESULT CALLBACK ThemeDefWindowProcA(
 
 /* * * *\
 	ThemeDefWindowProcW -
-		Stub.
+		Default ApiHook window procedure.
 \* * * */
 LRESULT CALLBACK ThemeDefWindowProcW(
 	HWND   hWnd,
@@ -43,7 +43,51 @@ LRESULT CALLBACK ThemeDefWindowProcW(
 	LPARAM lParam
 )
 {
-	return g_user32ApiHook.DefWindowProcW(hWnd, Msg, wParam, lParam);
+	switch (Msg)
+	{
+
+	case WM_NCPAINT:
+		return ThemeHandleNCPaint(hWnd, (HRGN)wParam);
+		//
+		// WM_NCUAHDRAWCAPTION : wParam are DC_* flags.
+		//
+	case WM_NCUAHDRAWCAPTION:
+		//
+		// WM_NCUAHDRAWFRAME : wParam is HDC, lParam are DC_ACTIVE and or DC_REDRAWHUNGWND.
+		//
+	case WM_NCUAHDRAWFRAME:
+	case WM_NCACTIVATE:
+		// Determine whether the window is active or not
+		// Determine whether or not the window has a caption bar
+		// Determine whether or not the window is visible or not
+		// If window is minimized, draw the icon
+		if ((GetWindowLongW(hWnd, GWL_STYLE) & WS_CAPTION) != WS_CAPTION)
+			return TRUE;
+
+		ThemeHandleNCPaint(hWnd, (HRGN)1);
+		return TRUE;
+
+	case WM_NCRBUTTONDOWN:
+	case WM_NCMBUTTONDOWN:
+	case WM_NCLBUTTONDOWN:
+	case WM_NCLBUTTONUP:
+	case WM_NCLBUTTONDBLCLK:
+	case WM_NCMOUSEMOVE:
+	{
+		ThemeHandleNcMouseMove(hWnd, Msg, wParam, lParam);
+		break;
+	}
+	//case WM_NCHITTEST:
+		//return DefWndNCHitTest(hWnd, Point);
+	//case WM_SYSCOMMAND:
+		// SC_VSCROLL/SC_HSCROLL deal with them later
+	//case WM_CREATE:
+		//MessageBox(NULL, L"Hurrah! WM_CREATE!", L"Cascades", MB_OK);
+		//OutputDebugString(L"Hurrah! WM_CREATE!");
+		//break;
+	default:
+		return g_user32ApiHook.DefWindowProcW(hWnd, Msg, wParam, lParam);
+	}
 }
 
 /* * * *\
@@ -59,16 +103,6 @@ LRESULT CALLBACK ThemePreWindowProc(
 	PDWORD unknown
 )
 {
-	switch (Msg)
-	{
-	case WM_CREATE:
-		MessageBox(NULL, L"Hurrah! WM_CREATE!", L"Cascades", MB_OK);
-		OutputDebugString(L"Hurrah! WM_CREATE!");
-		break;
-	default:
-		break;
-	}
-
 	return 0;
 }
 
@@ -85,12 +119,6 @@ LRESULT CALLBACK ThemePostWindowProc(
 	PDWORD unknown
 )
 {
-	switch (Msg)
-	{
-	default:
-		break;
-	}
-
 	return 0;
 }
 
