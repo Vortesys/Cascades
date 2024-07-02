@@ -104,7 +104,7 @@ __declspec(dllexport) BOOL CALLBACK InstallUserHook()
 \* * * */
 __declspec(dllexport) BOOL CALLBACK InitUserHook(UAPIHK State, PUSERAPIHOOK puah)
 {
-	MessageBox(NULL, L"InitUserHook called", L"ApiHook", MB_OK);
+	MessageBox(NULL, L"InitUserHook called", L"Cascades", MB_OK);
 
 	// Don't initialize if the state isn't appropriate.
 	if (!puah || State != uahLoadInit)
@@ -113,7 +113,7 @@ __declspec(dllexport) BOOL CALLBACK InitUserHook(UAPIHK State, PUSERAPIHOOK puah
 		return TRUE;
 	}
 
-	MessageBox(NULL, L"InitUserHook initializing", L"ApiHook", MB_OK);
+	MessageBox(NULL, L"InitUserHook initializing", L"Cascades", MB_OK);
 
 	/* Store the original functions from user32 */
 	g_user32ApiHook = *puah;

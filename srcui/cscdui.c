@@ -72,7 +72,7 @@ int WINAPI wWinMain(
 \* * * */
 BOOL NtStyleToggleHook(BOOL bInstall)
 {
-	HMODULE hLib = LoadLibrary(L"cscdhk64.dll");
+	HMODULE hLib = LoadLibrary(L"cascades.dll");
 	BOOL bRet = 0;
 
 	if (hLib)
@@ -89,26 +89,6 @@ BOOL NtStyleToggleHook(BOOL bInstall)
 		FreeLibrary(hLib);
 
 		return bRet;
-	}
-
-	return FALSE;
-}
-
-/* * * *\
-	NtStyleEnumWindowProc -
-		NT Style's window enumeration procedure.
-\* * * */
-BOOL CALLBACK NtStyleEnumWindowProc(
-	_In_ HWND hwnd,
-	_In_ LPARAM lParam
-)
-{
-	if ((HMODULE)lParam != NULL)
-	{
-		FARPROC fLib = GetProcAddress((HMODULE)lParam, "NtStyleDisableWindowTheme");
-		fLib(hwnd);
-
-		return TRUE;
 	}
 
 	return FALSE;
