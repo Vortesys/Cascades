@@ -47,15 +47,16 @@ LRESULT CALLBACK ThemeDefWindowProcW(
 	{
 
 	case WM_NCPAINT:
+		// Determine whether the window is active or not
+		// Determine whether or not the window has a caption bar
+		// Determine whether or not the window is visible or not
+		// If window is minimized, draw the icon
 		return ThemeHandleNCPaint(hWnd, (HRGN)wParam);
-		//
-		// WM_NCUAHDRAWCAPTION : wParam are DC_* flags.
-		//
+
 	case WM_NCUAHDRAWCAPTION:
-		//
-		// WM_NCUAHDRAWFRAME : wParam is HDC, lParam are DC_ACTIVE and or DC_REDRAWHUNGWND.
-		//
+		// WM_NCUAHDRAWCAPTION : wParam are DC_* flags.
 	case WM_NCUAHDRAWFRAME:
+		// WM_NCUAHDRAWFRAME : wParam is HDC, lParam are DC_ACTIVE and or DC_REDRAWHUNGWND.
 	case WM_NCACTIVATE:
 		// Determine whether the window is active or not
 		// Determine whether or not the window has a caption bar
@@ -67,16 +68,15 @@ LRESULT CALLBACK ThemeDefWindowProcW(
 		ThemeHandleNCPaint(hWnd, (HRGN)1);
 		return TRUE;
 
-	case WM_NCRBUTTONDOWN:
-	case WM_NCMBUTTONDOWN:
-	case WM_NCLBUTTONDOWN:
-	case WM_NCLBUTTONUP:
-	case WM_NCLBUTTONDBLCLK:
-	case WM_NCMOUSEMOVE:
-	{
-		ThemeHandleNcMouseMove(hWnd, Msg, wParam, lParam);
-		break;
-	}
+	//case WM_NCRBUTTONDOWN:
+	//case WM_NCMBUTTONDOWN:
+	//case WM_NCLBUTTONDOWN:
+	//case WM_NCLBUTTONUP:
+	//case WM_NCLBUTTONDBLCLK:
+	//case WM_NCMOUSEMOVE:
+		//ThemeHandleNcMouseMove(hWnd, Msg, wParam, lParam);
+		//break;
+
 	//case WM_NCHITTEST:
 		//return DefWndNCHitTest(hWnd, Point);
 	//case WM_SYSCOMMAND:
@@ -85,6 +85,7 @@ LRESULT CALLBACK ThemeDefWindowProcW(
 		//MessageBox(NULL, L"Hurrah! WM_CREATE!", L"Cascades", MB_OK);
 		//OutputDebugString(L"Hurrah! WM_CREATE!");
 		//break;
+
 	default:
 		return g_user32ApiHook.DefWindowProcW(hWnd, Msg, wParam, lParam);
 	}
