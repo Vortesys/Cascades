@@ -39,19 +39,83 @@ static DWORD g_dwWindowFrame;
 		Draws window using the
 		DrawWindow* helper
 		functions.
+	RETURNS -
+		TRUE if message completely processed
+		FALSE if defwindowproc needs to be called
 \* * * */
-VOID NTStyleWindowProc(_In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam, _In_ LPARAM lParam)
+BOOL NTStyleWindowProc(_In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam, _In_ LPARAM lParam)
 {
 	BOOL bDrawCaption = FALSE; // Determine whether or not the window has a caption bar
-	BOOL bWindowMinimized = FALSE; //learn more later, paint window, icon or nothing
-	BOOL bWindowVisible = FALSE; // Determine whether or not the window is visible or not
+	BOOL bDrawWindow = FALSE; // Determine whether or not the window is visible or not
 
 	// Figure out what we need to draw
+	bDrawWindow = IsIconic(hWnd);
+	bDrawCaption = ((GetWindowLongPtr(hWnd, GWL_STYLE) & WS_CAPTION) == WS_CAPTION);
 
-	
 	// Always refresh the colors and metrics before drawing
 	NTStyleGetWindowMetrics();
 
+	// Abort if window's not visible for now
+	if (!bDrawWindow)
+		return FALSE;
+
+	// Figure out what to draw based on the message we receive
+	switch (Msg)
+	{
+
+	// Draw the window
+	case WM_NCPAINT:
+		NTStyleDrawWindow(hWnd, wParam, lParam);
+		return TRUE;
+
+	// Also draw the window
+	case WM_NCUAHDRAWCAPTION:
+		// WM_NCUAHDRAWCAPTION : wParam are DC_* flags.
+	case WM_NCUAHDRAWFRAME:
+		// WM_NCUAHDRAWFRAME : wParam is HDC, lParam are DC_ACTIVE and or DC_REDRAWHUNGWND.
+	case WM_NCACTIVATE:
+		if ((GetWindowLongW(hWnd, GWL_STYLE) & WS_CAPTION) != WS_CAPTION)
+			return TRUE;
+
+		NTStyleDrawWindow(hWnd, wParam, lParam);
+		return TRUE;
+
+		//case WM_NCRBUTTONDOWN:
+		//case WM_NCMBUTTONDOWN:
+		//case WM_NCLBUTTONDOWN:
+		//case WM_NCLBUTTONUP:
+		//case WM_NCLBUTTONDBLCLK:
+		//case WM_NCMOUSEMOVE:
+			//ThemeHandleNcMouseMove(hWnd, Msg, wParam, lParam);
+			//break;
+
+		//case WM_NCHITTEST:
+			//return DefWndNCHitTest(hWnd, Point);
+		//case WM_SYSCOMMAND:
+			// SC_VSCROLL/SC_HSCROLL deal with them later
+		//case WM_CREATE:
+			//MessageBox(NULL, L"Hurrah! WM_CREATE!", L"Cascades", MB_OK);
+			//OutputDebugString(L"Hurrah! WM_CREATE!");
+			//break;
+
+		//case WM_PAINTICON:
+		//case WM_ICONERASEBKGND:
+		//case WM_MDIICONARRANGE:
+
+	default:
+		return FALSE;
+	}
+
+}
+
+/* * * *\
+	NTStyleDrawWindow -
+		Draws window using the
+		DrawWindow* helper
+		functions.
+\* * * */
+VOID NTStyleDrawWindow(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lParam)
+{
 	// Make sure we're only painting windows with titlebars
 	if ((GetWindowLongPtr(hWnd, GWL_STYLE) & WS_SYSMENU) == WS_SYSMENU)
 	{
@@ -105,7 +169,7 @@ VOID NTStyleWindowProc(_In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam, _In_ L
 
 			// Blit it to our actual window
 			TransparentBlt(hdc, 0, 0, wi.rcWindow.right - wi.rcWindow.left,
-				wi.rcWindow.bottom - wi.rcWindow.top, hdcMem, 0, 0, 
+				wi.rcWindow.bottom - wi.rcWindow.top, hdcMem, 0, 0,
 				wi.rcWindow.right - wi.rcWindow.left,
 				wi.rcWindow.bottom - wi.rcWindow.top, GetSysColor(COLOR_APPWORKSPACE)); //0xFF00FF
 
