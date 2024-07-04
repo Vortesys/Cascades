@@ -25,7 +25,7 @@
 #define NSDFC_STYLE_MAXIMIZE 0x20 // Maximized caption arrow
 
 /* Function Prototypes */
-VOID NTStyleDrawWindow(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lParam);
+VOID NTStyleWindowProc(_In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam, _In_ LPARAM lParam);
 
 // Drawing Functions
 VOID NTStyleGetWindowMetrics(VOID);

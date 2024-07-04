@@ -86,6 +86,10 @@ LRESULT CALLBACK ThemeDefWindowProcW(
 		//OutputDebugString(L"Hurrah! WM_CREATE!");
 		//break;
 
+	//case WM_PAINTICON:
+	//case WM_ICONERASEBKGND:
+	//case WM_MDIICONARRANGE:
+
 	default:
 		return g_user32ApiHook.DefWindowProcW(hWnd, Msg, wParam, lParam);
 	}

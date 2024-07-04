@@ -35,13 +35,20 @@ static DWORD g_dwWindowFrame;
 /* Functions */
 
 /* * * *\
-	NTStyleDrawWindow -
+	NTStyleWindowProc -
 		Draws window using the
 		DrawWindow* helper
 		functions.
 \* * * */
-VOID NTStyleDrawWindow(_In_ HWND hWnd, _In_ WPARAM wParam, _In_ LPARAM lParam)
+VOID NTStyleWindowProc(_In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam, _In_ LPARAM lParam)
 {
+	BOOL bDrawCaption = FALSE; // Determine whether or not the window has a caption bar
+	BOOL bWindowMinimized = FALSE; //learn more later, paint window, icon or nothing
+	BOOL bWindowVisible = FALSE; // Determine whether or not the window is visible or not
+
+	// Figure out what we need to draw
+
+	
 	// Always refresh the colors and metrics before drawing
 	NTStyleGetWindowMetrics();
 
