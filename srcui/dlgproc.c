@@ -41,7 +41,7 @@ INT_PTR CALLBACK NtStyleDialogProc(
 
 		case IDC_START:
 		{
-			if (NtStyleToggleHook(TRUE))
+			if (!NtStyleToggleHook(TRUE))
 			{
 				MessageBox(hDlg, L"Started Cascades.", L"Cascades",
 					MB_OK | MB_ICONINFORMATION | MB_DEFAULT_DESKTOP_ONLY);
@@ -59,7 +59,7 @@ INT_PTR CALLBACK NtStyleDialogProc(
 		}
 
 		case IDC_STOP:
-			if (NtStyleToggleHook(FALSE))
+			if (!NtStyleToggleHook(FALSE))
 			{
 				Button_Enable(GetDlgItem(hDlg, IDC_START), FALSE);
 				Button_Enable(GetDlgItem(hDlg, IDC_STOP), TRUE);

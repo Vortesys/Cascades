@@ -74,8 +74,8 @@ BOOL NTStyleWindowProc(_In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam, _In_ L
 	case WM_NCUAHDRAWFRAME:
 		// WM_NCUAHDRAWFRAME : wParam is HDC, lParam are DC_ACTIVE and or DC_REDRAWHUNGWND.
 	case WM_NCACTIVATE:
-		if ((GetWindowLongW(hWnd, GWL_STYLE) & WS_CAPTION) != WS_CAPTION)
-			return TRUE;
+		//if ((GetWindowLongW(hWnd, GWL_STYLE) & WS_CAPTION) != WS_CAPTION)
+			//return TRUE;
 
 		NTStyleDrawWindow(hWnd, wParam, lParam);
 		return TRUE;
