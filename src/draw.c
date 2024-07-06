@@ -57,7 +57,13 @@ BOOL NTStyleWindowProc(_In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam, _In_ L
 
 	// Abort if window's not visible for now
 	if (!bDrawWindow)
+	{
+		MessageBox(NULL, L"WNDPROC invisible!", L"Cascades", MB_OK);
+
 		return FALSE;
+	}
+
+	MessageBox(NULL, L"WNDPROC visible!", L"Cascades", MB_OK);
 
 	// Figure out what to draw based on the message we receive
 	switch (Msg)
