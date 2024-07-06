@@ -30,7 +30,7 @@ LRESULT CALLBACK ThemeDefWindowProcA(
 	LPARAM lParam
 )
 {
-	if (NTStyleWindowProc(hWnd, Msg, wParam, lParam) != TRUE)
+	if (!NTStyleWindowProc(hWnd, Msg, wParam, lParam))
 		return g_user32ApiHook.DefWindowProcA(hWnd, Msg, wParam, lParam);
 	else
 		return TRUE;
@@ -47,7 +47,7 @@ LRESULT CALLBACK ThemeDefWindowProcW(
 	LPARAM lParam
 )
 {
-	if (NTStyleWindowProc(hWnd, Msg, wParam, lParam) != TRUE)
+	if (!NTStyleWindowProc(hWnd, Msg, wParam, lParam))
 		return g_user32ApiHook.DefWindowProcW(hWnd, Msg, wParam, lParam);
 	else
 		return TRUE;

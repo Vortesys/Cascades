@@ -16,7 +16,8 @@
 
 /* Variables */
 // Handles
-HINSTANCE	g_hAppInstance;
+HINSTANCE	g_hAppInstance = NULL;
+HMODULE		g_hDllInstance = NULL;
 // Strings
 WCHAR		g_szAppTitle[64];
 // Other
@@ -74,6 +75,11 @@ BOOL NtStyleToggleHook(BOOL bInstall)
 {
 	HMODULE hLib = LoadLibrary(L"cascades.dll");
 	BOOL bRet = 0;
+
+	if (g_hDllInstance != NULL)
+		g_hDllInstance = hLib;
+	else
+		hLib = g_hDllInstance;
 
 	if (hLib)
 	{

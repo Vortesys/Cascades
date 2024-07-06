@@ -45,9 +45,6 @@ INT_PTR CALLBACK NtStyleDialogProc(
 			{
 				MessageBox(hDlg, L"Started Cascades.", L"Cascades",
 					MB_OK | MB_ICONINFORMATION | MB_DEFAULT_DESKTOP_ONLY);
-
-				Button_Enable(GetDlgItem(hDlg, IDC_START), FALSE);
-				Button_Enable(GetDlgItem(hDlg, IDC_STOP), TRUE);
 			}
 			else
 			{
@@ -61,11 +58,6 @@ INT_PTR CALLBACK NtStyleDialogProc(
 		case IDC_STOP:
 			if (!NtStyleToggleHook(FALSE))
 			{
-				Button_Enable(GetDlgItem(hDlg, IDC_START), FALSE);
-				Button_Enable(GetDlgItem(hDlg, IDC_STOP), TRUE);
-			}
-			else
-			{
 				MessageBox(hDlg, L"Failed to stop Cascades.", L"Cascades",
 					MB_OK | MB_ICONINFORMATION | MB_DEFAULT_DESKTOP_ONLY);
 			}
@@ -77,7 +69,7 @@ INT_PTR CALLBACK NtStyleDialogProc(
 	case WM_INITDIALOG:
 		Button_SetCheck(GetDlgItem(hDlg, IDC_THEMEOFF), BST_CHECKED);
 		Button_Enable(GetDlgItem(hDlg, IDC_START), TRUE);
-		Button_Enable(GetDlgItem(hDlg, IDC_STOP), FALSE);
+		Button_Enable(GetDlgItem(hDlg, IDC_STOP), TRUE);
 		return TRUE;
 
 	case WM_CLOSE:

@@ -199,6 +199,7 @@ __declspec(dllexport) BOOL CALLBACK RemoveUserHook(VOID)
 \* * * */
 BOOL WINAPI RegisterUserApiHookDelay(HINSTANCE hInstance, PUSERAPIHOOKINFO ApiHookInfo)
 {
+	// TODO: use GetLastError!!!
 	HMODULE hLib = LoadLibrary(L"user32.dll");
 	BOOL bRet = 0;
 	DWORD dwMajorVersion = 0;
@@ -251,6 +252,7 @@ BOOL WINAPI RegisterUserApiHookDelay(HINSTANCE hInstance, PUSERAPIHOOKINFO ApiHo
 \* * * */
 BOOL WINAPI UnregisterUserApiHookDelay(VOID)
 {
+	// TODO: use GetLastError!!!
 	HMODULE hLib = LoadLibrary(L"user32.dll");
 	BOOL bRet = 0;
 
