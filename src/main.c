@@ -90,8 +90,8 @@ __declspec(dllexport) BOOL CALLBACK InstallUserHook()
 	uah.m_size = sizeof(uah);
 	uah.m_funname1 = L"InitUserHook";
 	uah.m_dllname1 = szFullPath;
-	uah.m_funname2 = L"InitUserHook";
-	uah.m_dllname2 = szFullPath;
+	uah.m_funname2 = NULL;
+	uah.m_dllname2 = NULL;
 
 	// ApiHook is not support on Windows
 	// 2000 or below!
