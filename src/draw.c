@@ -43,7 +43,7 @@ static DWORD g_dwWindowFrame;
 		TRUE if message completely processed
 		FALSE if defwindowproc needs to be called
 \* * * */
-BOOL NTStyleWindowProc(_In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam, _In_ LPARAM lParam)
+BOOL NTStyleWindowProc(_In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam, _In_ LPARAM lParam, _In_ WNDPROC DefWndProc)
 {
 	BOOL bDrawCaption = FALSE; // Determine whether or not the window has a caption bar
 	BOOL bDrawWindow = FALSE; // Determine whether or not the window is visible or not
@@ -57,16 +57,17 @@ BOOL NTStyleWindowProc(_In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam, _In_ L
 
 	// Abort if window's not visible for now
 	//if (!bDrawWindow)
-		//return FALSE;
+		//return DefWndProc(hWnd, Msg, wParam, lParam);
 
 	// Figure out what to draw based on the message we receive
 	switch (Msg)
 	{
+		WCHAR szTitle[256];
 
 	// Draw the window
 	case WM_NCPAINT:
 		NTStyleDrawWindow(hWnd, wParam, lParam);
-		return TRUE;
+		return 0; // TRUE
 
 	// Also draw the window
 	case WM_NCUAHDRAWCAPTION:
@@ -78,7 +79,9 @@ BOOL NTStyleWindowProc(_In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam, _In_ L
 			//return TRUE;
 
 		NTStyleDrawWindow(hWnd, wParam, lParam);
-		return TRUE;
+		//GetWindowText(hWnd, szTitle, ARRAYSIZE(szTitle));
+		//MessageBox(hWnd, szTitle, L"I'M LOSING IT!!!", MB_ICONERROR | MB_OK);
+		return 0;
 
 		//case WM_NCRBUTTONDOWN:
 		//case WM_NCMBUTTONDOWN:
@@ -103,7 +106,7 @@ BOOL NTStyleWindowProc(_In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam, _In_ L
 		//case WM_MDIICONARRANGE:
 
 	default:
-		return FALSE;
+		return DefWndProc(hWnd, Msg, wParam, lParam);
 	}
 
 }
