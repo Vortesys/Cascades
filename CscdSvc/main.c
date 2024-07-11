@@ -5,6 +5,8 @@
 		Cascades Service
 	DESCRIPTION -
 		User32 UserApiHook testing program.
+        This service must be run as an elevated user,
+        such as SYSTEM.
 	LICENSE INFORMATION -
 		MIT License, see LICENSE.txt in the root folder
 \* * * * * * * */

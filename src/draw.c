@@ -81,7 +81,7 @@ BOOL NTStyleWindowProc(_In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam, _In_ L
 		NTStyleDrawWindow(hWnd, wParam, lParam);
 		//GetWindowText(hWnd, szTitle, ARRAYSIZE(szTitle));
 		//MessageBox(hWnd, szTitle, L"I'M LOSING IT!!!", MB_ICONERROR | MB_OK);
-		return 0;
+		return TRUE;
 
 		//case WM_NCRBUTTONDOWN:
 		//case WM_NCMBUTTONDOWN:
