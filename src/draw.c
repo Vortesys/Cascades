@@ -43,7 +43,7 @@ static DWORD g_dwWindowFrame;
 		TRUE if message completely processed
 		FALSE if defwindowproc needs to be called
 \* * * */
-BOOL NTStyleWindowProc(_In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam, _In_ LPARAM lParam, _In_ WNDPROC DefWndProc)
+LRESULT NTStyleWindowProc(_In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam, _In_ LPARAM lParam, _In_ WNDPROC DefWndProc)
 {
 	BOOL bDrawCaption = FALSE; // Determine whether or not the window has a caption bar
 	BOOL bDrawWindow = FALSE; // Determine whether or not the window is visible or not
@@ -62,7 +62,7 @@ BOOL NTStyleWindowProc(_In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam, _In_ L
 	// Figure out what to draw based on the message we receive
 	switch (Msg)
 	{
-		WCHAR szTitle[256];
+		//WCHAR szTitle[256];
 
 	// Draw the window
 	case WM_NCPAINT:
