@@ -68,17 +68,19 @@ __declspec(dllexport) LRESULT APIENTRY NTStyleHookProc(
 		// Drawing Messages
 		case WM_CREATE:
 			NTStyleDisableWindowTheme(pcwps->hwnd);
-		case WM_DISPLAYCHANGE:
-		case WM_SYNCPAINT:
-		case WM_ACTIVATE:
-		case WM_SETTEXT:
-		case WM_PAINT:
-		case WM_MOVE:
-			NTStyleDrawWindow(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
 			break;
 
+		case 0xAE: // WM_NCUAHDRAWCAPTION:
+			// WM_NCUAHDRAWCAPTION : wParam are DC_* flags.
+		case 0xAF: // WM_NCUAHDRAWFRAME:
+			// WM_NCUAHDRAWFRAME : wParam is HDC, lParam are DC_ACTIVE and or DC_REDRAWHUNGWND.
 		case WM_NCACTIVATE:
-		case WM_NCCALCSIZE:
+			//if ((GetWindowLongW(hWnd, GWL_STYLE) & WS_CAPTION) != WS_CAPTION)
+				//return TRUE;
+
+			NTStyleDrawWindow(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
+			return TRUE;
+
 		case WM_NCPAINT:
 			NTStyleDrawWindow(pcwps->hwnd, pcwps->wParam, pcwps->lParam);
 			return 0;
