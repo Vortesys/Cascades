@@ -1,56 +1,73 @@
-/* * * * * * * *\
-	MAIN.C -
-		Copyright © 2024 Brady McDermott
-	PROJECT - 
-		Cascades Service
-	DESCRIPTION -
-		User32 UserApiHook testing program.
-        This service must be run as an elevated user,
-        such as SYSTEM.
-	LICENSE INFORMATION -
-		MIT License, see LICENSE.txt in the root folder
-\* * * * * * * */
-
-/* Includes */
-#define VC_EXTRALEAN
-#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#include <tchar.h>
 #include <strsafe.h>
-#include "error.h"
+#include "sample.h"
 
-/* Defines */
-#define SVCNAME L"CscdSvc"
-#define SVCDESC L"Cascades Theme Utility"
+#pragma comment(lib, "advapi32.lib")
 
-/* Global Variables */
-SERVICE_STATUS          g_SvcStatus;
-SERVICE_STATUS_HANDLE   g_SvcStatusHandle;
-HANDLE                  g_hSvcStopEvent = NULL;
+#define SVCNAME TEXT("SvcName")
 
-/* Functions */
+SERVICE_STATUS          gSvcStatus;
+SERVICE_STATUS_HANDLE   gSvcStatusHandle;
+HANDLE                  ghSvcStopEvent = NULL;
 
-/* * * *\
-    wWinMain -
-        Main entry point
-\* * * */
-INT WINAPI wWinMain(
-    _In_ HINSTANCE hInstance,
-    _In_opt_ HINSTANCE hPrevInstance,
-    _In_ LPWSTR lpCmdLine,
-    _In_ int nCmdShow
-)
+VOID SvcInstall(void);
+VOID WINAPI SvcCtrlHandler(DWORD);
+VOID WINAPI SvcMain(DWORD, LPTSTR*);
+
+VOID ReportSvcStatus(DWORD, DWORD, DWORD);
+VOID SvcInit(DWORD, LPTSTR*);
+VOID SvcReportEvent(LPTSTR);
+
+
+//
+// Purpose: 
+//   Entry point for the process
+//
+// Parameters:
+//   None
+// 
+// Return value:
+//   None, defaults to 0 (zero)
+//
+int __cdecl _tmain(int argc, TCHAR* argv[])
 {
-    CscdSvcInstall();
+    // If command-line parameter is "install", install the service. 
+    // Otherwise, the service is probably being started by the SCM.
 
-	return 0;
+    if (lstrcmpi(argv[1], TEXT("install")) == 0)
+    {
+        SvcInstall();
+        return 0;
+    }
+
+    // TO_DO: Add any additional services for the process to this table.
+    SERVICE_TABLE_ENTRY DispatchTable[] =
+    {
+        { SVCNAME, (LPSERVICE_MAIN_FUNCTION)SvcMain },
+        { NULL, NULL }
+    };
+
+    // This call returns when the service has stopped. 
+    // The process should simply terminate when the call returns.
+
+    if (!StartServiceCtrlDispatcher(DispatchTable))
+    {
+        SvcReportEvent(TEXT("StartServiceCtrlDispatcher"));
+    }
 }
 
-/* * * *\
-	CscdSvcInstall -
-		Install the service in the SCM database
-        Borrowed from Microsoft's Svc.cpp
-\* * * */
-VOID CscdSvcInstall()
+//
+// Purpose: 
+//   Installs a service in the SCM database
+//
+// Parameters:
+//   None
+// 
+// Return value:
+//   None
+//
+VOID SvcInstall()
 {
     SC_HANDLE schSCManager;
     SC_HANDLE schService;
@@ -70,6 +87,7 @@ VOID CscdSvcInstall()
     StringCbPrintf(szPath, MAX_PATH, TEXT("\"%s\""), szUnquotedPath);
 
     // Get a handle to the SCM database. 
+
     schSCManager = OpenSCManager(
         NULL,                    // local computer
         NULL,                    // ServicesActive database 
@@ -82,10 +100,11 @@ VOID CscdSvcInstall()
     }
 
     // Create the service
+
     schService = CreateService(
         schSCManager,              // SCM database 
         SVCNAME,                   // name of service 
-        SVCDESC,                   // service name to display 
+        SVCNAME,                   // service name to display 
         SERVICE_ALL_ACCESS,        // desired access 
         SERVICE_WIN32_OWN_PROCESS, // service type 
         SERVICE_DEMAND_START,      // start type 
@@ -103,103 +122,119 @@ VOID CscdSvcInstall()
         CloseServiceHandle(schSCManager);
         return;
     }
-    else
-    {
-        printf("Service installed successfully\n");
-    }
+    else printf("Service installed successfully\n");
 
     CloseServiceHandle(schService);
     CloseServiceHandle(schSCManager);
 }
 
-/* * * *\
-    CscdSvcMain -
-        Install the service in the SCM database
-        Borrowed from Microsoft's Svc.cpp
-\* * * */
-VOID WINAPI CscdSvcMain(DWORD dwArgc, LPTSTR* lpszArgv)
+//
+// Purpose: 
+//   Entry point for the service
+//
+// Parameters:
+//   dwArgc - Number of arguments in the lpszArgv array
+//   lpszArgv - Array of strings. The first string is the name of
+//     the service and subsequent strings are passed by the process
+//     that called the StartService function to start the service.
+// 
+// Return value:
+//   None.
+//
+VOID WINAPI SvcMain(DWORD dwArgc, LPTSTR* lpszArgv)
 {
     // Register the handler function for the service
-    g_SvcStatusHandle = RegisterServiceCtrlHandler(
-        SVCNAME,
-        CscdSvcCtrlHandler);
 
-    // Return if the handler isn't installed
-    if (!g_SvcStatusHandle)
+    gSvcStatusHandle = RegisterServiceCtrlHandler(
+        SVCNAME,
+        SvcCtrlHandler);
+
+    if (!gSvcStatusHandle)
     {
-        CscdSvcReportEvent(TEXT("RegisterServiceCtrlHandler"));
+        SvcReportEvent(TEXT("RegisterServiceCtrlHandler"));
         return;
     }
 
     // These SERVICE_STATUS members remain as set here
-    g_SvcStatus.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
-    g_SvcStatus.dwServiceSpecificExitCode = 0;
+
+    gSvcStatus.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
+    gSvcStatus.dwServiceSpecificExitCode = 0;
 
     // Report initial status to the SCM
-    CscdReportSvcStatus(SERVICE_START_PENDING, NO_ERROR, 3000);
+
+    ReportSvcStatus(SERVICE_START_PENDING, NO_ERROR, 3000);
 
     // Perform service-specific initialization and work.
-    CscdSvcInit(dwArgc, lpszArgv);
+
+    SvcInit(dwArgc, lpszArgv);
 }
 
-/* * * *\
-    CscdSvcInit -
-        Service's initialization code
-        Borrowed from Microsoft's Svc.cpp
-    Parameters - 
-        dwArgc - Number of arguments in the lpszArgv array
-        lpszArgv - Array of strings. The first string is the name of
-        the service and subsequent strings are passed by the process
-        that called the StartService function to start the service.
-\* * * */
-VOID CscdSvcInit(DWORD dwArgc, LPTSTR* lpszArgv)
+//
+// Purpose: 
+//   The service code
+//
+// Parameters:
+//   dwArgc - Number of arguments in the lpszArgv array
+//   lpszArgv - Array of strings. The first string is the name of
+//     the service and subsequent strings are passed by the process
+//     that called the StartService function to start the service.
+// 
+// Return value:
+//   None
+//
+VOID SvcInit(DWORD dwArgc, LPTSTR* lpszArgv)
 {
     // TO_DO: Declare and set any required variables.
-    //   Be sure to periodically call CscdReportSvcStatus() with 
+    //   Be sure to periodically call ReportSvcStatus() with 
     //   SERVICE_START_PENDING. If initialization fails, call
-    //   CscdReportSvcStatus with SERVICE_STOPPED.
+    //   ReportSvcStatus with SERVICE_STOPPED.
 
-    // Create an event. The control handler function, CscdSvcCtrlHandler,
+    // Create an event. The control handler function, SvcCtrlHandler,
     // signals this event when it receives the stop control code.
-    g_hSvcStopEvent = CreateEvent(
+
+    ghSvcStopEvent = CreateEvent(
         NULL,    // default security attributes
         TRUE,    // manual reset event
         FALSE,   // not signaled
         NULL);   // no name
 
-    if (g_hSvcStopEvent == NULL)
+    if (ghSvcStopEvent == NULL)
     {
-        CscdReportSvcStatus(SERVICE_STOPPED, GetLastError(), 0);
+        ReportSvcStatus(SERVICE_STOPPED, GetLastError(), 0);
         return;
     }
 
     // Report running status when initialization is complete.
-    CscdReportSvcStatus(SERVICE_RUNNING, NO_ERROR, 0);
+
+    ReportSvcStatus(SERVICE_RUNNING, NO_ERROR, 0);
 
     // TO_DO: Perform work until service stops.
 
-    while (TRUE)
+    while (1)
     {
         // Check whether to stop the service.
-        WaitForSingleObject(g_hSvcStopEvent, INFINITE);
 
-        CscdReportSvcStatus(SERVICE_STOPPED, NO_ERROR, 0);
+        WaitForSingleObject(ghSvcStopEvent, INFINITE);
+
+        ReportSvcStatus(SERVICE_STOPPED, NO_ERROR, 0);
         return;
     }
 }
 
-/* * * *\
-    CscdReportSvcStatus -
-        Sets the current service status and
-        reports it to the SCM.
-        Borrowed from Microsoft's Svc.cpp
-    Parameters -
-        dwCurrentState - The current state (see SERVICE_STATUS)
-        dwWin32ExitCode - The system error code
-        dwWaitHint - Estimated time for pending operation, 
-        in milliseconds.
-\* * * */
-VOID CscdReportSvcStatus(DWORD dwCurrentState,
+//
+// Purpose: 
+//   Sets the current service status and reports it to the SCM.
+//
+// Parameters:
+//   dwCurrentState - The current state (see SERVICE_STATUS)
+//   dwWin32ExitCode - The system error code
+//   dwWaitHint - Estimated time for pending operation, 
+//     in milliseconds
+// 
+// Return value:
+//   None
+//
+VOID ReportSvcStatus(DWORD dwCurrentState,
     DWORD dwWin32ExitCode,
     DWORD dwWaitHint)
 {
@@ -207,42 +242,47 @@ VOID CscdReportSvcStatus(DWORD dwCurrentState,
 
     // Fill in the SERVICE_STATUS structure.
 
-    g_SvcStatus.dwCurrentState = dwCurrentState;
-    g_SvcStatus.dwWin32ExitCode = dwWin32ExitCode;
-    g_SvcStatus.dwWaitHint = dwWaitHint;
+    gSvcStatus.dwCurrentState = dwCurrentState;
+    gSvcStatus.dwWin32ExitCode = dwWin32ExitCode;
+    gSvcStatus.dwWaitHint = dwWaitHint;
 
     if (dwCurrentState == SERVICE_START_PENDING)
-        g_SvcStatus.dwControlsAccepted = 0;
-    else g_SvcStatus.dwControlsAccepted = SERVICE_ACCEPT_STOP;
+        gSvcStatus.dwControlsAccepted = 0;
+    else gSvcStatus.dwControlsAccepted = SERVICE_ACCEPT_STOP;
 
     if ((dwCurrentState == SERVICE_RUNNING) ||
         (dwCurrentState == SERVICE_STOPPED))
-        g_SvcStatus.dwCheckPoint = 0;
-    else g_SvcStatus.dwCheckPoint = dwCheckPoint++;
+        gSvcStatus.dwCheckPoint = 0;
+    else gSvcStatus.dwCheckPoint = dwCheckPoint++;
 
     // Report the status of the service to the SCM.
-    SetServiceStatus(g_SvcStatusHandle, &g_SvcStatus);
+    SetServiceStatus(gSvcStatusHandle, &gSvcStatus);
 }
 
-/* * * *\
-    CscdSvcCtrlHandler -
-        Called by SCM whenever a control code is sent to the service
-        using the ControlService function.
-        Borrowed from Microsoft's Svc.cpp
-    Parameters -
-        dwCtrl - control code
-\* * * */
-VOID WINAPI CscdSvcCtrlHandler(DWORD dwCtrl)
+//
+// Purpose: 
+//   Called by SCM whenever a control code is sent to the service
+//   using the ControlService function.
+//
+// Parameters:
+//   dwCtrl - control code
+// 
+// Return value:
+//   None
+//
+VOID WINAPI SvcCtrlHandler(DWORD dwCtrl)
 {
     // Handle the requested control code. 
+
     switch (dwCtrl)
     {
     case SERVICE_CONTROL_STOP:
-        CscdReportSvcStatus(SERVICE_STOP_PENDING, NO_ERROR, 0);
+        ReportSvcStatus(SERVICE_STOP_PENDING, NO_ERROR, 0);
 
         // Signal the service to stop.
-        SetEvent(g_hSvcStopEvent);
-        CscdReportSvcStatus(g_SvcStatus.dwCurrentState, NO_ERROR, 0);
+
+        SetEvent(ghSvcStopEvent);
+        ReportSvcStatus(gSvcStatus.dwCurrentState, NO_ERROR, 0);
 
         return;
 
@@ -255,16 +295,20 @@ VOID WINAPI CscdSvcCtrlHandler(DWORD dwCtrl)
 
 }
 
-/* * * *\
-    CscdSvcReportEvent -
-        Logs messages to the event log.
-        The service must have an entry in the
-        Application event log.
-        Borrowed from Microsoft's Svc.cpp
-    Parameters -
-        szFunction - name of function that failed
-\* * * */
-VOID CscdSvcReportEvent(LPTSTR szFunction)
+//
+// Purpose: 
+//   Logs messages to the event log
+//
+// Parameters:
+//   szFunction - name of function that failed
+// 
+// Return value:
+//   None
+//
+// Remarks:
+//   The service must have an entry in the Application event log.
+//
+VOID SvcReportEvent(LPTSTR szFunction)
 {
     HANDLE hEventSource;
     LPCTSTR lpszStrings[2];
