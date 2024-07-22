@@ -84,8 +84,8 @@ VOID __stdcall DoQuerySvc()
 {
     SC_HANDLE schSCManager;
     SC_HANDLE schService;
-    LPQUERY_SERVICE_CONFIG lpsc;
-    LPSERVICE_DESCRIPTION lpsd;
+    LPQUERY_SERVICE_CONFIG lpsc = NULL;
+    LPSERVICE_DESCRIPTION lpsd = NULL;
     DWORD dwBytesNeeded, cbBufSize, dwError;
 
     // Get a handle to the SCM database. 
