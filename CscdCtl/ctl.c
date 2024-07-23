@@ -1,24 +1,29 @@
+/* * * * * * * *\
+    CTL.C -
+        Copyright © 2024 Brady McDermott
+    DESCRIPTION -
+        Cascades' Service Control component, adapted from
+        https://learn.microsoft.com/en-us/windows/win32/services/the-complete-service-sample
+    LICENSE INFORMATION -
+        MIT License, see LICENSE.txt in the root folder
+\* * * * * * * */
+
+/* Includes */
 #include <windows.h>
 #include <tchar.h>
 #include <strsafe.h>
 #include <aclapi.h>
 #include <stdio.h>
+#include "ctl.h"
 
-#pragma comment(lib, "advapi32.lib")
-
+/* Variables */
 TCHAR szCommand[10];
 TCHAR szSvcName[80];
 
 SC_HANDLE schSCManager;
 SC_HANDLE schService;
 
-VOID __stdcall DisplayUsage(void);
-
-VOID __stdcall DoStartSvc(void);
-VOID __stdcall DoUpdateSvcDacl(void);
-VOID __stdcall DoStopSvc(void);
-
-BOOL __stdcall StopDependentServices(void);
+/* Functions */
 
 //
 // Purpose: 
@@ -56,7 +61,7 @@ void _tmain(int argc, TCHAR* argv[])
     }
 }
 
-VOID __stdcall DisplayUsage()
+VOID WINAPI DisplayUsage()
 {
     printf("Description:\n");
     printf("\tCommand-line tool that controls a service.\n\n");
@@ -78,11 +83,11 @@ VOID __stdcall DisplayUsage()
 // Return value:
 //   None
 //
-VOID __stdcall DoStartSvc()
+VOID WINAPI DoStartSvc()
 {
     SERVICE_STATUS_PROCESS ssStatus;
-    DWORD dwOldCheckPoint;
-    DWORD dwStartTickCount;
+    ULONGLONG ullOldCheckPoint;
+    ULONGLONG ullStartTickCount;
     DWORD dwWaitTime;
     DWORD dwBytesNeeded;
 
@@ -141,8 +146,8 @@ VOID __stdcall DoStartSvc()
 
     // Save the tick count and initial checkpoint.
 
-    dwStartTickCount = GetTickCount();
-    dwOldCheckPoint = ssStatus.dwCheckPoint;
+    ullStartTickCount = GetTickCount64();
+    ullOldCheckPoint = ssStatus.dwCheckPoint;
 
     // Wait for the service to stop before attempting to start it.
 
@@ -176,16 +181,16 @@ VOID __stdcall DoStartSvc()
             return;
         }
 
-        if (ssStatus.dwCheckPoint > dwOldCheckPoint)
+        if (ssStatus.dwCheckPoint > ullOldCheckPoint)
         {
             // Continue to wait and check.
 
-            dwStartTickCount = GetTickCount();
-            dwOldCheckPoint = ssStatus.dwCheckPoint;
+            ullStartTickCount = GetTickCount64();
+            ullOldCheckPoint = ssStatus.dwCheckPoint;
         }
         else
         {
-            if (GetTickCount() - dwStartTickCount > ssStatus.dwWaitHint)
+            if (GetTickCount64() - ullStartTickCount > ssStatus.dwWaitHint)
             {
                 printf("Timeout waiting for service to stop\n");
                 CloseServiceHandle(schService);
@@ -226,8 +231,8 @@ VOID __stdcall DoStartSvc()
 
     // Save the tick count and initial checkpoint.
 
-    dwStartTickCount = GetTickCount();
-    dwOldCheckPoint = ssStatus.dwCheckPoint;
+    ullStartTickCount = GetTickCount64();
+    ullOldCheckPoint = ssStatus.dwCheckPoint;
 
     while (ssStatus.dwCurrentState == SERVICE_START_PENDING)
     {
@@ -257,16 +262,16 @@ VOID __stdcall DoStartSvc()
             break;
         }
 
-        if (ssStatus.dwCheckPoint > dwOldCheckPoint)
+        if (ssStatus.dwCheckPoint > ullOldCheckPoint)
         {
             // Continue to wait and check.
 
-            dwStartTickCount = GetTickCount();
-            dwOldCheckPoint = ssStatus.dwCheckPoint;
+            ullStartTickCount = GetTickCount64();
+            ullOldCheckPoint = ssStatus.dwCheckPoint;
         }
         else
         {
-            if (GetTickCount() - dwStartTickCount > ssStatus.dwWaitHint)
+            if (GetTickCount64() - ullStartTickCount > ssStatus.dwWaitHint)
             {
                 // No progress made within the wait hint.
                 break;
@@ -304,9 +309,9 @@ VOID __stdcall DoStartSvc()
 // Return value:
 //   None
 //
-VOID __stdcall DoUpdateSvcDacl()
+VOID WINAPI DoUpdateSvcDacl()
 {
-    EXPLICIT_ACCESS      ea;
+    EXPLICIT_ACCESS      ea = { 0 };
     SECURITY_DESCRIPTOR  sd;
     PSECURITY_DESCRIPTOR psd = NULL;
     PACL                 pacl = NULL;
@@ -447,10 +452,10 @@ dacl_cleanup:
 // Return value:
 //   None
 //
-VOID __stdcall DoStopSvc()
+VOID WINAPI DoStopSvc()
 {
     SERVICE_STATUS_PROCESS ssp;
-    DWORD dwStartTime = GetTickCount();
+    ULONGLONG ullStartTime = GetTickCount64();
     DWORD dwBytesNeeded;
     DWORD dwTimeout = 30000; // 30-second time-out
     DWORD dwWaitTime;
@@ -539,7 +544,7 @@ VOID __stdcall DoStopSvc()
             goto stop_cleanup;
         }
 
-        if (GetTickCount() - dwStartTime > dwTimeout)
+        if (GetTickCount64() - ullStartTime > dwTimeout)
         {
             printf("Service stop timed out.\n");
             goto stop_cleanup;
@@ -580,7 +585,7 @@ VOID __stdcall DoStopSvc()
         if (ssp.dwCurrentState == SERVICE_STOPPED)
             break;
 
-        if (GetTickCount() - dwStartTime > dwTimeout)
+        if (GetTickCount64() - ullStartTime > dwTimeout)
         {
             printf("Wait timed out\n");
             goto stop_cleanup;
@@ -593,7 +598,7 @@ stop_cleanup:
     CloseServiceHandle(schSCManager);
 }
 
-BOOL __stdcall StopDependentServices()
+BOOL WINAPI StopDependentServices()
 {
     DWORD i;
     DWORD dwBytesNeeded;
@@ -604,7 +609,7 @@ BOOL __stdcall StopDependentServices()
     SC_HANDLE               hDepService;
     SERVICE_STATUS_PROCESS  ssp;
 
-    DWORD dwStartTime = GetTickCount();
+    DWORD dwStartTime = GetTickCount64();
     DWORD dwTimeout = 30000; // 30-second time-out
 
     // Pass a zero-length buffer to get the required buffer size.
@@ -667,7 +672,7 @@ BOOL __stdcall StopDependentServices()
                         if (ssp.dwCurrentState == SERVICE_STOPPED)
                             break;
 
-                        if (GetTickCount() - dwStartTime > dwTimeout)
+                        if (GetTickCount64() - dwStartTime > dwTimeout)
                             return FALSE;
                     }
                 }

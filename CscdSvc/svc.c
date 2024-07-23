@@ -1,24 +1,29 @@
+/* * * * * * * *\
+    SVC.C -
+        Copyright © 2024 Brady McDermott
+    DESCRIPTION -
+        Cascades' Service component, adapted from
+        https://learn.microsoft.com/en-us/windows/win32/services/the-complete-service-sample
+    LICENSE INFORMATION -
+        MIT License, see LICENSE.txt in the root folder
+\* * * * * * * */
+
+/* Includes */
 #include <windows.h>
 #include <tchar.h>
 #include <strsafe.h>
+#include "svc.h"
 #include "sample.h"
 
-#pragma comment(lib, "advapi32.lib")
+/* Defines */
+#define SVCNAME TEXT("CscdSvc")
 
-#define SVCNAME TEXT("SvcName")
-
+/* Variables */
 SERVICE_STATUS          gSvcStatus;
 SERVICE_STATUS_HANDLE   gSvcStatusHandle;
 HANDLE                  ghSvcStopEvent = NULL;
 
-VOID SvcInstall(void);
-VOID WINAPI SvcCtrlHandler(DWORD);
-VOID WINAPI SvcMain(DWORD, LPTSTR*);
-
-VOID ReportSvcStatus(DWORD, DWORD, DWORD);
-VOID SvcInit(DWORD, LPTSTR*);
-VOID SvcReportEvent(LPTSTR);
-
+/* Functions */
 
 //
 // Purpose: 
@@ -34,7 +39,6 @@ int __cdecl _tmain(int argc, TCHAR* argv[])
 {
     // If command-line parameter is "install", install the service. 
     // Otherwise, the service is probably being started by the SCM.
-
     if (lstrcmpi(argv[1], TEXT("install")) == 0)
     {
         SvcInstall();
@@ -50,7 +54,6 @@ int __cdecl _tmain(int argc, TCHAR* argv[])
 
     // This call returns when the service has stopped. 
     // The process should simply terminate when the call returns.
-
     if (!StartServiceCtrlDispatcher(DispatchTable))
     {
         SvcReportEvent(TEXT("StartServiceCtrlDispatcher"));

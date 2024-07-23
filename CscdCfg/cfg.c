@@ -1,20 +1,25 @@
+/* * * * * * * *\
+    CFG.C -
+        Copyright © 2024 Brady McDermott
+    DESCRIPTION -
+        Cascades' Service Configuration component, adapted from
+        https://learn.microsoft.com/en-us/windows/win32/services/the-complete-service-sample
+    LICENSE INFORMATION -
+        MIT License, see LICENSE.txt in the root folder
+\* * * * * * * */
+
+/* Includes */
 #include <windows.h>
 #include <tchar.h>
 #include <strsafe.h>
 #include <stdio.h>
+#include "cfg.h"
 
-#pragma comment(lib, "advapi32.lib")
-
+/* Variables */
 TCHAR szCommand[10];
 TCHAR szSvcName[80];
 
-VOID __stdcall DisplayUsage(void);
-
-VOID __stdcall DoQuerySvc(void);
-VOID __stdcall DoUpdateSvcDesc(void);
-VOID __stdcall DoDisableSvc(void);
-VOID __stdcall DoEnableSvc(void);
-VOID __stdcall DoDeleteSvc(void);
+/* Functions */
 
 //
 // Purpose: 
@@ -56,7 +61,7 @@ int __cdecl _tmain(int argc, TCHAR* argv[])
     }
 }
 
-VOID __stdcall DisplayUsage()
+VOID WINAPI DisplayUsage()
 {
     printf("Description:\n");
     printf("\tCommand-line tool that configures a service.\n\n");
@@ -80,7 +85,7 @@ VOID __stdcall DisplayUsage()
 // Return value:
 //   None
 //
-VOID __stdcall DoQuerySvc()
+VOID WINAPI DoQuerySvc()
 {
     SC_HANDLE schSCManager;
     SC_HANDLE schService;
@@ -213,7 +218,7 @@ cleanup:
 // Return value:
 //   None
 //
-VOID __stdcall DoDisableSvc()
+VOID WINAPI DoDisableSvc()
 {
     SC_HANDLE schSCManager;
     SC_HANDLE schService;
@@ -278,7 +283,7 @@ VOID __stdcall DoDisableSvc()
 // Return value:
 //   None
 //
-VOID __stdcall DoEnableSvc()
+VOID WINAPI DoEnableSvc()
 {
     SC_HANDLE schSCManager;
     SC_HANDLE schService;
@@ -343,7 +348,7 @@ VOID __stdcall DoEnableSvc()
 // Return value:
 //   None
 //
-VOID __stdcall DoUpdateSvcDesc()
+VOID WINAPI DoUpdateSvcDesc()
 {
     SC_HANDLE schSCManager;
     SC_HANDLE schService;
@@ -404,7 +409,7 @@ VOID __stdcall DoUpdateSvcDesc()
 // Return value:
 //   None
 //
-VOID __stdcall DoDeleteSvc()
+VOID WINAPI DoDeleteSvc()
 {
     SC_HANDLE schSCManager;
     SC_HANDLE schService;
