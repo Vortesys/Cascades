@@ -40,6 +40,9 @@ int WINAPI GuiMain(
 	HWND hDlg;
 	SYSTEM_INFO si;
 
+	// Hide the console
+	FreeConsole();
+
 	// Get our own hInstance and save it for later
 	g_hAppInstance = hInstance;
 
