@@ -38,7 +38,7 @@ int __cdecl _tmain(int argc, TCHAR* argv[])
     printf("\n");
     if (argc == 1)
     {
-        GuiMain(GetModuleHandle(NULL), NULL, argv[0], SW_SHOWDEFAULT);
+        return GuiMain(GetModuleHandle(NULL), NULL, argv[0], SW_SHOWDEFAULT);
     }
     else if (argc != 2)
     {
