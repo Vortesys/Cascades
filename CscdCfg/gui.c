@@ -21,8 +21,6 @@ HINSTANCE	g_hAppInstance = NULL;
 HMODULE		g_hDllInstance = NULL;
 // Strings
 WCHAR		g_szAppTitle[64];
-// Other
-BOOL		g_bSystem64 = TRUE;
 
 /* Functions */
 
@@ -48,12 +46,6 @@ int WINAPI GuiMain(
 	InitCommonControls();
 	hDlg = CreateDialogParam(g_hAppInstance, MAKEINTRESOURCE(IDD_MAIN), 0, CascadesDialogProc, 0);
 	ShowWindow(hDlg, nCmdShow);
-
-	// Get some system information to determine what
-	// copies of the style hook to load
-	GetSystemInfo(&si);
-
-	g_bSystem64 = (si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64);
 
 	// Enter the dialog message loop.
 	while (GetMessage(&msg, NULL, 0, 0) > 0)
