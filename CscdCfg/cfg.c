@@ -14,10 +14,10 @@
 #include <strsafe.h>
 #include <stdio.h>
 #include "cfg.h"
+#include "gui.h"
 
 /* Variables */
-TCHAR szCommand[10];
-TCHAR szSvcName[80];
+TCHAR szSvcName[80] = TEXT("CscdSvc");
 
 /* Functions */
 
@@ -33,8 +33,14 @@ TCHAR szSvcName[80];
 //
 int __cdecl _tmain(int argc, TCHAR* argv[])
 {
+    TCHAR szCommand[10];
+
     printf("\n");
-    if (argc != 3)
+    if (argc == 1)
+    {
+        GuiMain(GetModuleHandle(NULL), NULL, argv[0], SW_SHOWDEFAULT);
+    }
+    else if (argc != 2)
     {
         printf("ERROR:\tIncorrect number of arguments\n\n");
         DisplayUsage();
@@ -42,7 +48,7 @@ int __cdecl _tmain(int argc, TCHAR* argv[])
     }
 
     StringCchCopy(szCommand, 10, argv[1]);
-    StringCchCopy(szSvcName, 80, argv[2]);
+    //StringCchCopy(szSvcName, 80, argv[2]);
 
     if (lstrcmpi(szCommand, TEXT("query")) == 0)
         DoQuerySvc();
@@ -66,7 +72,7 @@ VOID WINAPI DisplayUsage()
     printf("Description:\n");
     printf("\tCommand-line tool that configures a service.\n\n");
     printf("Usage:\n");
-    printf("\tsvcconfig [command] [service_name]\n\n");
+    printf("\tcscdcfg [command]\n\n");
     printf("\t[command]\n");
     printf("\t  query\n");
     printf("\t  describe\n");

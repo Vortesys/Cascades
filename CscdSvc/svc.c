@@ -13,7 +13,7 @@
 #include <tchar.h>
 #include <strsafe.h>
 #include "svc.h"
-#include "sample.h"
+#include "..\CscdCom\error.h"
 
 /* Defines */
 #define SVCNAME TEXT("CscdSvc")

@@ -141,6 +141,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <MinimumRequiredVersion>5.02</MinimumRequiredVersion>
+      <TerminalServerAware>true</TerminalServerAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

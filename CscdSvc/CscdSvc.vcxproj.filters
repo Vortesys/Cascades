@@ -20,9 +20,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="sample.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="svc.h">
       <Filter>Header Files</Filter>
     </ClInclude>

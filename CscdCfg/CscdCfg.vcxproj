@@ -141,13 +141,28 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <MinimumRequiredVersion>5.02</MinimumRequiredVersion>
+      <TerminalServerAware>true</TerminalServerAware>
+      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="cfg.c" />
+    <ClCompile Include="dlgproc.c" />
+    <ClCompile Include="gui.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cfg.h" />
+    <ClInclude Include="gui.h" />
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="lang\dlg_en-US.rc" />
+    <ResourceCompile Include="lang\res_en-US.rc" />
+    <ResourceCompile Include="resource.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="CscdCfg.exe.manifest" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

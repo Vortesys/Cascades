@@ -1,0 +1,47 @@
+/* * * * * * * *\
+	DLG_EN-US.RC -
+		Copyright (c) 2024 Brady McDermott, Vortesys
+	LANGUAGE -
+		English, US
+	TRANSLATION CREDITS -
+		Brady McDermott
+	DESCRIPTION -
+		This file contains the language-specific dialogs
+		for Cascades.
+	LICENSE INFORMATION -
+		MIT License, see LICENSE.txt in the root folder
+\* * * * * * * */
+
+/* Necessary Evil */
+#define APSTUDIO_HIDDEN_SYMBOLS
+#include <windows.h>
+#define STRICT
+#include <CommCtrl.h>
+#undef STRICT
+#include "resource.h"
+#undef APSTUDIO_HIDDEN_SYMBOLS
+
+/* Dialogs */
+// Main Dialog
+IDD_MAIN DIALOG 0, 0, 168, 114
+STYLE DS_CENTER | DS_SHELLFONT | WS_CAPTION | WS_VISIBLE | WS_POPUP
+EXSTYLE WS_EX_APPWINDOW
+#ifndef _DEBUG
+CAPTION "Cascades"
+#else
+CAPTION "Cascades [Debug]"
+#endif
+FONT 8, "Ms Shell Dlg"
+{
+	COMBOBOX		IDC_THEMES, 48, 34, 104, 30, CBS_DROPDOWNLIST | CBS_HASSTRINGS, WS_EX_LEFT
+	AUTOCHECKBOX	"Disable DWM and theming", IDC_THEMEOFF, 16, 71, 101, 8, 0, WS_EX_LEFT
+	DEFPUSHBUTTON	"Start", IDC_START, 8, 93, 50, 14, WS_DISABLED, WS_EX_LEFT
+	DEFPUSHBUTTON	"Stop", IDC_STOP, 60, 93, 50, 14, WS_DISABLED, WS_EX_LEFT
+	PUSHBUTTON		"Close", IDCANCEL, 112, 93, 50, 14, 0, WS_EX_LEFT
+	// The following controls shouldn't be directly interacted with.
+	LTEXT			"Configure your themes and control Cascades.", 80, 7, 7, 140, 9, SS_LEFT, WS_EX_LEFT
+	GROUPBOX		"Style Options", 81, 7, 22, 154, 32, 0, WS_EX_LEFT
+	LTEXT			"Theme:", 82, 16, 37, 25, 9, SS_LEFT, WS_EX_LEFT
+	GROUPBOX		"Advanced", 83, 7, 59, 154, 27, 0, WS_EX_LEFT
+}
+
