@@ -19,3 +19,9 @@ VOID WINAPI DoUpdateSvcDesc(void);
 BOOL WINAPI DoDisableSvc(void);
 BOOL WINAPI DoEnableSvc(void);
 VOID WINAPI DoDeleteSvc(void);
+
+VOID WINAPI DoStartSvc(void);
+VOID WINAPI DoUpdateSvcDacl(void);
+VOID WINAPI DoStopSvc(void);
+
+BOOL WINAPI StopDependentServices(void);
