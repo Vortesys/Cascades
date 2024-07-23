@@ -24,10 +24,10 @@ IDI_MAIN	ICON	icons\cascades.ico
 
 /* Version Information */
 #define APSTUDIO_HIDDEN_SYMBOLS
-#define VER_FILEDESCRIPTION_STR     "Cascades Theming Utility"
-#define VER_INTERNALNAME_STR        "cascades\0"
-#define VER_ORIGINALFILENAME_STR    "CASCADES.EXE"
-#define VER_PRODUCTNAME_STR         "Cascades Theming Utility for Windows NT"
+#define VER_FILEDESCRIPTION_STR     "Cascades Configuration Utility"
+#define VER_INTERNALNAME_STR        "CscdCfg\0"
+#define VER_ORIGINALFILENAME_STR    "CSCDCFG.EXE"
+#define VER_PRODUCTNAME_STR         "Cascades Configuration Utility for Windows NT"
 #include "..\CscdCom\version.inc"
 #undef APSTUDIO_HIDDEN_SYMBOLS
 

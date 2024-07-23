@@ -25,13 +25,14 @@
 #define IDC_START       40001
 #define IDC_CLOSE	    40002
 // Checkboxes
-#define IDC_THEMEOFF    40003
+#define IDC_INSTALL     40003
 // Dropdowns
 #define IDC_THEMES      40004
 
 /* String Table */
 #define IDS_APPTITLE	1
 #define IDS_WEBSITE		5
+#define IDS_INSTALLING  6
 // Dialog Theme Selection
 #define IDS_THEME1		200
 #define IDS_THEME2		201

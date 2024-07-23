@@ -41,6 +41,8 @@ INT_PTR CALLBACK CascadesDialogProc(
 
 		case IDC_START:
 		{
+			CascadesToggleHook(TRUE);
+			/*
 			if (!CascadesToggleHook(TRUE))
 			{
 				MessageBox(hDlg, L"Started Cascades.", L"Cascades",
@@ -51,23 +53,25 @@ INT_PTR CALLBACK CascadesDialogProc(
 				MessageBox(hDlg, L"Failed to start Cascades.", L"Cascades",
 					MB_OK | MB_ICONINFORMATION | MB_DEFAULT_DESKTOP_ONLY);
 			}
-
+			*/
 			return 0;
 		}
 
 		case IDC_STOP:
+			CascadesToggleHook(FALSE);
+			/*
 			if (!CascadesToggleHook(FALSE))
 			{
 				MessageBox(hDlg, L"Failed to stop Cascades.", L"Cascades",
 					MB_OK | MB_ICONINFORMATION | MB_DEFAULT_DESKTOP_ONLY);
 			}
-
+			*/
 			return 0;
 		}
 		break;
 
 	case WM_INITDIALOG:
-		Button_SetCheck(GetDlgItem(hDlg, IDC_THEMEOFF), BST_CHECKED);
+		Button_SetCheck(GetDlgItem(hDlg, IDC_INSTALL), BST_CHECKED);
 		Button_Enable(GetDlgItem(hDlg, IDC_START), TRUE);
 		Button_Enable(GetDlgItem(hDlg, IDC_STOP), TRUE);
 		return TRUE;

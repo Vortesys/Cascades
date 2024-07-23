@@ -38,6 +38,9 @@ int __cdecl _tmain(int argc, TCHAR* argv[])
     printf("\n");
     if (argc == 1)
     {
+        // Hide the console
+        FreeConsole();
+
         return GuiMain(GetModuleHandle(NULL), NULL, argv[0], SW_SHOWDEFAULT);
     }
     else if (argc != 2)
@@ -48,7 +51,6 @@ int __cdecl _tmain(int argc, TCHAR* argv[])
     }
 
     StringCchCopy(szCommand, 10, argv[1]);
-    //StringCchCopy(szSvcName, 80, argv[2]);
 
     if (lstrcmpi(szCommand, TEXT("query")) == 0)
         DoQuerySvc();
@@ -60,6 +62,8 @@ int __cdecl _tmain(int argc, TCHAR* argv[])
         DoEnableSvc();
     else if (lstrcmpi(szCommand, TEXT("delete")) == 0)
         DoDeleteSvc();
+    else if (lstrcmpi(szCommand, TEXT("log")) == 0)
+        return GuiMain(GetModuleHandle(NULL), NULL, argv[0], SW_SHOWDEFAULT);
     else
     {
         _tprintf(TEXT("Unknown command (%s)\n\n"), szCommand);
@@ -79,6 +83,7 @@ VOID WINAPI DisplayUsage()
     printf("\t  disable\n");
     printf("\t  enable\n");
     printf("\t  delete\n");
+    printf("\t  log\n");
 }
 
 //
@@ -113,7 +118,6 @@ VOID WINAPI DoQuerySvc()
     }
 
     // Get a handle to the service.
-
     schService = OpenService(
         schSCManager,          // SCM database 
         szSvcName,             // name of service 
@@ -127,7 +131,6 @@ VOID WINAPI DoQuerySvc()
     }
 
     // Get the configuration information.
-
     if (!QueryServiceConfig(
         schService,
         NULL,
@@ -189,7 +192,6 @@ VOID WINAPI DoQuerySvc()
     }
 
     // Print the configuration information.
-
     _tprintf(TEXT("%s configuration: \n"), szSvcName);
     _tprintf(TEXT("  Type: 0x%x\n"), lpsc->dwServiceType);
     _tprintf(TEXT("  Start Type: 0x%x\n"), lpsc->dwStartType);
@@ -222,15 +224,14 @@ cleanup:
 //   None
 // 
 // Return value:
-//   None
+//   TRUE if successful, FALSE otherwise
 //
-VOID WINAPI DoDisableSvc()
+BOOL WINAPI DoDisableSvc()
 {
     SC_HANDLE schSCManager;
     SC_HANDLE schService;
 
     // Get a handle to the SCM database. 
-
     schSCManager = OpenSCManager(
         NULL,                    // local computer
         NULL,                    // ServicesActive database 
@@ -239,11 +240,10 @@ VOID WINAPI DoDisableSvc()
     if (NULL == schSCManager)
     {
         printf("OpenSCManager failed (%d)\n", GetLastError());
-        return;
+        return FALSE;
     }
 
     // Get a handle to the service.
-
     schService = OpenService(
         schSCManager,            // SCM database 
         szSvcName,               // name of service 
@@ -253,11 +253,10 @@ VOID WINAPI DoDisableSvc()
     {
         printf("OpenService failed (%d)\n", GetLastError());
         CloseServiceHandle(schSCManager);
-        return;
+        return FALSE;
     }
 
     // Change the service start type.
-
     if (!ChangeServiceConfig(
         schService,        // handle of service 
         SERVICE_NO_CHANGE, // service type: no change 
@@ -272,11 +271,18 @@ VOID WINAPI DoDisableSvc()
         NULL))            // display name: no change
     {
         printf("ChangeServiceConfig failed (%d)\n", GetLastError());
+
+        CloseServiceHandle(schService);
+        CloseServiceHandle(schSCManager);
+
+        return FALSE;
     }
     else printf("Service disabled successfully.\n");
 
     CloseServiceHandle(schService);
     CloseServiceHandle(schSCManager);
+
+    return TRUE;
 }
 
 //
@@ -287,15 +293,14 @@ VOID WINAPI DoDisableSvc()
 //   None
 // 
 // Return value:
-//   None
+//   TRUE if successful, FALSE otherwise
 //
-VOID WINAPI DoEnableSvc()
+BOOL WINAPI DoEnableSvc()
 {
     SC_HANDLE schSCManager;
     SC_HANDLE schService;
 
     // Get a handle to the SCM database. 
-
     schSCManager = OpenSCManager(
         NULL,                    // local computer
         NULL,                    // ServicesActive database 
@@ -304,11 +309,10 @@ VOID WINAPI DoEnableSvc()
     if (NULL == schSCManager)
     {
         printf("OpenSCManager failed (%d)\n", GetLastError());
-        return;
+        return FALSE;
     }
 
     // Get a handle to the service.
-
     schService = OpenService(
         schSCManager,            // SCM database 
         szSvcName,               // name of service 
@@ -318,11 +322,10 @@ VOID WINAPI DoEnableSvc()
     {
         printf("OpenService failed (%d)\n", GetLastError());
         CloseServiceHandle(schSCManager);
-        return;
+        return FALSE;
     }
 
     // Change the service start type.
-
     if (!ChangeServiceConfig(
         schService,            // handle of service 
         SERVICE_NO_CHANGE,     // service type: no change 
@@ -337,11 +340,18 @@ VOID WINAPI DoEnableSvc()
         NULL))                // display name: no change
     {
         printf("ChangeServiceConfig failed (%d)\n", GetLastError());
+
+        CloseServiceHandle(schService);
+        CloseServiceHandle(schSCManager);
+
+        return FALSE;
     }
     else printf("Service enabled successfully.\n");
 
     CloseServiceHandle(schService);
     CloseServiceHandle(schSCManager);
+
+    return TRUE;
 }
 
 //
@@ -362,7 +372,6 @@ VOID WINAPI DoUpdateSvcDesc()
     LPTSTR szDesc = TEXT("This is a test description");
 
     // Get a handle to the SCM database. 
-
     schSCManager = OpenSCManager(
         NULL,                    // local computer
         NULL,                    // ServicesActive database 
@@ -375,7 +384,6 @@ VOID WINAPI DoUpdateSvcDesc()
     }
 
     // Get a handle to the service.
-
     schService = OpenService(
         schSCManager,            // SCM database 
         szSvcName,               // name of service 
@@ -389,7 +397,6 @@ VOID WINAPI DoUpdateSvcDesc()
     }
 
     // Change the service description.
-
     sd.lpDescription = szDesc;
 
     if (!ChangeServiceConfig2(
@@ -421,7 +428,6 @@ VOID WINAPI DoDeleteSvc()
     SC_HANDLE schService;
 
     // Get a handle to the SCM database. 
-
     schSCManager = OpenSCManager(
         NULL,                    // local computer
         NULL,                    // ServicesActive database 
@@ -434,7 +440,6 @@ VOID WINAPI DoDeleteSvc()
     }
 
     // Get a handle to the service.
-
     schService = OpenService(
         schSCManager,       // SCM database 
         szSvcName,          // name of service 
@@ -448,7 +453,6 @@ VOID WINAPI DoDeleteSvc()
     }
 
     // Delete the service.
-
     if (!DeleteService(schService))
     {
         printf("DeleteService failed (%d)\n", GetLastError());

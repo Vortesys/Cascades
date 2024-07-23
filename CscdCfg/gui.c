@@ -9,6 +9,7 @@
 
 /* Headers */
 #include "gui.h"
+#include "cfg.h"
 #include "resource.h"
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
@@ -39,9 +40,6 @@ int WINAPI GuiMain(
 	MSG msg = { 0 };
 	HWND hDlg;
 	SYSTEM_INFO si;
-
-	// Hide the console
-	FreeConsole();
 
 	// Get our own hInstance and save it for later
 	g_hAppInstance = hInstance;
@@ -76,29 +74,8 @@ int WINAPI GuiMain(
 \* * * */
 BOOL CascadesToggleHook(BOOL bInstall)
 {
-	HMODULE hLib = LoadLibrary(L"cascades.dll");
-	BOOL bRet = 0;
-
-	if (g_hDllInstance != NULL)
-		g_hDllInstance = hLib;
+	if (bInstall)
+		return DoEnableSvc();
 	else
-		hLib = g_hDllInstance;
-
-	if (hLib)
-	{
-		FARPROC fLib;
-
-		if (bInstall)
-			fLib = GetProcAddress(hLib, "InstallUserHook");
-		else
-			fLib = GetProcAddress(hLib, "RemoveUserHook");
-
-		bRet = (BOOL)fLib();
-
-		FreeLibrary(hLib);
-
-		return bRet;
-	}
-
-	return FALSE;
+		return DoDisableSvc();
 }

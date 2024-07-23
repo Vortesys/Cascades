@@ -16,6 +16,6 @@ VOID WINAPI DisplayUsage(void);
 
 VOID WINAPI DoQuerySvc(void);
 VOID WINAPI DoUpdateSvcDesc(void);
-VOID WINAPI DoDisableSvc(void);
-VOID WINAPI DoEnableSvc(void);
+BOOL WINAPI DoDisableSvc(void);
+BOOL WINAPI DoEnableSvc(void);
 VOID WINAPI DoDeleteSvc(void);
