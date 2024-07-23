@@ -81,7 +81,7 @@ VOID SvcInstall()
         printf("Cannot install service (%d)\n", GetLastError());
         return;
     }
-
+    
     // In case the path contains a space, it must be quoted so that
     // it is correctly interpreted. For example,
     // "d:\my share\myservice.exe" should be specified as
