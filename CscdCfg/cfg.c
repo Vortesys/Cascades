@@ -711,6 +711,7 @@ BOOL WINAPI DoStartSvc()
 // Purpose: 
 //   Updates the service DACL to grant start, stop, delete, and read
 //   control access to the Guest account.
+//   TODO: determine if i need this
 //
 // Parameters:
 //   None

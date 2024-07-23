@@ -63,6 +63,7 @@ int __cdecl _tmain(int argc, TCHAR* argv[])
 //
 // Purpose: 
 //   Installs a service in the SCM database
+//   and registers the DLL in the event log
 //
 // Parameters:
 //   None
@@ -90,7 +91,6 @@ VOID SvcInstall()
     StringCbPrintf(szPath, MAX_PATH, TEXT("\"%s\""), szUnquotedPath);
 
     // Get a handle to the SCM database. 
-
     schSCManager = OpenSCManager(
         NULL,                    // local computer
         NULL,                    // ServicesActive database 
@@ -103,7 +103,6 @@ VOID SvcInstall()
     }
 
     // Create the service
-
     schService = CreateService(
         schSCManager,              // SCM database 
         SVCNAME,                   // name of service 
@@ -129,6 +128,70 @@ VOID SvcInstall()
 
     CloseServiceHandle(schService);
     CloseServiceHandle(schSCManager);
+
+    // Add ourselves to the registry for the event log
+    HKEY hKeyEventLog = NULL;
+    DWORD dwKeyDisposition = 0;
+
+    if (RegCreateKeyEx(
+        HKEY_LOCAL_MACHINE,
+        TEXT("SYSTEM\\CurrentControlSet\\Services\\EventLog\\Application\\CscdSvc"),
+        0,
+        NULL,
+        REG_OPTION_NON_VOLATILE,
+        KEY_ALL_ACCESS,
+        NULL,
+        hKeyEventLog,
+        &dwKeyDisposition
+    ) != ERROR_SUCCESS)
+    {
+        printf("RegCreateKeyEx failed (%d)\n", GetLastError());
+        return;
+    }
+
+    // Create the subkeys
+    if (hKeyEventLog != NULL)
+    {
+        if (dwKeyDisposition == REG_OPENED_EXISTING_KEY)
+        {
+            printf("Event Log key already exists\n");
+
+            RegCloseKey(hKeyEventLog);
+
+            return;
+        }
+
+        if (RegSetValueEx(hKeyEventLog, TEXT("EventMessageFile"), 0, REG_SZ, szPath, sizeof(szPath)) != ERROR_SUCCESS)
+        {
+            printf("RegSetValueEx failed (%d)\n", GetLastError());
+
+            RegCloseKey(hKeyEventLog);
+
+            return;
+        }
+
+        if (RegSetValueEx(hKeyEventLog, TEXT("TypesSupported"), 0, REG_DWORD, 0x7, sizeof(DWORD)) != ERROR_SUCCESS)
+        {
+            printf("RegSetValueEx failed (%d)\n", GetLastError());
+
+            RegCloseKey(hKeyEventLog);
+
+            return;
+        }
+    }
+
+    // Verify we've registered ourselves in the event log
+    HANDLE hEventLog = NULL;
+
+    hEventLog = RegisterEventSource(NULL, SVCNAME);
+
+    if (hEventLog == NULL)
+    {
+        printf("RegisterEventSource failed with 0x%x.\n", GetLastError());
+    }
+
+    if (hEventLog)
+        DeregisterEventSource(hEventLog);
 }
 
 //

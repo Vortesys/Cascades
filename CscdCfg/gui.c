@@ -37,7 +37,6 @@ int WINAPI GuiMain(
 {
 	MSG msg = { 0 };
 	HWND hDlg;
-	SYSTEM_INFO si;
 
 	// Get our own hInstance and save it for later
 	g_hAppInstance = hInstance;
