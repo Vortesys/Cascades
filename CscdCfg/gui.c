@@ -75,7 +75,7 @@ int WINAPI GuiMain(
 BOOL CascadesToggleHook(BOOL bInstall)
 {
 	if (bInstall)
-		return DoEnableSvc();
+		return DoStartSvc();
 	else
-		return DoDisableSvc();
+		return DoStopSvc();
 }

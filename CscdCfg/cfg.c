@@ -114,7 +114,7 @@ VOID WINAPI DoQuerySvc()
     SC_HANDLE schService;
     LPQUERY_SERVICE_CONFIG lpsc = NULL;
     LPSERVICE_DESCRIPTION lpsd = NULL;
-    DWORD dwBytesNeeded, cbBufSize, dwError;
+    DWORD dwBytesNeeded, cbBufSize, dwError = 0;
 
     // Get a handle to the SCM database. 
 
@@ -483,9 +483,9 @@ VOID WINAPI DoDeleteSvc()
 //   None
 // 
 // Return value:
-//   None
+//   TRUE if successful, FALSE otherwise
 //
-VOID WINAPI DoStartSvc()
+BOOL WINAPI DoStartSvc()
 {
     SERVICE_STATUS_PROCESS ssStatus;
     ULONGLONG ullOldCheckPoint;
@@ -503,7 +503,7 @@ VOID WINAPI DoStartSvc()
     if (NULL == schSCManager)
     {
         printf("OpenSCManager failed (%d)\n", GetLastError());
-        return;
+        return FALSE;
     }
 
     // Get a handle to the service.
@@ -517,7 +517,7 @@ VOID WINAPI DoStartSvc()
     {
         printf("OpenService failed (%d)\n", GetLastError());
         CloseServiceHandle(schSCManager);
-        return;
+        return FALSE;
     }
 
     // Check the status in case the service is not stopped. 
@@ -532,7 +532,7 @@ VOID WINAPI DoStartSvc()
         printf("QueryServiceStatusEx failed (%d)\n", GetLastError());
         CloseServiceHandle(schService);
         CloseServiceHandle(schSCManager);
-        return;
+        return FALSE;
     }
 
     // Check if the service is already running. It would be possible 
@@ -543,7 +543,7 @@ VOID WINAPI DoStartSvc()
         printf("Cannot start the service because it is already running\n");
         CloseServiceHandle(schService);
         CloseServiceHandle(schSCManager);
-        return;
+        return FALSE;
     }
 
     // Save the tick count and initial checkpoint.
@@ -580,7 +580,7 @@ VOID WINAPI DoStartSvc()
             printf("QueryServiceStatusEx failed (%d)\n", GetLastError());
             CloseServiceHandle(schService);
             CloseServiceHandle(schSCManager);
-            return;
+            return FALSE;
         }
 
         if (ssStatus.dwCheckPoint > ullOldCheckPoint)
@@ -597,7 +597,7 @@ VOID WINAPI DoStartSvc()
                 printf("Timeout waiting for service to stop\n");
                 CloseServiceHandle(schService);
                 CloseServiceHandle(schSCManager);
-                return;
+                return FALSE;
             }
         }
     }
@@ -612,7 +612,7 @@ VOID WINAPI DoStartSvc()
         printf("StartService failed (%d)\n", GetLastError());
         CloseServiceHandle(schService);
         CloseServiceHandle(schSCManager);
-        return;
+        return FALSE;
     }
     else printf("Service start pending...\n");
 
@@ -628,7 +628,7 @@ VOID WINAPI DoStartSvc()
         printf("QueryServiceStatusEx failed (%d)\n", GetLastError());
         CloseServiceHandle(schService);
         CloseServiceHandle(schSCManager);
-        return;
+        return FALSE;
     }
 
     // Save the tick count and initial checkpoint.
@@ -686,6 +686,11 @@ VOID WINAPI DoStartSvc()
     if (ssStatus.dwCurrentState == SERVICE_RUNNING)
     {
         printf("Service started successfully.\n");
+
+        CloseServiceHandle(schService);
+        CloseServiceHandle(schSCManager);
+
+        return TRUE;
     }
     else
     {
@@ -694,10 +699,12 @@ VOID WINAPI DoStartSvc()
         printf("  Exit Code: %d\n", ssStatus.dwWin32ExitCode);
         printf("  Check Point: %d\n", ssStatus.dwCheckPoint);
         printf("  Wait Hint: %d\n", ssStatus.dwWaitHint);
-    }
 
-    CloseServiceHandle(schService);
-    CloseServiceHandle(schSCManager);
+        CloseServiceHandle(schService);
+        CloseServiceHandle(schSCManager);
+
+        return FALSE;
+    }
 }
 
 //
@@ -852,15 +859,16 @@ dacl_cleanup:
 //   None
 // 
 // Return value:
-//   None
+//   TRUE if successful, FALSE otherwise
 //
-VOID WINAPI DoStopSvc()
+BOOL WINAPI DoStopSvc()
 {
     SERVICE_STATUS_PROCESS ssp;
     ULONGLONG ullStartTime = GetTickCount64();
     DWORD dwBytesNeeded;
     DWORD dwTimeout = 30000; // 30-second time-out
     DWORD dwWaitTime;
+    BOOL bRet = FALSE;
 
     // Get a handle to the SCM database. 
 
@@ -872,7 +880,7 @@ VOID WINAPI DoStopSvc()
     if (NULL == schSCManager)
     {
         printf("OpenSCManager failed (%d)\n", GetLastError());
-        return;
+        return FALSE;
     }
 
     // Get a handle to the service.
@@ -888,7 +896,7 @@ VOID WINAPI DoStopSvc()
     {
         printf("OpenService failed (%d)\n", GetLastError());
         CloseServiceHandle(schSCManager);
-        return;
+        return FALSE;
     }
 
     // Make sure the service is not already stopped.
@@ -901,12 +909,16 @@ VOID WINAPI DoStopSvc()
         &dwBytesNeeded))
     {
         printf("QueryServiceStatusEx failed (%d)\n", GetLastError());
+        bRet = FALSE;
+
         goto stop_cleanup;
     }
 
     if (ssp.dwCurrentState == SERVICE_STOPPED)
     {
         printf("Service is already stopped.\n");
+        bRet = FALSE;
+
         goto stop_cleanup;
     }
 
@@ -937,18 +949,24 @@ VOID WINAPI DoStopSvc()
             &dwBytesNeeded))
         {
             printf("QueryServiceStatusEx failed (%d)\n", GetLastError());
+            bRet = FALSE;
+
             goto stop_cleanup;
         }
 
         if (ssp.dwCurrentState == SERVICE_STOPPED)
         {
             printf("Service stopped successfully.\n");
+            bRet = TRUE;
+
             goto stop_cleanup;
         }
 
         if (GetTickCount64() - ullStartTime > dwTimeout)
         {
             printf("Service stop timed out.\n");
+            bRet = FALSE;
+
             goto stop_cleanup;
         }
     }
@@ -965,6 +983,8 @@ VOID WINAPI DoStopSvc()
         (LPSERVICE_STATUS)&ssp))
     {
         printf("ControlService failed (%d)\n", GetLastError());
+        bRet = FALSE;
+
         goto stop_cleanup;
     }
 
@@ -981,6 +1001,8 @@ VOID WINAPI DoStopSvc()
             &dwBytesNeeded))
         {
             printf("QueryServiceStatusEx failed (%d)\n", GetLastError());
+            bRet = FALSE;
+
             goto stop_cleanup;
         }
 
@@ -990,14 +1012,20 @@ VOID WINAPI DoStopSvc()
         if (GetTickCount64() - ullStartTime > dwTimeout)
         {
             printf("Wait timed out\n");
+            bRet = FALSE;
+
             goto stop_cleanup;
         }
     }
+
     printf("Service stopped successfully\n");
+    bRet = TRUE;
 
 stop_cleanup:
     CloseServiceHandle(schService);
     CloseServiceHandle(schSCManager);
+
+    return bRet;
 }
 
 BOOL WINAPI StopDependentServices()
@@ -1011,8 +1039,8 @@ BOOL WINAPI StopDependentServices()
     SC_HANDLE               hDepService;
     SERVICE_STATUS_PROCESS  ssp;
 
-    DWORD dwStartTime = GetTickCount64();
-    DWORD dwTimeout = 30000; // 30-second time-out
+    ULONGLONG ullStartTime = GetTickCount64();
+    ULONGLONG ullTimeout = 30000; // 30-second time-out
 
     // Pass a zero-length buffer to get the required buffer size.
     if (EnumDependentServices(schService, SERVICE_ACTIVE,
@@ -1074,7 +1102,7 @@ BOOL WINAPI StopDependentServices()
                         if (ssp.dwCurrentState == SERVICE_STOPPED)
                             break;
 
-                        if (GetTickCount64() - dwStartTime > dwTimeout)
+                        if (GetTickCount64() - ullStartTime > ullTimeout)
                             return FALSE;
                     }
                 }
