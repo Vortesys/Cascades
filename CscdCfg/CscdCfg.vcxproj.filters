@@ -14,14 +14,14 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
     <Filter Include="Resource Files\en-US">
-      <UniqueIdentifier>{d681401a-a069-441c-82e8-4bba44ebd993}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Common Files">
-      <UniqueIdentifier>{5de2b196-5c95-4426-b53a-6e9402331a6b}</UniqueIdentifier>
+      <UniqueIdentifier>{b9ba1b5a-be8d-48b9-b454-db86977813a6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ntstyle.c">
+    <ClCompile Include="cfg.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="gui.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="dlgproc.c">
@@ -29,14 +29,14 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ntstyle.h">
+    <ClInclude Include="cfg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gui.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\common\usrapihk.h">
-      <Filter>Common Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -51,13 +51,8 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="ntstyle.exe.manifest">
+    <Manifest Include="CscdCfg.exe.manifest">
       <Filter>Resource Files</Filter>
     </Manifest>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\common\version.inc">
-      <Filter>Common Files</Filter>
-    </None>
   </ItemGroup>
 </Project>
