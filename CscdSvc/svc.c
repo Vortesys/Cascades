@@ -17,6 +17,7 @@
 
 /* Defines */
 #define SVCNAME TEXT("CscdSvc")
+#define SVCDESC TEXT("Cascades' Theme Service")
 
 /* Variables */
 SERVICE_STATUS          gSvcStatus;
@@ -106,7 +107,7 @@ VOID SvcInstall()
     schService = CreateService(
         schSCManager,              // SCM database 
         SVCNAME,                   // name of service 
-        SVCNAME,                   // service name to display 
+        SVCDESC,                   // service name to display 
         SERVICE_ALL_ACCESS,        // desired access 
         SERVICE_WIN32_OWN_PROCESS, // service type 
         SERVICE_DEMAND_START,      // start type 
@@ -132,6 +133,7 @@ VOID SvcInstall()
     // Add ourselves to the registry for the event log
     HKEY hKeyEventLog = NULL;
     DWORD dwKeyDisposition = 0;
+    DWORD dwEventLogMask = 0x7;
 
     if (RegCreateKeyEx(
         HKEY_LOCAL_MACHINE,
@@ -141,7 +143,7 @@ VOID SvcInstall()
         REG_OPTION_NON_VOLATILE,
         KEY_ALL_ACCESS,
         NULL,
-        hKeyEventLog,
+        &hKeyEventLog,
         &dwKeyDisposition
     ) != ERROR_SUCCESS)
     {
@@ -155,27 +157,21 @@ VOID SvcInstall()
         if (dwKeyDisposition == REG_OPENED_EXISTING_KEY)
         {
             printf("Event Log key already exists\n");
-
             RegCloseKey(hKeyEventLog);
-
             return;
         }
 
-        if (RegSetValueEx(hKeyEventLog, TEXT("EventMessageFile"), 0, REG_SZ, szPath, sizeof(szPath)) != ERROR_SUCCESS)
+        if (RegSetValueEx(hKeyEventLog, TEXT("EventMessageFile"), 0, REG_SZ, (const BYTE *)szPath, sizeof(szPath)) != ERROR_SUCCESS)
         {
-            printf("RegSetValueEx failed (%d)\n", GetLastError());
-
+            printf("RegSetValueEx (STRING) failed (%d)\n", GetLastError());
             RegCloseKey(hKeyEventLog);
-
             return;
         }
 
-        if (RegSetValueEx(hKeyEventLog, TEXT("TypesSupported"), 0, REG_DWORD, 0x7, sizeof(DWORD)) != ERROR_SUCCESS)
+        if (RegSetValueEx(hKeyEventLog, TEXT("TypesSupported"), 0, REG_DWORD, (const BYTE*)&dwEventLogMask, sizeof(DWORD)) != ERROR_SUCCESS)
         {
-            printf("RegSetValueEx failed (%d)\n", GetLastError());
-
+            printf("RegSetValueEx (DWORD) failed (%d)\n", GetLastError());
             RegCloseKey(hKeyEventLog);
-
             return;
         }
     }

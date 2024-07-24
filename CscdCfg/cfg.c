@@ -473,6 +473,38 @@ VOID WINAPI DoDeleteSvc()
 
     CloseServiceHandle(schService);
     CloseServiceHandle(schSCManager);
+
+    // Remove our event log registry entry
+    HKEY hKeyEventLog = NULL;
+    DWORD dwEventLogMask = 0x7;
+
+    if (RegOpenKeyEx(
+        HKEY_LOCAL_MACHINE,
+        TEXT("SYSTEM\\CurrentControlSet\\Services\\EventLog\\Application"),
+        0,
+        KEY_ALL_ACCESS,
+        &hKeyEventLog
+    ) != ERROR_SUCCESS)
+    {
+        printf("RegOpenKeyEx failed (%d)\n", GetLastError());
+        return;
+    }
+
+    // Create the subkeys
+    if (hKeyEventLog != NULL)
+    {
+        if (RegDeleteKey(hKeyEventLog, szSvcName) != ERROR_SUCCESS)
+        {
+            printf("RegDeleteKey failed (%d)\n", GetLastError());
+            RegCloseKey(hKeyEventLog);
+            return;
+        }
+    }
+
+    if (hKeyEventLog)
+        RegCloseKey(hKeyEventLog);
+
+    return;
 }
 
 //
