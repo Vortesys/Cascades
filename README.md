@@ -2,6 +2,7 @@
 
 ## What is *Cascades*?
 *Cascades* is a theme utility designed to make your computer look like classic operating systems such as Windows 3.1 and OS/2. Using the same method that Stardock's *Windowblinds* and Microsoft's *UxTheme* employ, every titlebar and button is skinned with a vintage look.
+=======
 
 ## What does it run on?
 Support and compatibility for *Cascades* is provided for all versions of Windows XP and newer. This program is currently untested and unsupported on any non-x86/AMD64 platforms. This program is not compatible with Windows 2000 and older.
