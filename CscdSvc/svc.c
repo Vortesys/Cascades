@@ -226,9 +226,6 @@ VOID WINAPI SvcMain(DWORD dwArgc, LPTSTR* lpszArgv)
 
     // Perform service-specific initialization and work.
     SvcInit(dwArgc, lpszArgv);
-
-    // On shutdown, terminate the Api Hook
-    RemoveUserHook();
 }
 
 //
@@ -271,11 +268,15 @@ VOID SvcInit(DWORD dwArgc, LPTSTR* lpszArgv)
     // TO_DO: Perform work until service stops.
 
     // Install our user hook, if FALSE then fail.
-    if (InstallUserHook())
+    /*
+    if (!InstallUserHook())
     {
         ReportSvcStatus(SERVICE_STOPPED, GetLastError(), 0);
         return;
     }
+    */
+
+    InstallUserHook();
 
     while (TRUE)
     {
@@ -283,6 +284,13 @@ VOID SvcInit(DWORD dwArgc, LPTSTR* lpszArgv)
         WaitForSingleObject(ghSvcStopEvent, INFINITE);
 
         ReportSvcStatus(SERVICE_STOPPED, NO_ERROR, 0);
+        return;
+    }
+
+    // Kill the user hook
+    if (!RemoveUserHook())
+    {
+        ReportSvcStatus(SERVICE_STOPPED, GetLastError(), 0);
         return;
     }
 }

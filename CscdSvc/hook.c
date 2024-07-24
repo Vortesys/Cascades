@@ -72,6 +72,8 @@ __declspec(dllexport) BOOL CALLBACK InitUserHook(UAPIHK State, PUSERAPIHOOK puah
 		return TRUE;
 	}
 
+	MessageBox(NULL, L"test", L"InitUserHook called", MB_OK);
+
 	OutputDebugString(L"InitUserHook initializing\n");
 
 	/* Store the original functions from user32 */
