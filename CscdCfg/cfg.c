@@ -57,8 +57,6 @@ int __cdecl _tmain(int argc, TCHAR* argv[])
 
     if (lstrcmpi(szCommand, TEXT("query")) == 0)
         DoQuerySvc();
-    else if (lstrcmpi(szCommand, TEXT("describe")) == 0)
-        DoUpdateSvcDesc();
     else if (lstrcmpi(szCommand, TEXT("disable")) == 0)
         DoDisableSvc();
     else if (lstrcmpi(szCommand, TEXT("enable")) == 0)
@@ -88,7 +86,6 @@ VOID WINAPI DisplayUsage()
     printf("\tcscdcfg [command]\n\n");
     printf("\t[command]\n");
     printf("\t  query\n");
-    printf("\t  describe\n");
     printf("\t  disable\n");
     printf("\t  enable\n");
     printf("\t  delete\n");
@@ -312,6 +309,9 @@ BOOL WINAPI DoEnableSvc()
     SC_HANDLE schSCManager;
     SC_HANDLE schService;
 
+    // Update svc desc TODO: do this elsewhere
+    DoUpdateSvcDesc();
+
     // Get a handle to the SCM database. 
     schSCManager = OpenSCManager(
         NULL,                    // local computer
@@ -381,7 +381,7 @@ VOID WINAPI DoUpdateSvcDesc()
     SC_HANDLE schSCManager;
     SC_HANDLE schService;
     SERVICE_DESCRIPTION sd;
-    LPTSTR szDesc = TEXT("This is a test description");
+    LPTSTR szDesc = TEXT("Cascades Theme Utility");
 
     // Get a handle to the SCM database. 
     schSCManager = OpenSCManager(
@@ -524,6 +524,9 @@ BOOL WINAPI DoStartSvc()
     ULONGLONG ullStartTickCount;
     DWORD dwWaitTime;
     DWORD dwBytesNeeded;
+
+    // Update svc desc TODO: do this elsewhere
+    DoUpdateSvcDesc();
 
     // Get a handle to the SCM database. 
 

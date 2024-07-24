@@ -21,13 +21,15 @@
 
 /* Dialog Controls */
 // Buttons
-#define IDC_STOP        40000
-#define IDC_START       40001
-#define IDC_CLOSE	    40002
+#define IDC_INSTALL     40000
+#define IDC_ENABLE      40001
+#define IDC_DISABLE	    40002
+#define IDC_STOP        40003
+#define IDC_START       40004
 // Checkboxes
-#define IDC_INSTALL     40003
+#define IDC_KILLEM      40005
 // Dropdowns
-#define IDC_THEMES      40004
+#define IDC_THEMES      40006
 
 /* String Table */
 #define IDS_APPTITLE	1

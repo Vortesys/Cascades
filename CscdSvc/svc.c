@@ -249,7 +249,6 @@ VOID SvcInit(DWORD dwArgc, LPTSTR* lpszArgv)
 
     // Create an event. The control handler function, SvcCtrlHandler,
     // signals this event when it receives the stop control code.
-
     ghSvcStopEvent = CreateEvent(
         NULL,    // default security attributes
         TRUE,    // manual reset event
@@ -263,15 +262,13 @@ VOID SvcInit(DWORD dwArgc, LPTSTR* lpszArgv)
     }
 
     // Report running status when initialization is complete.
-
     ReportSvcStatus(SERVICE_RUNNING, NO_ERROR, 0);
 
     // TO_DO: Perform work until service stops.
 
-    while (1)
+    while (TRUE)
     {
         // Check whether to stop the service.
-
         WaitForSingleObject(ghSvcStopEvent, INFINITE);
 
         ReportSvcStatus(SERVICE_STOPPED, NO_ERROR, 0);
@@ -298,8 +295,7 @@ VOID ReportSvcStatus(DWORD dwCurrentState,
 {
     static DWORD dwCheckPoint = 1;
 
-    // Fill in the SERVICE_STATUS structure.
-
+    // Fill in the SERVICE_STATUS structure.=
     gSvcStatus.dwCurrentState = dwCurrentState;
     gSvcStatus.dwWin32ExitCode = dwWin32ExitCode;
     gSvcStatus.dwWaitHint = dwWaitHint;
@@ -330,8 +326,7 @@ VOID ReportSvcStatus(DWORD dwCurrentState,
 //
 VOID WINAPI SvcCtrlHandler(DWORD dwCtrl)
 {
-    // Handle the requested control code. 
-
+    // Handle the requested control code.
     switch (dwCtrl)
     {
     case SERVICE_CONTROL_STOP:

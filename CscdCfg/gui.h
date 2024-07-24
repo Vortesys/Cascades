@@ -10,6 +10,7 @@
 /* Pragmas */
 #pragma once
 #pragma comment(lib, "ComCtl32.lib")
+#pragma comment(lib, "Shlwapi.lib")
 
 /* Includes */
 #include <wtypes.h>

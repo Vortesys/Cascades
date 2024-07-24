@@ -9,10 +9,12 @@
 
 /* Headers */
 #include "gui.h"
+#include "cfg.h"
 #include "resource.h"
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <windowsx.h>
+#include <shlwapi.h>
 
 /* Functions */
 
@@ -67,13 +69,39 @@ INT_PTR CALLBACK CascadesDialogProc(
 			}
 			*/
 			return 0;
+
+		case IDC_INSTALL:
+		{
+			WCHAR szCurrentPath[MAX_PATH];
+
+			// Get current filename and path
+			GetModuleFileName(NULL, szCurrentPath, MAX_PATH);
+
+			// Strip the filename from the path
+			PathRemoveFileSpec(szCurrentPath);
+
+			// Call the service and install
+			ShellExecute(NULL, TEXT("runas"), TEXT("CscdSvc.exe"), TEXT("install"), szCurrentPath, SW_SHOWDEFAULT);
+			return 0;
 		}
+		case IDC_ENABLE:
+			DoEnableSvc();
+			return 0;
+		case IDC_DISABLE:
+			DoDisableSvc();
+			return 0;
+
+		}
+
 		break;
 
 	case WM_INITDIALOG:
 		Button_SetCheck(GetDlgItem(hDlg, IDC_INSTALL), BST_CHECKED);
 		Button_Enable(GetDlgItem(hDlg, IDC_START), TRUE);
 		Button_Enable(GetDlgItem(hDlg, IDC_STOP), TRUE);
+		Button_Enable(GetDlgItem(hDlg, IDC_INSTALL), TRUE);
+		Button_Enable(GetDlgItem(hDlg, IDC_ENABLE), TRUE);
+		Button_Enable(GetDlgItem(hDlg, IDC_DISABLE), TRUE);
 		return TRUE;
 
 	case WM_CLOSE:
