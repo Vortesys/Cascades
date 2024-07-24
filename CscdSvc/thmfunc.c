@@ -12,8 +12,7 @@
 #define VC_EXTRALEAN
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#include "usrapihk.h"
-#include "main.h"
+#include "hook.h"
 #include "thmfunc.h"
 #include "draw.h"
 

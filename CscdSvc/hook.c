@@ -15,8 +15,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <strsafe.h>
-#include "usrapihk.h"
-#include "main.h"
+#include "hook.h"
 #include "thmfunc.h"
 
 /* Defines */
@@ -31,46 +30,6 @@ BYTE gabDLGPmessages[UAHOWP_MAX_SIZE];
 BOOL g_bThemeHooksActive = FALSE;
 
 /* Functions */
-
-/* * * *\
-	DllMain -
-		ApiHook's entry point
-\* * * */
-BOOL APIENTRY DllMain(
-	HMODULE hModule,
-	DWORD  ul_reason_for_call,
-	LPVOID lpReserved
-)
-{
-	switch (ul_reason_for_call)
-	{
-	case DLL_PROCESS_ATTACH:
-		// Store our HMODULE as a global var
-		g_hModule = hModule;
-
-		// Call InstallUserHook
-		if (InstallUserHook())
-			break;
-
-		// Return FALSE if it fails
-		return FALSE;
-
-	case DLL_THREAD_ATTACH:
-		// Do thread-specific initialization.
-		break;
-
-	case DLL_THREAD_DETACH:
-		// Do thread-specific cleanup.
-		break;
-
-	case DLL_PROCESS_DETACH:
-		// Call UnregisterUserApiHook
-		UnregisterUserApiHookDelay();
-
-		break;
-	}
-	return TRUE;
-}
 
 /* * * *\
 	InstallUserHook -

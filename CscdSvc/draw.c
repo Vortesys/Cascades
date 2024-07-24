@@ -8,9 +8,8 @@
 \* * * * * * * */
 
 /* Headers */
-#include "main.h"
+#include "hook.h"
 #include "draw.h"
-#include "oebitmap.h"
 #include <strsafe.h>
 
 /* Global Variables */

@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.35026.282
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Cascades", "src\cascades.vcxproj", "{F3917BF2-0C25-4C6D-B2EB-EE462DC22F14}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CscdSvc", "CscdSvc\CscdSvc.vcxproj", "{286EEF2A-FCB8-4FA7-A1BD-3F59CCFF4F1B}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CscdCfg", "CscdCfg\CscdCfg.vcxproj", "{0071D3E6-CB60-43FD-A17F-9D7DF735A5B4}"
@@ -17,10 +15,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F3917BF2-0C25-4C6D-B2EB-EE462DC22F14}.Debug|x64.ActiveCfg = Debug|x64
-		{F3917BF2-0C25-4C6D-B2EB-EE462DC22F14}.Debug|x86.ActiveCfg = Debug|Win32
-		{F3917BF2-0C25-4C6D-B2EB-EE462DC22F14}.Release|x64.ActiveCfg = Release|x64
-		{F3917BF2-0C25-4C6D-B2EB-EE462DC22F14}.Release|x86.ActiveCfg = Release|Win32
 		{286EEF2A-FCB8-4FA7-A1BD-3F59CCFF4F1B}.Debug|x64.ActiveCfg = Debug|x64
 		{286EEF2A-FCB8-4FA7-A1BD-3F59CCFF4F1B}.Debug|x64.Build.0 = Debug|x64
 		{286EEF2A-FCB8-4FA7-A1BD-3F59CCFF4F1B}.Debug|x86.ActiveCfg = Debug|Win32

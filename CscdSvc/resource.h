@@ -13,6 +13,9 @@
 #pragma once
 #endif
 
+/* Icon Library */
+#define IDI_MAIN		1
+
 /* Bitmaps */
 #define IDB_MAX		1
 #define IDB_MAX_S	2

@@ -1,4 +1,4 @@
-LIBRARY CASCADES
+LIBRARY CSCDSVC
 EXPORTS
     InstallUserHook @1
     InitUserHook @2

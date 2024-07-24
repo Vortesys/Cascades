@@ -152,10 +152,24 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="draw.c" />
+    <ClCompile Include="hook.c" />
     <ClCompile Include="svc.c" />
+    <ClCompile Include="thmfunc.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="draw.h" />
+    <ClInclude Include="hook.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="svc.h" />
+    <ClInclude Include="thmfunc.h" />
+    <ClInclude Include="usrapihk.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="resource.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="export.def" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

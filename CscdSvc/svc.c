@@ -13,6 +13,7 @@
 #include <tchar.h>
 #include <strsafe.h>
 #include "svc.h"
+#include "hook.h"
 #include "..\CscdCom\error.h"
 
 /* Defines */
@@ -225,6 +226,9 @@ VOID WINAPI SvcMain(DWORD dwArgc, LPTSTR* lpszArgv)
 
     // Perform service-specific initialization and work.
     SvcInit(dwArgc, lpszArgv);
+
+    // On shutdown, terminate the Api Hook
+    RemoveUserHook();
 }
 
 //
@@ -265,6 +269,13 @@ VOID SvcInit(DWORD dwArgc, LPTSTR* lpszArgv)
     ReportSvcStatus(SERVICE_RUNNING, NO_ERROR, 0);
 
     // TO_DO: Perform work until service stops.
+
+    // Install our user hook, if FALSE then fail.
+    if (InstallUserHook())
+    {
+        ReportSvcStatus(SERVICE_STOPPED, GetLastError(), 0);
+        return;
+    }
 
     while (TRUE)
     {
