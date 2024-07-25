@@ -40,7 +40,11 @@ __declspec(dllexport) BOOL CALLBACK InstallUserHook()
 	WCHAR szFullPath[MAX_PATH];
 	USERAPIHOOKINFO uah;
 
+	MessageBox(NULL, L"test", L"InstallUserHook called", MB_OK);
 	OutputDebugString(L"InstallUserHook called\n");
+
+	// Get the module
+	g_hModule = GetModuleHandle(NULL);
 
 	// Get our current directory and filename
 	GetModuleFileName(g_hModule, szFullPath, ARRAYSIZE(szFullPath));
@@ -150,6 +154,7 @@ __declspec(dllexport) BOOL CALLBACK InitUserHook(UAPIHK State, PUSERAPIHOOK puah
 \* * * */
 __declspec(dllexport) BOOL CALLBACK RemoveUserHook(VOID)
 {
+	MessageBox(NULL, L"test", L"RemoveUserHook called", MB_OK);
 	return UnregisterUserApiHookDelay();
 }
 
