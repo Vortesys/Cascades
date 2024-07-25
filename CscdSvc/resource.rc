@@ -13,6 +13,10 @@
 #include "resource.h"
 #undef APSTUDIO_HIDDEN_SYMBOLS
 
+/* Error Handling */
+LANGUAGE 0x9, 0x1
+1 11 "..\CscdCom\MSG00409.bin"
+
 /* Icon Library */
 IDI_MAIN	ICON	icons\ntstyle.ico
 

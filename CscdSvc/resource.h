@@ -3,7 +3,6 @@
 		Copyright © 2024 Brady McDermott, Vortesys
 	DESCRIPTION -
 		Cascades' Hook's resource collection.
-		** NO DEPENDENCIES **
 	LICENSE INFORMATION -
 		MIT License, see LICENSE.txt in the root folder
 \* * * * * * * */
@@ -12,6 +11,9 @@
 #ifndef RC_INVOKED
 #pragma once
 #endif
+
+/* Includes */
+#include "..\CscdCom\error.h"
 
 /* Icon Library */
 #define IDI_MAIN		1
