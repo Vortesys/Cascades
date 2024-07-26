@@ -24,9 +24,6 @@
     <ClCompile Include="gui.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="dlgproc.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cfg.h">

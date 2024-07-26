@@ -157,7 +157,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="cfg.c" />
-    <ClCompile Include="dlgproc.c" />
     <ClCompile Include="gui.c" />
   </ItemGroup>
   <ItemGroup>
