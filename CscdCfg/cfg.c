@@ -520,8 +520,8 @@ VOID WINAPI DoDeleteSvc()
 BOOL WINAPI DoStartSvc()
 {
 	SERVICE_STATUS_PROCESS ssStatus;
-	ULONGLONG ullOldCheckPoint;
-	ULONGLONG ullStartTickCount;
+	DWORD dwOldCheckPoint;
+	DWORD dwStartTickCount;
 	DWORD dwWaitTime;
 	DWORD dwBytesNeeded;
 
@@ -583,8 +583,8 @@ BOOL WINAPI DoStartSvc()
 
 	// Save the tick count and initial checkpoint.
 
-	ullStartTickCount = GetTickCount64();
-	ullOldCheckPoint = ssStatus.dwCheckPoint;
+	dwOldCheckPoint = GetTickCount();
+	dwStartTickCount = ssStatus.dwCheckPoint;
 
 	// Wait for the service to stop before attempting to start it.
 
@@ -618,16 +618,16 @@ BOOL WINAPI DoStartSvc()
 			return FALSE;
 		}
 
-		if (ssStatus.dwCheckPoint > ullOldCheckPoint)
+		if (ssStatus.dwCheckPoint > dwOldCheckPoint)
 		{
 			// Continue to wait and check.
 
-			ullStartTickCount = GetTickCount64();
-			ullOldCheckPoint = ssStatus.dwCheckPoint;
+			dwStartTickCount = GetTickCount();
+			dwOldCheckPoint = ssStatus.dwCheckPoint;
 		}
 		else
 		{
-			if (GetTickCount64() - ullStartTickCount > ssStatus.dwWaitHint)
+			if (GetTickCount() - dwStartTickCount > ssStatus.dwWaitHint)
 			{
 				printf("Timeout waiting for service to stop\n");
 				CloseServiceHandle(schService);
@@ -668,8 +668,8 @@ BOOL WINAPI DoStartSvc()
 
 	// Save the tick count and initial checkpoint.
 
-	ullStartTickCount = GetTickCount64();
-	ullOldCheckPoint = ssStatus.dwCheckPoint;
+	dwStartTickCount = GetTickCount();
+	dwOldCheckPoint = ssStatus.dwCheckPoint;
 
 	while (ssStatus.dwCurrentState == SERVICE_START_PENDING)
 	{
@@ -699,16 +699,16 @@ BOOL WINAPI DoStartSvc()
 			break;
 		}
 
-		if (ssStatus.dwCheckPoint > ullOldCheckPoint)
+		if (ssStatus.dwCheckPoint > dwOldCheckPoint)
 		{
 			// Continue to wait and check.
 
-			ullStartTickCount = GetTickCount64();
-			ullOldCheckPoint = ssStatus.dwCheckPoint;
+			dwStartTickCount = GetTickCount();
+			dwOldCheckPoint = ssStatus.dwCheckPoint;
 		}
 		else
 		{
-			if (GetTickCount64() - ullStartTickCount > ssStatus.dwWaitHint)
+			if (GetTickCount() - dwStartTickCount > ssStatus.dwWaitHint)
 			{
 				// No progress made within the wait hint.
 				break;
@@ -900,7 +900,7 @@ dacl_cleanup:
 BOOL WINAPI DoStopSvc()
 {
 	SERVICE_STATUS_PROCESS ssp;
-	ULONGLONG ullStartTime = GetTickCount64();
+	DWORD dwStartTime = GetTickCount();
 	DWORD dwBytesNeeded;
 	DWORD dwTimeout = 30000; // 30-second time-out
 	DWORD dwWaitTime;
@@ -998,7 +998,7 @@ BOOL WINAPI DoStopSvc()
 			goto stop_cleanup;
 		}
 
-		if (GetTickCount64() - ullStartTime > dwTimeout)
+		if (GetTickCount() - dwStartTime > dwTimeout)
 		{
 			printf("Service stop timed out.\n");
 			bRet = FALSE;
@@ -1045,7 +1045,7 @@ BOOL WINAPI DoStopSvc()
 		if (ssp.dwCurrentState == SERVICE_STOPPED)
 			break;
 
-		if (GetTickCount64() - ullStartTime > dwTimeout)
+		if (GetTickCount() - dwStartTime > dwTimeout)
 		{
 			printf("Wait timed out\n");
 			bRet = FALSE;
@@ -1075,8 +1075,8 @@ BOOL WINAPI StopDependentServices()
 	SC_HANDLE               hDepService;
 	SERVICE_STATUS_PROCESS  ssp;
 
-	ULONGLONG ullStartTime = GetTickCount64();
-	ULONGLONG ullTimeout = 30000; // 30-second time-out
+	DWORD dwStartTime = GetTickCount();
+	DWORD dwTimeout = 30000; // 30-second time-out
 
 	// Pass a zero-length buffer to get the required buffer size.
 	if (EnumDependentServices(schService, SERVICE_ACTIVE,
@@ -1138,7 +1138,7 @@ BOOL WINAPI StopDependentServices()
 						if (ssp.dwCurrentState == SERVICE_STOPPED)
 							break;
 
-						if (GetTickCount64() - ullStartTime > ullTimeout)
+						if (GetTickCount() - dwStartTime > dwTimeout)
 							return FALSE;
 					}
 				}
