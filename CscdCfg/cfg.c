@@ -8,6 +8,9 @@
 		MIT License, see LICENSE.txt in the root folder
 \* * * * * * * */
 
+/* Pragmas */
+#pragma warning(disable : 28159) // error C28159: 'GetTickCount': was declared deprecated
+
 /* Includes */
 #include <windows.h>
 #include <tchar.h>
@@ -1008,11 +1011,9 @@ BOOL WINAPI DoStopSvc()
 	}
 
 	// If the service is running, dependencies must be stopped first.
-
 	StopDependentServices();
 
 	// Send a stop code to the service.
-
 	if (!ControlService(
 		schService,
 		SERVICE_CONTROL_STOP,
@@ -1025,7 +1026,6 @@ BOOL WINAPI DoStopSvc()
 	}
 
 	// Wait for the service to stop.
-
 	while (ssp.dwCurrentState != SERVICE_STOPPED)
 	{
 		Sleep(ssp.dwWaitHint);

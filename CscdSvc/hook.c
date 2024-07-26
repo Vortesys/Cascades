@@ -9,6 +9,7 @@
 
 /* Pragmas */
 #pragma warning(disable : 4996) // error C4996: 'GetVersion': was declared deprecated
+#pragma warning(disable : 28159) // error C28159: 'GetVersion': was declared deprecated
 
 /* Includes */
 #define VC_EXTRALEAN
@@ -42,6 +43,10 @@ __declspec(dllexport) BOOL CALLBACK InstallUserHook()
 
 	MessageBox(NULL, L"test", L"InstallUserHook called", MB_OK);
 	OutputDebugString(L"InstallUserHook called\n");
+
+	// Unregister before we do anything
+	// TODO: kill uxtheme kill uxtheme
+	UnregisterUserApiHookDelay();
 
 	// Get the module
 	g_hModule = GetModuleHandle(NULL);
