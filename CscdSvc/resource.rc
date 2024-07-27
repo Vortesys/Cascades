@@ -35,7 +35,7 @@ IDB_MENU BITMAP images\menu.bmp
 #define VER_INTERNALNAME_STR        "CscdSvc\0"
 #define VER_ORIGINALFILENAME_STR    "CSCDSVC.EXE"
 #define VER_PRODUCTNAME_STR         "Cascades Service Executable for Windows NT"
-#include "..\CscdCom\version.inc"
+#include "..\\CscdCom\\version.inc"
 #undef APSTUDIO_HIDDEN_SYMBOLS
 
 VS_VERSION_INFO VERSIONINFO

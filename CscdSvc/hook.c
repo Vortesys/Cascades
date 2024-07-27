@@ -46,7 +46,7 @@ __declspec(dllexport) BOOL CALLBACK InstallUserHook()
 
 	// Unregister before we do anything
 	// TODO: kill uxtheme kill uxtheme
-	UnregisterUserApiHook();
+	UnregisterUserApiHookDelay();
 
 	// Get the module
 	g_hModule = GetModuleHandle(NULL);
