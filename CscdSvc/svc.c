@@ -94,9 +94,9 @@ VOID SvcInstall()
 
 	// Get a handle to the SCM database. 
 	schSCManager = OpenSCManager(
-		NULL,                    // local computer
-		NULL,                    // ServicesActive database 
-		SC_MANAGER_ALL_ACCESS);  // full access rights 
+		NULL,                       // local computer
+		SERVICES_ACTIVE_DATABASE,   // ServicesActive database 
+		SC_MANAGER_ALL_ACCESS);     // full access rights 
 
 	if (NULL == schSCManager)
 	{
@@ -110,7 +110,7 @@ VOID SvcInstall()
 		SVCNAME,                   // name of service 
 		SVCDESC,                   // service name to display 
 		SERVICE_ALL_ACCESS,        // desired access 
-		SERVICE_WIN32_OWN_PROCESS, // service type 
+		SERVICE_WIN32_OWN_PROCESS | SERVICE_INTERACTIVE_PROCESS, // service type 
 		SERVICE_DEMAND_START,      // start type 
 		SERVICE_ERROR_NORMAL,      // error control type 
 		szPath,                    // path to service's binary 
@@ -268,19 +268,15 @@ VOID SvcInit(DWORD dwArgc, LPTSTR* lpszArgv)
 	// TO_DO: Perform work until service stops.
 
 	// Install our user hook, if FALSE then fail.
-	/*
 	if (!InstallUserHook())
 	{
-		ReportSvcStatus(SERVICE_STOPPED, GetLastError(), 0);
-		return;
-	}
-	*/
+		SvcMessageEvent(TEXT("RegisterUserApiHook"));
 
-	if (!InstallUserHook())
-	{
 		ReportSvcStatus(SERVICE_STOPPED, GetLastError(), 0);
 		return;
 	}
+
+	SvcMessageEvent(TEXT("InstallUserHook"));
 
 	while (TRUE)
 	{
@@ -294,6 +290,8 @@ VOID SvcInit(DWORD dwArgc, LPTSTR* lpszArgv)
 	// Kill the user hook
 	if (!RemoveUserHook())
 	{
+		SvcMessageEvent(TEXT("UnregisterUserApiHook"));
+
 		ReportSvcStatus(SERVICE_STOPPED, GetLastError(), 0);
 		return;
 	}
@@ -308,7 +306,7 @@ VOID SvcInit(DWORD dwArgc, LPTSTR* lpszArgv)
 //   dwWin32ExitCode - The system error code
 //   dwWaitHint - Estimated time for pending operation, 
 //     in milliseconds
-// 
+//
 // Return value:
 //   None
 //
@@ -343,7 +341,7 @@ VOID ReportSvcStatus(DWORD dwCurrentState,
 //
 // Parameters:
 //   dwCtrl - control code
-// 
+//
 // Return value:
 //   None
 //
@@ -376,7 +374,7 @@ VOID WINAPI SvcCtrlHandler(DWORD dwCtrl)
 //
 // Parameters:
 //   szFunction - name of function that failed
-// 
+//
 // Return value:
 //   None
 //
@@ -410,4 +408,29 @@ VOID SvcReportEvent(LPTSTR szFunction)
 
 		DeregisterEventSource(hEventSource);
 	}
+}
+
+
+//
+// Purpose: 
+//   Show a message window for debugging
+//
+// Parameters:
+//   szFunction - name of function that failed
+//
+// Return value:
+//   None
+//
+// Remarks:
+//   The service must have an entry in the Application event log.
+//
+VOID SvcMessageEvent(LPTSTR szFunction)
+{
+	TCHAR Buffer[80];
+
+	StringCchPrintf(Buffer, 80, TEXT("%s failed with %d"), szFunction, GetLastError());
+
+	MessageBox(NULL, Buffer, SVCNAME, MB_SERVICE_NOTIFICATION | MB_OK);
+
+	return;
 }
