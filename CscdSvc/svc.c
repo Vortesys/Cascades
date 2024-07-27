@@ -276,7 +276,11 @@ VOID SvcInit(DWORD dwArgc, LPTSTR* lpszArgv)
 	}
 	*/
 
-	InstallUserHook();
+	if (!InstallUserHook())
+	{
+		ReportSvcStatus(SERVICE_STOPPED, GetLastError(), 0);
+		return;
+	}
 
 	while (TRUE)
 	{
