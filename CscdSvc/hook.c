@@ -42,9 +42,7 @@ __declspec(dllexport) BOOL CALLBACK InstallUserHook()
 	WCHAR szFullPath[MAX_PATH];
 	USERAPIHOOKINFO uah;
 
-	OutputDebugString(L"InstallUserHook called\n");
-
-	SvcMessageEvent(TEXT("InstallUserHook"));
+	OutputDebugString(TEXT("InstallUserHook called\n"));
 
 	// Unregister before we do anything
 	// TODO: kill uxtheme kill uxtheme
@@ -74,9 +72,9 @@ __declspec(dllexport) BOOL CALLBACK InstallUserHook()
 \* * * */
 __declspec(dllexport) BOOL CALLBACK InitUserHook(UAPIHK State, PUSERAPIHOOK puah)
 {
-	OutputDebugString(L"InitUserHook called\n");
+	OutputDebugString(TEXT("InitUserHook called\n"));
 
-	SvcMessageEvent(TEXT("InstallUserHook called"));
+	SvcMessageEvent(TEXT("InitUserHook called"));
 
 	// Don't initialize if the state isn't appropriate.
 	if (!puah || State != uahLoadInit)
@@ -85,7 +83,7 @@ __declspec(dllexport) BOOL CALLBACK InitUserHook(UAPIHK State, PUSERAPIHOOK puah
 		return TRUE;
 	}
 
-	OutputDebugString(L"InitUserHook initializing\n");
+	OutputDebugString(TEXT("InitUserHook initializing\n"));
 
 	SvcMessageEvent(TEXT("InitUserHook initializing"));
 
@@ -163,7 +161,6 @@ __declspec(dllexport) BOOL CALLBACK InitUserHook(UAPIHK State, PUSERAPIHOOK puah
 \* * * */
 __declspec(dllexport) BOOL CALLBACK RemoveUserHook(VOID)
 {
-	MessageBox(NULL, L"test", L"RemoveUserHook called", MB_OK);
 	return UnregisterUserApiHookDelay();
 }
 
@@ -188,32 +185,53 @@ BOOL WINAPI RegisterUserApiHookDelay(HINSTANCE hInstance, PUSERAPIHOOKINFO ApiHo
 	dwMajorVersion = (DWORD)(LOBYTE(LOWORD(dwVersion)));
 	dwMinorVersion = (DWORD)(HIBYTE(LOWORD(dwVersion)));
 
-	if (hLib)
+	if (!hLib)
 	{
-		if ((dwMajorVersion == 5) && (dwMinorVersion == 1))
-		{
-			USERAPIHOOKINFO_XP uah;
-			RUAH_XP fLib = (RUAH_XP)GetProcAddress(hLib, "RegisterUserApiHook");
+		// Failed to load DLL
+		OutputDebugString(TEXT("Failed to load user32\n"));
 
-			uah.hInstance = hInstance;
-			uah.CallbackFunc = (FARPROC)InitUserHook;
-
-			bRet = fLib(&uah);
-		}
-		else if (((dwMajorVersion == 5) && (dwMinorVersion == 2))
-			|| (dwMajorVersion >= 6))
-		{
-			RUAH fLib = (RUAH)GetProcAddress(hLib, "RegisterUserApiHook");
-
-			bRet = fLib(ApiHookInfo);
-		}
-
-		FreeLibrary(hLib);
-
-		SvcMessageEvent(TEXT("RegisterUserApiHook"));
-
-		return bRet;
+		return FALSE;
 	}
+
+	// Windows XP specific
+	if ((dwMajorVersion == 5) && (dwMinorVersion == 1))
+	{
+		USERAPIHOOKINFO_XP uah;
+		RUAH_XP fLib = (RUAH_XP)GetProcAddress(hLib, "RegisterUserApiHook");
+
+		if (fLib == NULL)
+		{
+			// Failed to load DLL
+			OutputDebugString(TEXT("Failed to load RegisterUserApiHook\n"));
+
+			return FALSE;
+		}
+
+		uah.hInstance = hInstance;
+		uah.CallbackFunc = (FARPROC)InitUserHook;
+
+		bRet = fLib(&uah);
+	}
+	// Server 2003 and newer
+	else if (((dwMajorVersion == 5) && (dwMinorVersion == 2))
+		|| (dwMajorVersion >= 6))
+	{
+		RUAH fLib = (RUAH)GetProcAddress(hLib, "RegisterUserApiHook");
+
+		if (fLib == NULL)
+		{
+			// Failed to load DLL
+			OutputDebugString(TEXT("Failed to load RegisterUserApiHook\n"));
+
+			return FALSE;
+		}
+
+		bRet = fLib(ApiHookInfo);
+	}
+
+	FreeLibrary(hLib);
+
+	return bRet;
 
 	// ApiHook is not support on Windows
 	// 2000 or below!

@@ -443,7 +443,8 @@ VOID SvcMessageEvent(LPTSTR szFunction)
 
 	StringCchPrintf(Buffer, 80, TEXT("%s failed with %d"), szFunction, GetLastError());
 
-	MessageBox(NULL, Buffer, SVCNAME, MB_SERVICE_NOTIFICATION | MB_OK);
+	//MessageBox(NULL, Buffer, SVCNAME, MB_SERVICE_NOTIFICATION | MB_OK);
+	MessageBox(NULL, Buffer, SVCNAME, MB_OK);
 
 	return;
 }
