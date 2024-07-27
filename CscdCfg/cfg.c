@@ -312,9 +312,6 @@ BOOL WINAPI DoEnableSvc()
 	SC_HANDLE schSCManager;
 	SC_HANDLE schService;
 
-	// Update svc desc TODO: do this elsewhere
-	DoUpdateSvcDesc();
-
 	// Get a handle to the SCM database. 
 	schSCManager = OpenSCManager(
 		NULL,                    // local computer
@@ -367,64 +364,6 @@ BOOL WINAPI DoEnableSvc()
 	CloseServiceHandle(schSCManager);
 
 	return TRUE;
-}
-
-//
-// Purpose: 
-//   Updates the service description to "This is a test description".
-//
-// Parameters:
-//   None
-// 
-// Return value:
-//   None
-//
-VOID WINAPI DoUpdateSvcDesc()
-{
-	SC_HANDLE schSCManager;
-	SC_HANDLE schService;
-	SERVICE_DESCRIPTION sd;
-	LPTSTR szDesc = TEXT("Cascades Theme Utility");
-
-	// Get a handle to the SCM database. 
-	schSCManager = OpenSCManager(
-		NULL,                    // local computer
-		NULL,                    // ServicesActive database 
-		SC_MANAGER_ALL_ACCESS);  // full access rights 
-
-	if (NULL == schSCManager)
-	{
-		printf("OpenSCManager failed (%d)\n", GetLastError());
-		return;
-	}
-
-	// Get a handle to the service.
-	schService = OpenService(
-		schSCManager,            // SCM database 
-		szSvcName,               // name of service 
-		SERVICE_CHANGE_CONFIG);  // need change config access 
-
-	if (schService == NULL)
-	{
-		printf("OpenService failed (%d)\n", GetLastError());
-		CloseServiceHandle(schSCManager);
-		return;
-	}
-
-	// Change the service description.
-	sd.lpDescription = szDesc;
-
-	if (!ChangeServiceConfig2(
-		schService,                 // handle to service
-		SERVICE_CONFIG_DESCRIPTION, // change: description
-		&sd))                      // new description
-	{
-		printf("ChangeServiceConfig2 failed\n");
-	}
-	else printf("Service description updated successfully.\n");
-
-	CloseServiceHandle(schService);
-	CloseServiceHandle(schSCManager);
 }
 
 //
@@ -528,11 +467,7 @@ BOOL WINAPI DoStartSvc()
 	DWORD dwWaitTime;
 	DWORD dwBytesNeeded;
 
-	// Update svc desc TODO: do this elsewhere
-	DoUpdateSvcDesc();
-
-	// Get a handle to the SCM database. 
-
+	// Get a handle to the SCM database.
 	schSCManager = OpenSCManager(
 		NULL,                    // local computer
 		NULL,                    // servicesActive database 
@@ -545,7 +480,6 @@ BOOL WINAPI DoStartSvc()
 	}
 
 	// Get a handle to the service.
-
 	schService = OpenService(
 		schSCManager,         // SCM database 
 		szSvcName,            // name of service 
@@ -558,8 +492,7 @@ BOOL WINAPI DoStartSvc()
 		return FALSE;
 	}
 
-	// Check the status in case the service is not stopped. 
-
+	// Check the status in case the service is not stopped.
 	if (!QueryServiceStatusEx(
 		schService,                     // handle to service 
 		SC_STATUS_PROCESS_INFO,         // information level
@@ -573,9 +506,8 @@ BOOL WINAPI DoStartSvc()
 		return FALSE;
 	}
 
-	// Check if the service is already running. It would be possible 
-	// to stop the service here, but for simplicity this example just returns. 
-
+	// Check if the service is already running. It would be possible
+	// to stop the service here, but for simplicity this example just returns.
 	if (ssStatus.dwCurrentState != SERVICE_STOPPED && ssStatus.dwCurrentState != SERVICE_STOP_PENDING)
 	{
 		printf("Cannot start the service because it is already running\n");
@@ -585,18 +517,15 @@ BOOL WINAPI DoStartSvc()
 	}
 
 	// Save the tick count and initial checkpoint.
-
 	dwOldCheckPoint = GetTickCount();
 	dwStartTickCount = ssStatus.dwCheckPoint;
 
 	// Wait for the service to stop before attempting to start it.
-
 	while (ssStatus.dwCurrentState == SERVICE_STOP_PENDING)
 	{
 		// Do not wait longer than the wait hint. A good interval is 
 		// one-tenth of the wait hint but not less than 1 second  
-		// and not more than 10 seconds. 
-
+		// and not more than 10 seconds.
 		dwWaitTime = ssStatus.dwWaitHint / 10;
 
 		if (dwWaitTime < 1000)
@@ -606,8 +535,7 @@ BOOL WINAPI DoStartSvc()
 
 		Sleep(dwWaitTime);
 
-		// Check the status until the service is no longer stop pending. 
-
+		// Check the status until the service is no longer stop pending.
 		if (!QueryServiceStatusEx(
 			schService,                     // handle to service 
 			SC_STATUS_PROCESS_INFO,         // information level
@@ -624,7 +552,6 @@ BOOL WINAPI DoStartSvc()
 		if (ssStatus.dwCheckPoint > dwOldCheckPoint)
 		{
 			// Continue to wait and check.
-
 			dwStartTickCount = GetTickCount();
 			dwOldCheckPoint = ssStatus.dwCheckPoint;
 		}
@@ -641,7 +568,6 @@ BOOL WINAPI DoStartSvc()
 	}
 
 	// Attempt to start the service.
-
 	if (!StartService(
 		schService,  // handle to service 
 		0,           // number of arguments 
@@ -654,8 +580,7 @@ BOOL WINAPI DoStartSvc()
 	}
 	else printf("Service start pending...\n");
 
-	// Check the status until the service is no longer start pending. 
-
+	// Check the status until the service is no longer start pending.
 	if (!QueryServiceStatusEx(
 		schService,                     // handle to service 
 		SC_STATUS_PROCESS_INFO,         // info level
@@ -670,7 +595,6 @@ BOOL WINAPI DoStartSvc()
 	}
 
 	// Save the tick count and initial checkpoint.
-
 	dwStartTickCount = GetTickCount();
 	dwOldCheckPoint = ssStatus.dwCheckPoint;
 
@@ -678,8 +602,7 @@ BOOL WINAPI DoStartSvc()
 	{
 		// Do not wait longer than the wait hint. A good interval is 
 		// one-tenth the wait hint, but no less than 1 second and no 
-		// more than 10 seconds. 
-
+		// more than 10 seconds.
 		dwWaitTime = ssStatus.dwWaitHint / 10;
 
 		if (dwWaitTime < 1000)
@@ -689,8 +612,7 @@ BOOL WINAPI DoStartSvc()
 
 		Sleep(dwWaitTime);
 
-		// Check the status again. 
-
+		// Check the status again.
 		if (!QueryServiceStatusEx(
 			schService,             // handle to service 
 			SC_STATUS_PROCESS_INFO, // info level
@@ -705,7 +627,6 @@ BOOL WINAPI DoStartSvc()
 		if (ssStatus.dwCheckPoint > dwOldCheckPoint)
 		{
 			// Continue to wait and check.
-
 			dwStartTickCount = GetTickCount();
 			dwOldCheckPoint = ssStatus.dwCheckPoint;
 		}

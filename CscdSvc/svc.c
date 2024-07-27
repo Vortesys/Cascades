@@ -78,6 +78,8 @@ VOID SvcInstall()
 	SC_HANDLE schSCManager;
 	SC_HANDLE schService;
 	TCHAR szUnquotedPath[MAX_PATH];
+	SERVICE_DESCRIPTION sd;
+	LPTSTR szDesc = TEXT("Hosts and maintains the Cascades Theme Utility.");
 
 	if (!GetModuleFileName(NULL, szUnquotedPath, MAX_PATH))
 	{
@@ -127,6 +129,17 @@ VOID SvcInstall()
 		return;
 	}
 	else printf("Service installed successfully\n");
+
+	// Change the service description.
+	sd.lpDescription = szDesc;
+
+	if (!ChangeServiceConfig2(
+		schService,                 // handle to service
+		SERVICE_CONFIG_DESCRIPTION, // change: description
+		&sd))                       // new description
+	{
+		printf("ChangeServiceConfig2 failed\n");
+	}
 
 	CloseServiceHandle(schService);
 	CloseServiceHandle(schSCManager);

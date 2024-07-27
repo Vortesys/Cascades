@@ -18,6 +18,7 @@
 #include <strsafe.h>
 #include "hook.h"
 #include "thmfunc.h"
+#include "svc.h"
 
 /* Defines */
 #define WM_THEMECHANGED 0x031A
@@ -41,8 +42,9 @@ __declspec(dllexport) BOOL CALLBACK InstallUserHook()
 	WCHAR szFullPath[MAX_PATH];
 	USERAPIHOOKINFO uah;
 
-	MessageBox(NULL, L"test", L"InstallUserHook called", MB_OK);
 	OutputDebugString(L"InstallUserHook called\n");
+
+	SvcMessageEvent(TEXT("InstallUserHook"));
 
 	// Unregister before we do anything
 	// TODO: kill uxtheme kill uxtheme
@@ -73,7 +75,8 @@ __declspec(dllexport) BOOL CALLBACK InstallUserHook()
 __declspec(dllexport) BOOL CALLBACK InitUserHook(UAPIHK State, PUSERAPIHOOK puah)
 {
 	OutputDebugString(L"InitUserHook called\n");
-	MessageBox(NULL, L"test", L"InitUserHook called", MB_OK);
+
+	SvcMessageEvent(TEXT("InstallUserHook called"));
 
 	// Don't initialize if the state isn't appropriate.
 	if (!puah || State != uahLoadInit)
@@ -82,9 +85,9 @@ __declspec(dllexport) BOOL CALLBACK InitUserHook(UAPIHK State, PUSERAPIHOOK puah
 		return TRUE;
 	}
 
-	MessageBox(NULL, L"test", L"InitUserHook initializing", MB_OK);
-
 	OutputDebugString(L"InitUserHook initializing\n");
+
+	SvcMessageEvent(TEXT("InitUserHook initializing"));
 
 	/* Store the original functions from user32 */
 	g_user32ApiHook = *puah;
@@ -206,6 +209,8 @@ BOOL WINAPI RegisterUserApiHookDelay(HINSTANCE hInstance, PUSERAPIHOOKINFO ApiHo
 		}
 
 		FreeLibrary(hLib);
+
+		SvcMessageEvent(TEXT("RegisterUserApiHook"));
 
 		return bRet;
 	}
