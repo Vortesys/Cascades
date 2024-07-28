@@ -46,8 +46,11 @@ __declspec(dllexport) BOOL CALLBACK InstallUserHook()
 	OutputDebugString(TEXT("InstallUserHook called\n"));
 
 	// Unregister before we do anything
-	// TODO: kill uxtheme kill uxtheme
-	//UnregisterUserApiHookDelay();
+	if (!UnregisterUserApiHookRemote())
+		SvcReportEvent(TEXT("InstallUserHook: UnregisterUserApiHookRemote"));
+
+	if (!UnregisterUserApiHookDelay())
+		SvcReportEvent(TEXT("InstallUserHook: UnregisterUserApiHookDelay"));
 
 	// Get the module
 	g_hModule = GetModuleHandle(NULL);
@@ -276,9 +279,15 @@ static BOOL WINAPI UnregisterUserApiHookRemote(VOID)
 	// Return if we can't get the snapshot
 	// or if we get an invalid session ID
 	if (hProcessSnapshot == NULL)
+	{
+		SvcReportEvent(TEXT("UnregisterUserApiHookRemote: CreateToolhelp32Snapshot"));
 		return FALSE;
+	}
 	if (dwSessionID == 0xFFFFFFFF)
+	{
+		SvcReportEvent(TEXT("UnregisterUserApiHookRemote: WTSGetActiveConsoleSessionId"));
 		return FALSE;
+	}
 
 	// Set the size of the structure before using it
 	pe32.dwSize = sizeof(PROCESSENTRY32);
@@ -309,7 +318,10 @@ static BOOL WINAPI UnregisterUserApiHookRemote(VOID)
 	hProcess = OpenProcess(0x1FFFFFu, FALSE, dwProcessID);
 
 	if (hProcess == NULL)
+	{
+		SvcReportEvent(TEXT("UnregisterUserApiHookRemote: OpenProcess"));
 		return FALSE;
+	}
 
 	// Calculate the size of the UnregisterUserApiHookDelay function... HACK!
 	LONGLONG sizeofUnregisterUserApiHookDelay = (BYTE*)UnregisterUserApiHookRemote - (BYTE*)UnregisterUserApiHookDelay;
@@ -319,7 +331,10 @@ static BOOL WINAPI UnregisterUserApiHookRemote(VOID)
 
 	// Blah blah error checking
 	if (lpvRemoteProcessBuffer == 0)
+	{
+		SvcReportEvent(TEXT("UnregisterUserApiHookRemote: VirtualAllocEx"));
 		return FALSE;
+	}
 
 	// Write the sauce into Winlogon (not dangerous!)
 	WriteProcessMemory(hProcess, lpvRemoteProcessBuffer, UnregisterUserApiHookRemote, sizeofUnregisterUserApiHookDelay, NULL);
@@ -332,26 +347,4 @@ static BOOL WINAPI UnregisterUserApiHookRemote(VOID)
 		CloseHandle(hProcess);
 
 	return TRUE;
-}
-
-/* * * *\
-	ExternUnregisterUserApiHookDelay -
-		Forward function
-	RETURNS -
-		TRUE if successful.
-\* * * */
-BOOL WINAPI ExternUnregisterUserApiHookDelay(VOID)
-{
-	UnregisterUserApiHookDelay();
-}
-
-/* * * *\
-	ExternUnregisterUserApiHookRemote -
-		Forward function
-	RETURNS -
-		TRUE if successful.
-\* * * */
-BOOL WINAPI ExternUnregisterUserApiHookRemote(VOID)
-{
-	return UnregisterUserApiHookRemote();
 }

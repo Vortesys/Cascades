@@ -278,13 +278,10 @@ VOID SvcInit(DWORD dwArgc, LPTSTR* lpszArgv)
 	// Report running status when initialization is complete.
 	ReportSvcStatus(SERVICE_RUNNING, NO_ERROR, 0);
 
-	// Kill UxTheme for good
-	ExternUnregisterUserApiHookRemote();
-
 	// Install our user hook, if FALSE then fail.
 	if (!InstallUserHook())
 	{
-		SvcMessageEvent(TEXT("RegisterUserApiHook"));
+		SvcReportEvent(TEXT("RegisterUserApiHook"));
 
 		ReportSvcStatus(SERVICE_STOPPED, GetLastError(), 0);
 		return;
@@ -302,7 +299,7 @@ VOID SvcInit(DWORD dwArgc, LPTSTR* lpszArgv)
 	// Kill the user hook
 	if (!RemoveUserHook())
 	{
-		SvcMessageEvent(TEXT("UnregisterUserApiHook"));
+		SvcReportEvent(TEXT("UnregisterUserApiHook"));
 
 		ReportSvcStatus(SERVICE_STOPPED, GetLastError(), 0);
 		return;
