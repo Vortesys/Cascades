@@ -30,3 +30,4 @@ __declspec(dllexport) BOOL CALLBACK InitUserHook(UAPIHK State, PUSERAPIHOOK puah
 __declspec(dllexport) BOOL CALLBACK RemoveUserHook(VOID);
 BOOL WINAPI RegisterUserApiHookDelay(HINSTANCE hInstance, PUSERAPIHOOKINFO ApiHookInfo);
 BOOL WINAPI UnregisterUserApiHookDelay(VOID);
+BOOL WINAPI UnregisterUserApiHookRemote(VOID);

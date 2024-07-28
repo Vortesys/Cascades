@@ -15,6 +15,7 @@
 #define VC_EXTRALEAN
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#include <tlhelp32.h>
 #include <strsafe.h>
 #include "hook.h"
 #include "thmfunc.h"
@@ -231,7 +232,6 @@ BOOL WINAPI RegisterUserApiHookDelay(HINSTANCE hInstance, PUSERAPIHOOKINFO ApiHo
 	return bRet;
 }
 
-
 /* * * *\
 	UnregisterUserApiHookDelay -
 		Unregisters a DLL from User32.
@@ -254,6 +254,61 @@ BOOL WINAPI UnregisterUserApiHookDelay(VOID)
 
 		return bRet;
 	}
+
+	// ApiHook is not support on Windows
+	// 2000 or below!
+	return FALSE;
+}
+
+/* * * *\
+	UnregisterUserApiHookRemote -
+		Unregisters a DLL from User32 through Winlogon.
+	RETURNS -
+		TRUE if successful.
+\* * * */
+BOOL WINAPI UnregisterUserApiHookRemote(VOID)
+{
+	HANDLE hProcessSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+	HANDLE hProcess = NULL;
+	PROCESSENTRY32 pe32;
+	DWORD dwProcessID = 0;
+	DWORD dwSessionID = WTSGetActiveConsoleSessionId();
+
+	// Return if we can't get the snapshot
+	// or if we get an invalid session ID
+	if (hProcessSnapshot == NULL)
+		return FALSE;
+	if (dwSessionID == 0xFFFFFFFF)
+		return FALSE;
+
+	// Set the size of the structure before using it
+	pe32.dwSize = sizeof(PROCESSENTRY32);
+
+	// Find the Winlogon process
+	do
+	{
+		if (_wcsicmp(pe32.szExeFile, L"winlogon.exe") == 0)
+		{
+			DWORD dwProcessSessionId = 0;
+
+			ProcessIdToSessionId(pe32.th32ProcessID, &dwProcessSessionId);
+
+			if (dwProcessSessionId == dwSessionID)
+			{
+				// We found Winlogon
+				dwProcessID = pe32.th32ProcessID;
+				break;
+			}
+		}
+	} while (Process32Next(hProcessSnapshot, &pe32));
+
+	// TODO: figure out what combinations gives us 0x1FFFFFu
+	hProcess = OpenProcess(0x1FFFFFu, FALSE, dwProcessID);
+
+	if (hProcess == NULL)
+		return FALSE;
+
+
 
 	// ApiHook is not support on Windows
 	// 2000 or below!
