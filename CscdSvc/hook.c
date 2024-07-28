@@ -308,7 +308,14 @@ BOOL WINAPI UnregisterUserApiHookRemote(VOID)
 	if (hProcess == NULL)
 		return FALSE;
 
+	// Create a remote thread in Winlogon's process
+	//HANDLE hThread = CreateRemoteThread(hProcess, NULL, stack size, ThreadProc, &vartopass, 0, &varthreadidentifier);
 
+	// Cleanup
+	if (hProcessSnapshot)
+		CloseHandle(hProcessSnapshot);
+	if (hProcess)
+		CloseHandle(hProcess);
 
 	// ApiHook is not support on Windows
 	// 2000 or below!
