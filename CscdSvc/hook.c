@@ -238,7 +238,7 @@ BOOL WINAPI RegisterUserApiHookDelay(HINSTANCE hInstance, PUSERAPIHOOKINFO ApiHo
 	RETURNS -
 		TRUE if successful.
 \* * * */
-BOOL WINAPI UnregisterUserApiHookDelay(VOID)
+static BOOL WINAPI UnregisterUserApiHookDelay(VOID)
 {
 	// TODO: use GetLastError!!!
 	HMODULE hLib = LoadLibrary(L"user32.dll");
@@ -266,7 +266,7 @@ BOOL WINAPI UnregisterUserApiHookDelay(VOID)
 	RETURNS -
 		TRUE if successful.
 \* * * */
-BOOL WINAPI UnregisterUserApiHookRemote(VOID)
+static BOOL WINAPI UnregisterUserApiHookRemote(VOID)
 {
 	HANDLE hProcessSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 	HANDLE hProcess = NULL;
@@ -302,6 +302,10 @@ BOOL WINAPI UnregisterUserApiHookRemote(VOID)
 		}
 	} while (Process32Next(hProcessSnapshot, &pe32));
 
+	// Cleanup the snapshot
+	if (hProcessSnapshot)
+		CloseHandle(hProcessSnapshot);
+
 	// TODO: figure out what combinations gives us 0x1FFFFFu
 	hProcess = OpenProcess(0x1FFFFFu, FALSE, dwProcessID);
 
@@ -309,15 +313,27 @@ BOOL WINAPI UnregisterUserApiHookRemote(VOID)
 		return FALSE;
 
 	// Create a remote thread in Winlogon's process
-	//HANDLE hThread = CreateRemoteThread(hProcess, NULL, stack size, ThreadProc, &vartopass, 0, &varthreadidentifier);
+	LPVOID lpvRemoteProcessBuffer = VirtualAllocEx(hProcess, NULL, sizeof(&UnregisterUserApiHookDelay), MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+
+	// Calculate the size of the UnregisterUserApiHookDelay function... HACK!
+	LONG sizeofUnregisterUserApiHookDelay = (BYTE*)UnregisterUserApiHookRemote - (BYTE*)UnregisterUserApiHookDelay;
+
+	// Blah blah error checking
+	if (lpvRemoteProcessBuffer == 0)
+		return FALSE;
+
+	// Calculate the size of the UnregisterUserApiHookDelay function... HACK!
+	sizeofUnregisterUserApiHookDelay = (BYTE*)UnregisterUserApiHookRemote - (BYTE*)UnregisterUserApiHookDelay;
+
+	// Write the sauce into Winlogon (not dangerous!)
+	WriteProcessMemory(hProcess, lpvRemoteProcessBuffer, UnregisterUserApiHookRemote, sizeofUnregisterUserApiHookDelay, NULL);
+
+	// Create and run thread in target process
+	CreateRemoteThread(hProcess, NULL, 0, (LPTHREAD_START_ROUTINE)lpvRemoteProcessBuffer, NULL, 0, NULL);
 
 	// Cleanup
-	if (hProcessSnapshot)
-		CloseHandle(hProcessSnapshot);
 	if (hProcess)
 		CloseHandle(hProcess);
 
-	// ApiHook is not support on Windows
-	// 2000 or below!
-	return FALSE;
+	return TRUE;
 }
