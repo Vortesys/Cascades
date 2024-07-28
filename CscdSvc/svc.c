@@ -289,8 +289,6 @@ VOID SvcInit(DWORD dwArgc, LPTSTR* lpszArgv)
 		return;
 	}
 
-	SvcMessageEvent(TEXT("InstallUserHook"));
-
 	while (TRUE)
 	{
 		// Check whether to stop the service.

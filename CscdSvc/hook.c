@@ -40,7 +40,6 @@ BOOL g_bThemeHooksActive = FALSE;
 __declspec(dllexport) BOOL CALLBACK InstallUserHook()
 {
 	WCHAR szFullPath[MAX_PATH];
-	WCHAR szQuotedPath[MAX_PATH + 2]; // + 2 for the quotation marks
 	USERAPIHOOKINFO uah;
 
 	OutputDebugString(TEXT("InstallUserHook called\n"));
@@ -55,20 +54,13 @@ __declspec(dllexport) BOOL CALLBACK InstallUserHook()
 	// Get our current directory and filename
 	GetModuleFileName(g_hModule, szFullPath, ARRAYSIZE(szFullPath));
 
-	// In case the path contains a space, it must be quoted so that
-	// it is correctly interpreted. For example,
-	// "d:\my share\myservice.exe" should be specified as
-	// ""d:\my share\myservice.exe"".
-	StringCbPrintf(szQuotedPath, MAX_PATH, TEXT("\"%s\""), szFullPath);
-
-	SvcMessageEvent(szQuotedPath);
 
 	// Fill out the ApiHookInfo structure
 	uah.m_size = sizeof(uah);
 	uah.m_funname1 = L"InitUserHook";
-	uah.m_dllname1 = szQuotedPath;
-	uah.m_funname2 = NULL;
-	uah.m_dllname2 = NULL;
+	uah.m_dllname1 = szFullPath;
+	uah.m_funname2 = L"InitUserHook";
+	uah.m_dllname2 = szFullPath;
 
 	// ApiHook is not support on Windows
 	// 2000 or below!
@@ -83,8 +75,6 @@ __declspec(dllexport) BOOL CALLBACK InitUserHook(UAPIHK State, PUSERAPIHOOK puah
 {
 	OutputDebugString(TEXT("InitUserHook called\n"));
 
-	SvcMessageEvent(TEXT("InitUserHook called"));
-
 	// Don't initialize if the state isn't appropriate.
 	if (!puah || State != uahLoadInit)
 	{
@@ -93,8 +83,6 @@ __declspec(dllexport) BOOL CALLBACK InitUserHook(UAPIHK State, PUSERAPIHOOK puah
 	}
 
 	OutputDebugString(TEXT("InitUserHook initializing\n"));
-
-	SvcMessageEvent(TEXT("InitUserHook initializing"));
 
 	/* Store the original functions from user32 */
 	g_user32ApiHook = *puah;
