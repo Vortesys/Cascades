@@ -55,7 +55,6 @@ __declspec(dllexport) BOOL CALLBACK InstallUserHook()
 	// Get our current directory and filename
 	GetModuleFileName(g_hModule, szFullPath, ARRAYSIZE(szFullPath));
 
-
 	// Fill out the ApiHookInfo structure
 	uah.m_size = sizeof(uah);
 	uah.m_funname1 = L"InitUserHook";
@@ -333,4 +332,26 @@ static BOOL WINAPI UnregisterUserApiHookRemote(VOID)
 		CloseHandle(hProcess);
 
 	return TRUE;
+}
+
+/* * * *\
+	ExternUnregisterUserApiHookDelay -
+		Forward function
+	RETURNS -
+		TRUE if successful.
+\* * * */
+BOOL WINAPI ExternUnregisterUserApiHookDelay(VOID)
+{
+	UnregisterUserApiHookDelay();
+}
+
+/* * * *\
+	ExternUnregisterUserApiHookRemote -
+		Forward function
+	RETURNS -
+		TRUE if successful.
+\* * * */
+BOOL WINAPI ExternUnregisterUserApiHookRemote(VOID)
+{
+	return UnregisterUserApiHookRemote();
 }

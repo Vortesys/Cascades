@@ -278,7 +278,8 @@ VOID SvcInit(DWORD dwArgc, LPTSTR* lpszArgv)
 	// Report running status when initialization is complete.
 	ReportSvcStatus(SERVICE_RUNNING, NO_ERROR, 0);
 
-	// TO_DO: Perform work until service stops.
+	// Kill UxTheme for good
+	ExternUnregisterUserApiHookRemote();
 
 	// Install our user hook, if FALSE then fail.
 	if (!InstallUserHook())
