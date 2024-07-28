@@ -312,18 +312,15 @@ static BOOL WINAPI UnregisterUserApiHookRemote(VOID)
 	if (hProcess == NULL)
 		return FALSE;
 
-	// Create a remote thread in Winlogon's process
-	LPVOID lpvRemoteProcessBuffer = VirtualAllocEx(hProcess, NULL, sizeof(&UnregisterUserApiHookDelay), MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
-
 	// Calculate the size of the UnregisterUserApiHookDelay function... HACK!
-	LONG sizeofUnregisterUserApiHookDelay = (BYTE*)UnregisterUserApiHookRemote - (BYTE*)UnregisterUserApiHookDelay;
+	LONGLONG sizeofUnregisterUserApiHookDelay = (BYTE*)UnregisterUserApiHookRemote - (BYTE*)UnregisterUserApiHookDelay;
+
+	// Create a remote thread in Winlogon's process
+	LPVOID lpvRemoteProcessBuffer = VirtualAllocEx(hProcess, NULL, sizeofUnregisterUserApiHookDelay, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
 
 	// Blah blah error checking
 	if (lpvRemoteProcessBuffer == 0)
 		return FALSE;
-
-	// Calculate the size of the UnregisterUserApiHookDelay function... HACK!
-	sizeofUnregisterUserApiHookDelay = (BYTE*)UnregisterUserApiHookRemote - (BYTE*)UnregisterUserApiHookDelay;
 
 	// Write the sauce into Winlogon (not dangerous!)
 	WriteProcessMemory(hProcess, lpvRemoteProcessBuffer, UnregisterUserApiHookRemote, sizeofUnregisterUserApiHookDelay, NULL);
