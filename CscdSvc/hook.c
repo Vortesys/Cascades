@@ -240,7 +240,7 @@ BOOL WINAPI RegisterUserApiHookDelay(HINSTANCE hInstance, PUSERAPIHOOKINFO ApiHo
 	RETURNS -
 		TRUE if successful.
 \* * * */
-static BOOL WINAPI UnregisterUserApiHookDelay(VOID)
+BOOL WINAPI UnregisterUserApiHookDelay(VOID)
 {
 	// TODO: use GetLastError!!!
 	HMODULE hLib = LoadLibrary(L"user32.dll");
@@ -268,7 +268,7 @@ static BOOL WINAPI UnregisterUserApiHookDelay(VOID)
 	RETURNS -
 		TRUE if successful.
 \* * * */
-static BOOL WINAPI UnregisterUserApiHookRemote(VOID)
+BOOL WINAPI UnregisterUserApiHookRemote(VOID)
 {
 	HANDLE hProcessSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 	HANDLE hProcess = NULL;
@@ -323,24 +323,58 @@ static BOOL WINAPI UnregisterUserApiHookRemote(VOID)
 		return FALSE;
 	}
 
-	// Calculate the size of the UnregisterUserApiHookDelay function... HACK!
-	LONGLONG sizeofUnregisterUserApiHookDelay = (BYTE*)UnregisterUserApiHookRemote - (BYTE*)UnregisterUserApiHookDelay;
-
 	// Create a remote thread in Winlogon's process
-	LPVOID lpvRemoteProcessBuffer = VirtualAllocEx(hProcess, NULL, sizeofUnregisterUserApiHookDelay, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+	WCHAR szDllPath[] = L"kernel32.dll";
+	LPVOID lpRemoteProcessBuffer = VirtualAllocEx(hProcess, NULL, wcslen(szDllPath), MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+	LPVOID lpLoadLibraryAddress = NULL;
 
 	// Blah blah error checking
-	if (lpvRemoteProcessBuffer == 0)
+	if (lpRemoteProcessBuffer == NULL)
 	{
 		SvcReportEvent(TEXT("UnregisterUserApiHookRemote: VirtualAllocEx"));
+
+		// Cleanup
+		if (hProcess)
+			CloseHandle(hProcess);
+
 		return FALSE;
 	}
 
 	// Write the sauce into Winlogon (not dangerous!)
-	WriteProcessMemory(hProcess, lpvRemoteProcessBuffer, UnregisterUserApiHookRemote, sizeofUnregisterUserApiHookDelay, NULL);
+	if (!WriteProcessMemory(hProcess, lpRemoteProcessBuffer, szDllPath, wcslen(szDllPath), NULL))
+	{
+		SvcReportEvent(TEXT("UnregisterUserApiHookRemote: WriteProcessMemory"));
+
+		// Cleanup
+		if (hProcess)
+			CloseHandle(hProcess);
+
+		return FALSE;
+	}
+
+	// Load the LoadLibrary
+	if ((lpLoadLibraryAddress = (LPVOID)GetProcAddress(GetModuleHandle(L"kernel32.dll"), "LoadLibraryW")) == NULL)
+	{
+		SvcReportEvent(TEXT("UnregisterUserApiHookRemote: GetProcAddress"));
+
+		// Cleanup
+		if (hProcess)
+			CloseHandle(hProcess);
+
+		return FALSE;
+	}
 
 	// Create and run thread in target process
-	CreateRemoteThread(hProcess, NULL, 0, (LPTHREAD_START_ROUTINE)lpvRemoteProcessBuffer, NULL, 0, NULL);
+	if (CreateRemoteThread(hProcess, NULL, 0, (LPTHREAD_START_ROUTINE)lpLoadLibraryAddress, lpRemoteProcessBuffer, 0, NULL) == NULL)
+	{
+		SvcReportEvent(TEXT("UnregisterUserApiHookRemote: CreateRemoteThread"));
+
+		// Cleanup
+		if (hProcess)
+			CloseHandle(hProcess);
+
+		return FALSE;
+	}
 
 	// Cleanup
 	if (hProcess)
